@@ -37,23 +37,25 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-2">
-            <Link to="/home" className={getLinkClass('home')}>
-              Home
-            </Link>
-            <Link to="/home" className={getLinkClass('search')}>
-              Search
-            </Link>
-            <Link to="/map" className={getLinkClass('map')}>
-              Map View
-            </Link>
-            <Link to="/home" className={getLinkClass('about')}>
-              About us
-            </Link>
-            <Link to="/home" className={getLinkClass('contact')}>
-              Contact us
-            </Link>
-          </div>
+          {isLoggedIn && (
+            <div className="hidden lg:flex items-center gap-2">
+              <Link to="/home" className={getLinkClass('home')}>
+                Home
+              </Link>
+              <Link to="/home" className={getLinkClass('search')}>
+                Search
+              </Link>
+              <Link to="/map" className={getLinkClass('map')}>
+                Map View
+              </Link>
+              <Link to="/home" className={getLinkClass('about')}>
+                About us
+              </Link>
+              <Link to="/home" className={getLinkClass('contact')}>
+                Contact us
+              </Link>
+            </div>
+          )}
 
           {/* User Actions & Mobile Hamburger */}
           <div className="flex items-center gap-4 sm:gap-5">
@@ -128,32 +130,34 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
             ) : (
               <Link 
                 to="/login" 
-                className="hidden sm:inline-block px-6 py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-sm rounded-full transition-all shadow-sm"
+                className="inline-block px-5 py-2 sm:px-6 sm:py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-xs sm:text-sm rounded-full transition-all shadow-sm"
               >
                 Sign In
               </Link>
             )}
 
             {/* Hamburger Button for Mobile */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all cursor-pointer border-none bg-transparent"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                {isMobileMenuOpen ? (
-                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-                ) : (
-                  <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
-                )}
-              </svg>
-            </button>
+            {isLoggedIn && (
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all cursor-pointer border-none bg-transparent"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                  {isMobileMenuOpen ? (
+                    <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                  ) : (
+                    <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
+                  )}
+                </svg>
+              </button>
+            )}
 
           </div>
         </div>
       </div>
 
       {/* ===== MOBILE NAVIGATION DROPDOWN ===== */}
-      {isMobileMenuOpen && (
+      {isLoggedIn && isMobileMenuOpen && (
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-[#e2e8f0] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-4">
             <Link 
