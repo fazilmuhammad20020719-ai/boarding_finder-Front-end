@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const LoginPage = () => {
   const [role, setRole] = useState('student'); // 'student', 'owner', 'admin'
@@ -28,35 +29,24 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-[#f0f4f9] font-sans antialiased">
-      <div className="w-full max-w-[440px] flex flex-col items-center">
-        {/* ===== BRAND HEADER ===== */}
-        <div className="flex flex-col items-center mb-8 text-center w-full">
-          <div className="flex items-center gap-3 justify-center">
-            <div className="w-10 h-10 rounded-full bg-[#1952c4] flex items-center justify-center text-white shadow-sm">
-              <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
-                <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
-                <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
-                <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
-              </svg>
-            </div>
-            <span className="font-bold text-[22px] text-[#0f172a] tracking-tight">BoardingFinder</span>
+    <div className="min-h-screen flex flex-col bg-[#f0f4f9] font-sans antialiased">
+      <Navbar isLoggedIn={false} />
+      
+      <div className="flex-grow flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[440px] flex flex-col items-center">
+          {/* ===== BRAND HEADER ===== */}
+          <div className="flex flex-col items-center mb-8 text-center w-full">
+            <h2 className="text-[32px] font-bold text-[#0f172a] tracking-tight">
+              {role === 'student' && 'Welcome back'}
+              {role === 'owner' && 'Owner Portal'}
+              {role === 'admin' && 'Admin Portal'}
+            </h2>
+            <p className="text-[#64748b] text-[15px] mt-1.5 font-normal">
+              {role === 'student' && 'Sign in to your account to continue'}
+              {role === 'owner' && 'Manage your listings and boarding houses'}
+              {role === 'admin' && 'Access the administrative control center'}
+            </p>
           </div>
-
-          <h2 className="text-[32px] font-bold text-[#0f172a] mt-8 tracking-tight">
-            {role === 'student' && 'Welcome back'}
-            {role === 'owner' && 'Owner Portal'}
-            {role === 'admin' && 'Admin Portal'}
-          </h2>
-          <p className="text-[#64748b] text-[15px] mt-1.5 font-normal">
-            {role === 'student' && 'Sign in to your account to continue'}
-            {role === 'owner' && 'Manage your listings and boarding houses'}
-            {role === 'admin' && 'Access the administrative control center'}
-          </p>
-        </div>
 
         {/* ===== FORM SECTION ===== */}
         <form onSubmit={handleLogin} className="w-full">
@@ -182,6 +172,7 @@ const LoginPage = () => {
             Create account
           </Link>
         </p>
+      </div>
       </div>
     </div>
   );

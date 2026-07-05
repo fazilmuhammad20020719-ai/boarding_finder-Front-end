@@ -50,7 +50,7 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
 
           {/* User Actions & Mobile Hamburger */}
           <div className="flex items-center gap-4 sm:gap-5">
-            {isLoggedIn && (
+            {isLoggedIn ? (
               <>
                 {/* Saved Hearts Badge */}
                 <Link to="/saved-homes" className="relative cursor-pointer hover:scale-105 transition-transform block">
@@ -118,6 +118,13 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
                   )}
                 </div>
               </>
+            ) : (
+              <Link 
+                to="/login" 
+                className="hidden sm:inline-block px-6 py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-sm rounded-full transition-all shadow-sm"
+              >
+                Sign In
+              </Link>
             )}
 
             {/* Hamburger Button for Mobile */}
@@ -173,10 +180,19 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
             <Link 
               to="/home" 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2"
+              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
               Contact us
             </Link>
+            {!isLoggedIn && (
+              <Link 
+                to="/login" 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit text-center mt-2"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       )}
