@@ -4,6 +4,7 @@ import logoImg from '../assets/Image/Logo.png';
 
 const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogoutClick = () => {
@@ -64,8 +65,11 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
                 </Link>
 
                 {/* Profile Dropdown */}
-                <div className="relative group">
-                  <button className="flex items-center gap-2.5 px-3 py-1.5 border border-[#e2e8f0] bg-slate-50 hover:bg-slate-100 rounded-full text-slate-700 text-sm font-semibold transition-all cursor-pointer">
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="flex items-center gap-2.5 px-3 py-1.5 border border-[#e2e8f0] bg-slate-50 hover:bg-slate-100 rounded-full text-slate-700 text-sm font-semibold transition-all cursor-pointer"
+                  >
                     <div className="w-7 h-7 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-xs shadow-sm">
                       J
                     </div>
@@ -75,18 +79,43 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
                     </svg>
                   </button>
                   
-                  {/* Hover Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-[#e2e8f0] rounded-2xl shadow-xl py-2 hidden group-hover:block z-50">
-                    <Link to="/profile" className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50">My Profile</Link>
-                    <Link to="/saved-homes" className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50">Saved Homes</Link>
-                    <hr className="border-[#e2e8f0] my-1" />
-                    <button
-                      onClick={handleLogoutClick}
-                      className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Logout
-                    </button>
-                  </div>
+                  {/* Click Toggled Dropdown Menu */}
+                  {isProfileDropdownOpen && (
+                    <>
+                      {/* Invisible backdrop click-handler to close menu when clicking outside */}
+                      <div 
+                        className="fixed inset-0 z-40 bg-transparent"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      ></div>
+                      
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-[#e2e8f0] rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
+                        <Link 
+                          to="/profile" 
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
+                        >
+                          My Profile
+                        </Link>
+                        <Link 
+                          to="/saved-homes" 
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
+                        >
+                          Saved Homes
+                        </Link>
+                        <hr className="border-[#e2e8f0] my-1" />
+                        <button
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            handleLogoutClick();
+                          }}
+                          className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </>
             )}
