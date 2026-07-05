@@ -384,7 +384,7 @@ const BookingConfirmation = () => {
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between items-center text-[14px]">
                     <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                    <span className="font-bold text-[#0f172a]">Rs. {listing.price.toLocaleString()}</span>
+                    <span className="font-bold text-[#0f172a]">LKR {listing.price.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
                     <span className="text-[#64748b] font-medium">Duration</span>
@@ -392,11 +392,11 @@ const BookingConfirmation = () => {
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
                     <span className="text-[#64748b] font-medium">Subtotal (Rent)</span>
-                    <span className="font-bold text-[#0f172a]">Rs. {totalRent.toLocaleString()}</span>
+                    <span className="font-bold text-[#0f172a]">LKR {totalRent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
                     <span className="text-[#64748b] font-medium">Security Deposit (1 month)</span>
-                    <span className="font-bold text-[#0f172a]">Rs. {securityDeposit.toLocaleString()}</span>
+                    <span className="font-bold text-[#0f172a]">LKR {securityDeposit.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -404,7 +404,7 @@ const BookingConfirmation = () => {
 
                 <div className="flex justify-between items-center">
                   <span className="text-[16px] font-extrabold text-[#0f172a]">Total Amount</span>
-                  <span className="text-[20px] font-black text-[#1952c4]">Rs. {total.toLocaleString()}</span>
+                  <span className="text-[20px] font-black text-[#1952c4]">LKR {total.toLocaleString()}</span>
                 </div>
               </div>
             </div>

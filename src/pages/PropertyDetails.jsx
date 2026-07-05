@@ -329,7 +329,7 @@ const PropertyDetails = () => {
             <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-xl border border-[#e2e8f0]/60 sticky top-28">
               {/* Price */}
               <div className="mb-6">
-                <span className="text-3xl font-black text-[#1952c4]">Rs. {listing.price.toLocaleString()}</span>
+                <span className="text-3xl font-black text-[#1952c4]">LKR {listing.price.toLocaleString()}</span>
                 <span className="text-slate-400 font-medium ml-1">/ month</span>
               </div>
 

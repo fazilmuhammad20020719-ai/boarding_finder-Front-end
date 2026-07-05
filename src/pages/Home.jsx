@@ -292,7 +292,7 @@ const HomePage = () => {
 
                   <div className="absolute bottom-4 left-4 z-20 flex gap-2">
                     <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
-                      Rs. {listing.price.toLocaleString()}/mo
+                      LKR {listing.price.toLocaleString()}/mo
                     </span>
                     <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${
                       listing.gender === 'female'

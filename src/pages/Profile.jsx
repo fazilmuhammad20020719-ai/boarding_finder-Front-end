@@ -293,7 +293,7 @@ const ProfilePage = () => {
                     <tr key={request.id} className="align-middle">
                       <td className="py-4 font-bold text-slate-800">{request.propertyName}</td>
                       <td className="py-4">{request.date}</td>
-                      <td className="py-4 font-semibold text-[#1952c4]">Rs. {request.price.toLocaleString()}</td>
+                      <td className="py-4 font-semibold text-[#1952c4]">LKR {request.price.toLocaleString()}</td>
                       <td className="py-4">
                         <span className="bg-amber-50 text-amber-600 border border-amber-200 text-xs font-bold px-2.5 py-1 rounded-full">
                           {request.status}

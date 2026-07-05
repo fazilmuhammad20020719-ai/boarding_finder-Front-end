@@ -87,7 +87,7 @@ const DigitalLease = () => {
                     </p>
                     <h3 className="font-bold mt-6 mb-2">3. RENT</h3>
                     <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                      Tenant agrees to pay Landlord rent in the amount of $1,200.00 per month, payable in advance on the 1st day of each calendar month.
+                      Tenant agrees to pay Landlord rent in the amount of LKR 1,200.00 per month, payable in advance on the 1st day of each calendar month.
                     </p>
                     <div className="h-64 flex items-center justify-center border-t border-gray-300 mt-12 pt-8">
                        <p className="text-gray-400 italic">... Continued on next page ...</p>

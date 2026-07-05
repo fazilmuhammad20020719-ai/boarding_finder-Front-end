@@ -112,10 +112,10 @@ const OwnerDashboard = () => {
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
-              ₱
+              LKR 
             </div>
             <div>
-              <div className="text-[22px] font-black text-[#0f172a]">₱38,500</div>
+              <div className="text-[22px] font-black text-[#0f172a]">LKR 38,500</div>
               <div className="text-xs font-semibold text-[#64748b]">Monthly Revenue</div>
               <div className="text-xs font-bold text-[#10b981] mt-1">+12% this month</div>
             </div>
@@ -326,7 +326,7 @@ const OwnerDashboard = () => {
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">BlueSky Residences</h3>
-                  <div className="text-sm font-medium text-[#64748b] mb-6">₱4,500/mo • Dormitory</div>
+                  <div className="text-sm font-medium text-[#64748b] mb-6">LKR 4,500/mo • Dormitory</div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
@@ -353,7 +353,7 @@ const OwnerDashboard = () => {
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Tranquil Lodge</h3>
-                  <div className="text-sm font-medium text-[#64748b] mb-6">₱3,800/mo • Boarding House</div>
+                  <div className="text-sm font-medium text-[#64748b] mb-6">LKR 3,800/mo • Boarding House</div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
@@ -379,7 +379,7 @@ const OwnerDashboard = () => {
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Metro Haven</h3>
-                  <div className="text-sm font-medium text-[#64748b] mb-6">₱6,200/mo • Studio Unit</div>
+                  <div className="text-sm font-medium text-[#64748b] mb-6">LKR 6,200/mo • Studio Unit</div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
@@ -426,7 +426,7 @@ const OwnerDashboard = () => {
                     <td className="px-6 py-5">
                       <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>
                     </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱4,500</td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 4,500</td>
                     <td className="px-6 py-5">
                       <div className="flex gap-2">
                         <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
@@ -443,7 +443,7 @@ const OwnerDashboard = () => {
                     <td className="px-6 py-5">
                       <span className="bg-[#e8f7ec] text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">active</span>
                     </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱6,200</td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 6,200</td>
                     <td className="px-6 py-5 text-[#94a3b8]">—</td>
                   </tr>
 
@@ -455,7 +455,7 @@ const OwnerDashboard = () => {
                     <td className="px-6 py-5">
                       <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>
                     </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱3,800</td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 3,800</td>
                     <td className="px-6 py-5">
                       <div className="flex gap-2">
                         <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
@@ -472,7 +472,7 @@ const OwnerDashboard = () => {
                     <td className="px-6 py-5">
                       <span className="bg-[#f1f5f9] text-[#64748b] px-3 py-1.5 rounded-full text-xs font-bold">completed</span>
                     </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱4,500</td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 4,500</td>
                     <td className="px-6 py-5 text-[#94a3b8]">—</td>
                   </tr>
                 </tbody>

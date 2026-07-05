@@ -391,7 +391,7 @@ const OwnerListingForm = () => {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Monthly Rent (Rs.) *</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Monthly Rent (LKR ) *</label>
                   <input 
                     type="number" 
                     name="monthlyRent"
@@ -403,7 +403,7 @@ const OwnerListingForm = () => {
                   {errors.monthlyRent && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.monthlyRent}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Security Deposit (Rs.) *</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Security Deposit (LKR ) *</label>
                   <input 
                     type="number" 
                     name="securityDeposit"
@@ -489,11 +489,11 @@ const OwnerListingForm = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between pb-3 border-b border-slate-200">
                     <span className="text-slate-500 font-medium text-sm">Monthly Rent</span>
-                    <span className="font-bold text-[#0f172a]">Rs. {formData.monthlyRent}</span>
+                    <span className="font-bold text-[#0f172a]">LKR {formData.monthlyRent}</span>
                   </div>
                   <div className="flex justify-between pb-3 border-b border-slate-200">
                     <span className="text-slate-500 font-medium text-sm">Security Deposit</span>
-                    <span className="font-bold text-[#0f172a]">Rs. {formData.securityDeposit}</span>
+                    <span className="font-bold text-[#0f172a]">LKR {formData.securityDeposit}</span>
                   </div>
                   <div className="flex justify-between pb-3 border-b border-slate-200">
                     <span className="text-slate-500 font-medium text-sm">Nearest University</span>

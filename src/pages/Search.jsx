@@ -322,11 +322,11 @@ const SearchPage = () => {
                     className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#1952c4]"
                   />
                   <div className="flex justify-between items-center mt-2 text-[11px] font-bold text-slate-400">
-                    <span>Rs. 5,000</span>
-                    <span>Rs. 30,000</span>
+                    <span>LKR 5,000</span>
+                    <span>LKR 30,000</span>
                   </div>
                   <div className="text-center mt-2">
-                    <span className="text-[#1952c4] font-extrabold text-sm">Rs. {maxPrice.toLocaleString()}</span>
+                    <span className="text-[#1952c4] font-extrabold text-sm">LKR {maxPrice.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -451,7 +451,7 @@ const SearchPage = () => {
                         {/* Bottom Image Badges (Price / Gender) */}
                         <div className="absolute bottom-4 left-4 z-20 flex gap-2">
                           <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
-                            Rs. {listing.price.toLocaleString()}/mo
+                            LKR {listing.price.toLocaleString()}/mo
                           </span>
                           <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${
                             listing.gender === 'female'
@@ -586,7 +586,7 @@ const SearchPage = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[14px] font-extrabold text-[#1952c4]">
-                        Rs. {listing.price.toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
+                        LKR {listing.price.toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
                       </span>
                       <span className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5">
                         ⭐ {listing.rating}
@@ -654,7 +654,7 @@ const SearchPage = () => {
                       <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                       </svg>
-                      Rs. {(listing.price / 1000).toFixed(0)}k
+                      LKR {(listing.price / 1000).toFixed(0)}k
                     </button>
 
                     {isSelected && (
@@ -677,7 +677,7 @@ const SearchPage = () => {
                         </div>
                         <div>
                           <h5 className="font-bold text-slate-800 text-[12px] truncate">{listing.name}</h5>
-                          <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">Rs. {listing.price.toLocaleString()}/mo</span>
+                          <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">LKR {listing.price.toLocaleString()}/mo</span>
                         </div>
                         <button
                           onClick={(e) => {

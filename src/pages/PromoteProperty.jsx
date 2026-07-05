@@ -240,7 +240,7 @@ const PromoteProperty = () => {
                           Processing...
                         </>
                       ) : (
-                        `Pay $${selectedPlan.price}`
+                        `Pay LKR ${selectedPlan.price}`
                       )}
                     </button>
                     <div className="mt-4 flex items-center justify-center gap-1.5 text-[#94a3b8]">

@@ -221,7 +221,7 @@ const MapViewPage = () => {
                       : 'bg-white border-[#e2e8f0] text-slate-800 hover:border-slate-300'
                   }`}
                 >
-                  ₱{(listing.price / 1000).toFixed(1)}k
+                  LKR {(listing.price / 1000).toFixed(1)}k
                 </button>
 
                 {/* Map Mini Popup Info */}
@@ -245,7 +245,7 @@ const MapViewPage = () => {
                     </div>
                     <div>
                       <h5 className="font-bold text-slate-800 text-[12px] truncate">{listing.name}</h5>
-                      <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">₱{listing.price.toLocaleString()}/mo</span>
+                      <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">LKR {listing.price.toLocaleString()}/mo</span>
                     </div>
                     <button
                       onClick={(e) => {
@@ -356,7 +356,7 @@ const MapViewPage = () => {
 
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-base font-extrabold text-[#1952c4]">
-                          ₱{listing.price.toLocaleString()}
+                          LKR {listing.price.toLocaleString()}
                           <span className="text-[11px] text-slate-400 font-normal">/mo</span>
                         </span>
                         <span className="text-sm font-bold text-slate-700 flex items-center gap-1">

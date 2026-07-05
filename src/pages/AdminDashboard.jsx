@@ -70,10 +70,10 @@ const AdminDashboard = () => {
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#f5f3ff] text-[#8b5cf6] flex items-center justify-center text-2xl font-bold">
-              ₱
+              LKR 
             </div>
             <div>
-              <div className="text-[22px] font-black text-[#0f172a]">₱2.4M</div>
+              <div className="text-[22px] font-black text-[#0f172a]">LKR 2.4M</div>
               <div className="text-xs font-semibold text-[#64748b]">Platform Revenue</div>
               <div className="text-xs font-bold text-[#10b981] mt-1">+18% this month</div>
             </div>
@@ -462,7 +462,7 @@ const AdminDashboard = () => {
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Diliman, Quezon City • Maria Santos</div>
                 
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-[15px] font-extrabold text-[#1952c4]">₱4,500/mo</div>
+                  <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 4,500/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
                     <span className="text-[#f59e0b]">★</span> 4.8
                   </div>
@@ -496,7 +496,7 @@ const AdminDashboard = () => {
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Sampaloc, Manila • Carmelita Reyes</div>
                 
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-[15px] font-extrabold text-[#1952c4]">₱3,800/mo</div>
+                  <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 3,800/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
                     <span className="text-[#f59e0b]">★</span> 4.5
                   </div>
@@ -529,7 +529,7 @@ const AdminDashboard = () => {
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Taft Avenue, Manila • Roberto Cruz</div>
                 
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-[15px] font-extrabold text-[#1952c4]">₱6,200/mo</div>
+                  <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 6,200/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
                     <span className="text-[#f59e0b]">★</span> 4.9
                   </div>
@@ -563,7 +563,7 @@ const AdminDashboard = () => {
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">España Blvd, Manila • Jose Mendoza</div>
                 
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-[15px] font-extrabold text-[#1952c4]">₱3,200/mo</div>
+                  <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 3,200/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
                     <span className="text-[#f59e0b]">★</span> 4.3
                   </div>
@@ -597,7 +597,7 @@ const AdminDashboard = () => {
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Calamba, Laguna • Ana Villanueva</div>
                 
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-[15px] font-extrabold text-[#1952c4]">₱2,900/mo</div>
+                  <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 2,900/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
                     <span className="text-[#f59e0b]">★</span> 4.6
                   </div>
@@ -631,7 +631,7 @@ const AdminDashboard = () => {
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Katipunan Ave, QC • Patricia Gomez</div>
                 
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-[15px] font-extrabold text-[#1952c4]">₱7,500/mo</div>
+                  <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 7,500/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
                     <span className="text-[#f59e0b]">★</span> 4.7
                   </div>

@@ -213,7 +213,7 @@ const MyBookings = () => {
                         </div>
                         <div>
                           <div className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Total</div>
-                          <div className="text-[13px] font-bold text-[#1952c4]">Rs. {booking.totalPrice.toLocaleString()}</div>
+                          <div className="text-[13px] font-bold text-[#1952c4]">LKR {booking.totalPrice.toLocaleString()}</div>
                         </div>
                       </div>
                     </div>

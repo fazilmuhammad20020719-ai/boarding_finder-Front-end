@@ -187,11 +187,11 @@ const BookingPage = () => {
               </div>
               <div className="flex justify-between text-[14px]">
                 <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                <span className="font-extrabold text-[#0f172a]">Rs. {listing.price.toLocaleString()}</span>
+                <span className="font-extrabold text-[#0f172a]">LKR {listing.price.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-[15px] mt-4 pt-4 border-t border-[#e2e8f0]/80">
                 <span className="text-[#64748b] font-bold">Total</span>
-                <span className="font-black text-[#0f172a]">Rs. {total.toLocaleString()}</span>
+                <span className="font-black text-[#0f172a]">LKR {total.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -403,7 +403,7 @@ const BookingPage = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center text-[15px]">
                   <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                  <span className="font-extrabold text-[#0f172a]">Rs. {listing.price.toLocaleString()}</span>
+                  <span className="font-extrabold text-[#0f172a]">LKR {listing.price.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center text-[15px]">
                   <span className="text-[#64748b] font-medium">Duration</span>
@@ -411,7 +411,7 @@ const BookingPage = () => {
                 </div>
                 <div className="flex justify-between items-center text-[15px]">
                   <span className="text-[#64748b] font-medium">Security Deposit</span>
-                  <span className="font-extrabold text-[#0f172a]">Rs. {securityDeposit.toLocaleString()}</span>
+                  <span className="font-extrabold text-[#0f172a]">LKR {securityDeposit.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -421,7 +421,7 @@ const BookingPage = () => {
               {/* Total */}
               <div className="flex justify-between items-center text-lg">
                 <span className="font-extrabold text-[#0f172a]">Total</span>
-                <span className="font-black text-[#1952c4]">Rs. {total.toLocaleString()}</span>
+                <span className="font-black text-[#1952c4]">LKR {total.toLocaleString()}</span>
               </div>
 
             </div>

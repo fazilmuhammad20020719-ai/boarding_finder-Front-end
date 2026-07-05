@@ -8,7 +8,7 @@ const mockPayments = [
     date: "Jul 01, 2025",
     property: "BlueSky Residences",
     type: "Monthly Rent",
-    amount: "Rs. 15,000",
+    amount: "LKR 15,000",
     method: "Visa ending in •••• 4242",
     status: "Completed"
   },
@@ -17,7 +17,7 @@ const mockPayments = [
     date: "Jun 01, 2025",
     property: "BlueSky Residences",
     type: "Monthly Rent",
-    amount: "Rs. 15,000",
+    amount: "LKR 15,000",
     method: "Visa ending in •••• 4242",
     status: "Completed"
   },
@@ -26,7 +26,7 @@ const mockPayments = [
     date: "May 28, 2025",
     property: "BlueSky Residences",
     type: "Security Deposit",
-    amount: "Rs. 30,000",
+    amount: "LKR 30,000",
     method: "Bank Transfer",
     status: "Completed"
   },
@@ -35,7 +35,7 @@ const mockPayments = [
     date: "May 28, 2025",
     property: "BlueSky Residences",
     type: "First Month Rent",
-    amount: "Rs. 15,000",
+    amount: "LKR 15,000",
     method: "Bank Transfer",
     status: "Completed"
   },
@@ -44,7 +44,7 @@ const mockPayments = [
     date: "Dec 15, 2024",
     property: "Green Valley Dorms",
     type: "Booking Reservation",
-    amount: "Rs. 5,000",
+    amount: "LKR 5,000",
     method: "Mastercard ending in •••• 1234",
     status: "Refunded"
   }
@@ -91,11 +91,11 @@ const PaymentHistory = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e2e8f0]/60">
             <div className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Total Paid (This Year)</div>
-            <div className="text-3xl font-black text-[#0f172a]">Rs. 75,000</div>
+            <div className="text-3xl font-black text-[#0f172a]">LKR 75,000</div>
           </div>
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e2e8f0]/60">
             <div className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Next Payment Due</div>
-            <div className="text-3xl font-black text-[#f59e0b]">Rs. 15,000</div>
+            <div className="text-3xl font-black text-[#f59e0b]">LKR 15,000</div>
             <div className="text-sm font-semibold text-slate-500 mt-1">Due on Aug 01, 2025</div>
           </div>
           <div className="bg-[#1952c4] p-6 rounded-2xl shadow-sm border border-[#1952c4] text-white relative overflow-hidden">
