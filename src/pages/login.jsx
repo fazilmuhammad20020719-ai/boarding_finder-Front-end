@@ -13,7 +13,7 @@ const LoginPage = () => {
     if (email && password) {
       localStorage.setItem('userLoggedIn', 'true');
       alert(`Successfully signed in as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}`);
-      navigate('/home'); // Login success -> Home page
+      navigate('/'); // Login success -> Home page
     } else {
       alert('Please fill all fields');
     }
@@ -22,13 +22,13 @@ const LoginPage = () => {
   const handleGoogleLogin = () => {
     localStorage.setItem('userLoggedIn', 'true');
     alert(`Signing in with Google as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    navigate('/home');
+    navigate('/');
   };
 
   const handleFacebookLogin = () => {
     localStorage.setItem('userLoggedIn', 'true');
     alert(`Signing in with Facebook as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    navigate('/home');
+    navigate('/');
   };
 
   return (
