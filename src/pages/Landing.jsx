@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import bgImage from '../assets/Image/Image.png';
 import Navbar from '../components/Navbar';
 
 const LandingPage = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem('userLoggedIn') === 'true');
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userLoggedIn');
+    setIsLoggedIn(false);
+  };
+
   return (
     <div className="relative min-h-screen w-full bg-slate-950 font-sans antialiased overflow-x-hidden">
       {/* ===== NAVBAR ===== */}
-      <Navbar isLoggedIn={false} />
+      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} activeTab="home" />
 
       {/* ===== HERO SECTION ===== */}
       <main
@@ -26,6 +37,24 @@ const LandingPage = () => {
             <p className="mt-6 text-base sm:text-lg text-white/80 max-w-md leading-relaxed">
               Connect with verified boarding house owners near top universities across the Philippines.
             </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              {isLoggedIn ? (
+                <Link 
+                  to="/home" 
+                  className="px-8 py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-full shadow-lg transition-all text-center text-sm"
+                >
+                  Explore Boarding Houses ➔
+                </Link>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="px-8 py-4 bg-white hover:bg-slate-100 text-[#0f172a] font-bold rounded-full shadow-lg transition-all text-center text-sm"
+                >
+                  Get Started ➔
+                </Link>
+              )}
+            </div>
 
             {/* Stats Row */}
             <div className="mt-12 flex flex-wrap gap-4 md:gap-5">

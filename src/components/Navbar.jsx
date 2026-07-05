@@ -9,6 +9,7 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
 
   const handleLogoutClick = () => {
     setIsMobileMenuOpen(false);
+    localStorage.removeItem('userLoggedIn');
     if (onLogout) {
       onLogout();
     } else {
@@ -39,7 +40,7 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
           {/* Desktop Navigation Links */}
           {isLoggedIn && (
             <div className="hidden lg:flex items-center gap-2">
-              <Link to="/home" className={getLinkClass('home')}>
+              <Link to="/" className={getLinkClass('home')}>
                 Home
               </Link>
               <Link to="/home" className={getLinkClass('search')}>
@@ -161,7 +162,7 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-[#e2e8f0] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-4">
             <Link 
-              to="/home" 
+              to="/" 
               onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
