@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
+  const [role, setRole] = useState('student'); // 'student', 'owner', 'admin'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -9,10 +10,21 @@ const LoginPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     if (email && password) {
+      alert(`Successfully signed in as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}`);
       navigate('/home'); // Login success -> Home page
     } else {
       alert('Please fill all fields');
     }
+  };
+
+  const handleGoogleLogin = () => {
+    alert(`Signing in with Google as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
+    navigate('/home');
+  };
+
+  const handleFacebookLogin = () => {
+    alert(`Signing in with Facebook as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
+    navigate('/home');
   };
 
   return (
@@ -34,8 +46,16 @@ const LoginPage = () => {
             <span className="font-bold text-[22px] text-[#0f172a] tracking-tight">BoardingFinder</span>
           </div>
 
-          <h2 className="text-[32px] font-bold text-[#0f172a] mt-8 tracking-tight">Welcome back</h2>
-          <p className="text-[#64748b] text-[15px] mt-1.5 font-normal">Sign in to your account to continue</p>
+          <h2 className="text-[32px] font-bold text-[#0f172a] mt-8 tracking-tight">
+            {role === 'student' && 'Welcome back'}
+            {role === 'owner' && 'Owner Portal'}
+            {role === 'admin' && 'Admin Portal'}
+          </h2>
+          <p className="text-[#64748b] text-[15px] mt-1.5 font-normal">
+            {role === 'student' && 'Sign in to your account to continue'}
+            {role === 'owner' && 'Manage your listings and boarding houses'}
+            {role === 'admin' && 'Access the administrative control center'}
+          </p>
         </div>
 
         {/* ===== FORM SECTION ===== */}
@@ -80,26 +100,43 @@ const LoginPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-4 mt-6 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm"
+            className="w-full py-4 mt-6 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm cursor-pointer"
           >
-            Sign In as Student
+            {role === 'student' && 'Sign In as Student'}
+            {role === 'owner' && 'Sign In as Property Owner'}
+            {role === 'admin' && 'Sign In as Administrator'}
           </button>
         </form>
 
         {/* ===== ALTERNATIVE LOGINS ===== */}
         <div className="grid grid-cols-2 gap-4 mt-4 w-full">
-          <button
-            type="button"
-            className="py-3 px-5 border border-slate-900 bg-transparent hover:bg-slate-100/50 text-[#0f172a] font-semibold rounded-full flex items-center justify-center gap-2 text-sm transition-all duration-200"
-          >
-            <span role="img" aria-label="owner">🏠</span> Owner Login
-          </button>
-          <button
-            type="button"
-            className="py-3 px-5 border border-slate-900 bg-transparent hover:bg-slate-100/50 text-[#0f172a] font-semibold rounded-full flex items-center justify-center gap-2 text-sm transition-all duration-200"
-          >
-            <span role="img" aria-label="admin">⚙️</span> Admin Login
-          </button>
+          {role !== 'student' && (
+            <button
+              type="button"
+              onClick={() => setRole('student')}
+              className="py-3 px-5 border border-slate-900 bg-transparent hover:bg-slate-100/50 text-[#0f172a] font-semibold rounded-full flex items-center justify-center gap-2 text-sm transition-all duration-200 cursor-pointer"
+            >
+              <span role="img" aria-label="student">🎓</span> Student Login
+            </button>
+          )}
+          {role !== 'owner' && (
+            <button
+              type="button"
+              onClick={() => setRole('owner')}
+              className="py-3 px-5 border border-slate-900 bg-transparent hover:bg-slate-100/50 text-[#0f172a] font-semibold rounded-full flex items-center justify-center gap-2 text-sm transition-all duration-200 cursor-pointer"
+            >
+              <span role="img" aria-label="owner">🏠</span> Owner Login
+            </button>
+          )}
+          {role !== 'admin' && (
+            <button
+              type="button"
+              onClick={() => setRole('admin')}
+              className="py-3 px-5 border border-slate-900 bg-transparent hover:bg-slate-100/50 text-[#0f172a] font-semibold rounded-full flex items-center justify-center gap-2 text-sm transition-all duration-200 cursor-pointer"
+            >
+              <span role="img" aria-label="admin">⚙️</span> Admin Login
+            </button>
+          )}
         </div>
 
         {/* ===== SOCIAL DIVIDER ===== */}
@@ -115,7 +152,8 @@ const LoginPage = () => {
         <div className="grid grid-cols-2 gap-4 w-full">
           <button
             type="button"
-            className="flex items-center justify-center gap-2.5 py-3.5 px-5 border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-[#0f172a] font-semibold rounded-[16px] text-sm transition-all shadow-sm duration-200"
+            onClick={handleGoogleLogin}
+            className="flex items-center justify-center gap-2.5 py-3.5 px-5 border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-[#0f172a] font-semibold rounded-[16px] text-sm transition-all shadow-sm duration-200 cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -127,7 +165,8 @@ const LoginPage = () => {
           </button>
           <button
             type="button"
-            className="flex items-center justify-center gap-2.5 py-3.5 px-5 border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-[#0f172a] font-semibold rounded-[16px] text-sm transition-all shadow-sm duration-200"
+            onClick={handleFacebookLogin}
+            className="flex items-center justify-center gap-2.5 py-3.5 px-5 border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-[#0f172a] font-semibold rounded-[16px] text-sm transition-all shadow-sm duration-200 cursor-pointer"
           >
             <svg className="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -137,7 +176,7 @@ const LoginPage = () => {
         </div>
 
         {/* ===== REGISTRATION FOOTER ===== */}
-        <p className="text-center text-sm text-[#64748b] mt-8 w-full">
+        <p className="text-center text-sm text-[#64748b] mt-8 w-full font-medium">
           Don't have an account?{' '}
           <Link to="/register" className="text-[#1952c4] font-semibold hover:underline">
             Create account
