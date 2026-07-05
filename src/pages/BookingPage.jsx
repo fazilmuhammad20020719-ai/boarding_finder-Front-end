@@ -367,7 +367,7 @@ const BookingPage = () => {
                         alert('Please select a payment method');
                         return;
                       }
-                      setStep(3);
+                      navigate(`/booking-confirmation?propertyId=${listing.id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}&name=${encodeURIComponent('Juan Fernando')}&email=${encodeURIComponent('juan.fernando@mrt.ac.lk')}`);
                     }}
                     className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none text-[15px]"
                   >

@@ -371,7 +371,15 @@ const HomePage = () => {
                       <span className="text-[#0f172a] ml-1">{listing.rating}</span>
                       <span className="text-slate-400 font-normal text-xs">({listing.reviews})</span>
                     </div>
-                    <span className="text-xs font-bold text-[#1952c4]">View details ➔</span>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
+                        className="text-xs font-bold text-slate-500 hover:text-[#1952c4] transition-colors border border-slate-200 rounded-md px-2 py-1 bg-white cursor-pointer"
+                      >
+                        Compare
+                      </button>
+                      <span className="text-xs font-bold text-[#1952c4]">View details ➔</span>
+                    </div>
                   </div>
                 </div>
               </div>

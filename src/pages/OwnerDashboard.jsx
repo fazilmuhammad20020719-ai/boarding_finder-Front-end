@@ -1,9 +1,84 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const OWNER_MOCK_CONVERSATIONS = [
+  {
+    id: 1,
+    name: "Juan Fernando",
+    property: "Tranquil Lodge - Room 2B",
+    avatar: "https://ui-avatars.com/api/?name=Juan+Fernando&background=e8f7ec&color=10b981",
+    lastMessage: "Hi Sarah, just confirming if the WiFi is already set up?",
+    time: "09:15 AM",
+    unread: 1,
+    online: true,
+    messages: [
+      { id: 101, sender: "them", text: "Hi Sarah, just confirming if the WiFi is already set up?", time: "09:15 AM", date: "Today" }
+    ]
+  },
+  {
+    id: 2,
+    name: "Emily Chen",
+    property: "BlueSky Residences - Studio",
+    avatar: "https://ui-avatars.com/api/?name=Emily+Chen&background=ebf3ff&color=1952c4",
+    lastMessage: "Thank you for the quick response!",
+    time: "Yesterday",
+    unread: 0,
+    online: false,
+    messages: [
+      { id: 201, sender: "me", text: "Hi Emily, the maintenance guy will be there at 2 PM.", time: "02:00 PM", date: "Yesterday" },
+      { id: 202, sender: "them", text: "Thank you for the quick response!", time: "02:15 PM", date: "Yesterday" }
+    ]
+  }
+];
+
 const OwnerDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('listings');
+  const [conversations, setConversations] = useState(OWNER_MOCK_CONVERSATIONS);
+  const [activeChatId, setActiveChatId] = useState(OWNER_MOCK_CONVERSATIONS[0].id);
+  const [newMessage, setNewMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const activeChat = conversations.find(c => c.id === activeChatId);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    const newMsgObj = {
+      id: Date.now(),
+      sender: "me",
+      text: newMessage,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: "Today"
+    };
+
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === activeChatId) {
+        return {
+          ...conv,
+          lastMessage: newMessage,
+          time: "Just now",
+          messages: [...conv.messages, newMsgObj]
+        };
+      }
+      return conv;
+    }));
+
+    setNewMessage('');
+  };
+
+  const handleSelectChat = (id) => {
+    setActiveChatId(id);
+    setConversations(prev => prev.map(conv => 
+      conv.id === id ? { ...conv, unread: 0 } : conv
+    ));
+  };
+
+  const filteredConversations = conversations.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.property.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
@@ -23,7 +98,7 @@ const OwnerDashboard = () => {
             <div className="text-xl font-extrabold">Roberto Cruz</div>
           </div>
         </div>
-        
+
         <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           Logout
@@ -31,10 +106,10 @@ const OwnerDashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 md:px-8 py-10">
-        
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          
+
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
               ₱
@@ -83,33 +158,40 @@ const OwnerDashboard = () => {
 
         {/* Tabs */}
         <div className="flex border-b border-[#e2e8f0] mb-8">
-          <button 
+          <button
             onClick={() => setActiveTab('overview')}
             className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 ${activeTab === 'overview' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             Overview
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('listings')}
             className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 ${activeTab === 'listings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             My Listings
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('bookings')}
             className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 ${activeTab === 'bookings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             Bookings
           </button>
+          <button
+            onClick={() => setActiveTab('messages')}
+            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 ${activeTab === 'messages' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            Messages
+          </button>
         </div>
 
         {/* Content Area */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Revenue Chart */}
             <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col min-h-[400px]">
               <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Revenue — Last 6 Months</h3>
@@ -118,7 +200,7 @@ const OwnerDashboard = () => {
                 <div className="absolute bottom-16 left-4 right-4 border-b border-dashed border-[#e2e8f0]/80"></div>
                 <div className="absolute bottom-32 left-4 right-4 border-b border-dashed border-[#e2e8f0]/80"></div>
                 <div className="absolute bottom-48 left-4 right-4 border-b border-dashed border-[#e2e8f0]/80"></div>
-                
+
                 <div className="flex flex-col items-center gap-2 z-10 w-1/6">
                   <div className="w-8 md:w-12 bg-slate-100 rounded-t-md h-24"></div>
                   <div className="text-xs font-semibold text-slate-400">Jan</div>
@@ -149,9 +231,9 @@ const OwnerDashboard = () => {
             {/* Pending Requests */}
             <div className="lg:col-span-1 bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
               <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Pending Requests</h3>
-              
+
               <div className="space-y-4">
-                
+
                 {/* Request 1 */}
                 <div className="flex items-center justify-between pb-4 border-b border-[#e2e8f0]/60">
                   <div className="flex items-center gap-3">
@@ -225,14 +307,17 @@ const OwnerDashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <span className="text-[#64748b] font-medium">3 listings</span>
-              <button className="flex items-center gap-2 bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-colors cursor-pointer border-none shadow-sm">
+              <button 
+                onClick={() => navigate('/add-listing')}
+                className="flex items-center gap-2 bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-colors cursor-pointer border-none shadow-sm"
+              >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                 Add Listing
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               {/* Listing 1 */}
               <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
                 <div className="h-48 bg-slate-200 relative">
@@ -242,7 +327,7 @@ const OwnerDashboard = () => {
                 <div className="p-6">
                   <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">BlueSky Residences</h3>
                   <div className="text-sm font-medium text-[#64748b] mb-6">₱4,500/mo • Dormitory</div>
-                  
+
                   <div className="grid grid-cols-3 gap-3">
                     <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -269,7 +354,7 @@ const OwnerDashboard = () => {
                 <div className="p-6">
                   <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Tranquil Lodge</h3>
                   <div className="text-sm font-medium text-[#64748b] mb-6">₱3,800/mo • Boarding House</div>
-                  
+
                   <div className="grid grid-cols-3 gap-3">
                     <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -295,7 +380,7 @@ const OwnerDashboard = () => {
                 <div className="p-6">
                   <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Metro Haven</h3>
                   <div className="text-sm font-medium text-[#64748b] mb-6">₱6,200/mo • Studio Unit</div>
-                  
+
                   <div className="grid grid-cols-3 gap-3">
                     <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -349,7 +434,7 @@ const OwnerDashboard = () => {
                       </div>
                     </td>
                   </tr>
-                  
+
                   {/* Row 2 */}
                   <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-5 font-bold">Jose Santos</td>
@@ -393,6 +478,212 @@ const OwnerDashboard = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* Messages Content Area */}
+        {activeTab === 'messages' && (
+          <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 flex overflow-hidden min-h-[600px] h-[calc(100vh-250px)]">
+            
+            {/* Left Sidebar (Conversation List) */}
+            <div className="w-full md:w-[350px] border-r border-[#e2e8f0]/60 flex flex-col bg-white">
+              
+              {/* Header */}
+              <div className="p-5 border-b border-[#e2e8f0]/60">
+                <h2 className="text-xl font-extrabold text-[#0f172a] mb-4 tracking-tight">Student Messages</h2>
+                
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="Search messages..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20" 
+                  />
+                </div>
+              </div>
+
+              {/* List */}
+              <div className="flex-grow overflow-y-auto">
+                {filteredConversations.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 text-sm">No conversations found.</div>
+                ) : (
+                  filteredConversations.map(conv => (
+                    <div 
+                      key={conv.id}
+                      onClick={() => handleSelectChat(conv.id)}
+                      className={`p-4 border-b border-[#e2e8f0]/40 cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-3 ${activeChatId === conv.id ? 'bg-[#ebf3ff]/50' : ''}`}
+                    >
+                      <div className="relative flex-shrink-0">
+                        <img src={conv.avatar} alt={conv.name} className="w-12 h-12 rounded-full object-cover" />
+                        {conv.online && (
+                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10b981] border-2 border-white rounded-full"></div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-grow min-w-0">
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className={`text-[15px] font-bold truncate ${conv.unread > 0 ? 'text-[#0f172a]' : 'text-[#334155]'}`}>
+                            {conv.name}
+                          </h3>
+                          <span className={`text-[11px] whitespace-nowrap ml-2 ${conv.unread > 0 ? 'text-[#1952c4] font-bold' : 'text-slate-400'}`}>
+                            {conv.time}
+                          </span>
+                        </div>
+                        
+                        <div className="text-[11px] font-bold text-[#1952c4] mb-1 truncate">
+                          {conv.property}
+                        </div>
+                        
+                        <div className="flex justify-between items-center gap-2">
+                          <p className={`text-[13px] truncate ${conv.unread > 0 ? 'font-semibold text-[#0f172a]' : 'text-slate-500'}`}>
+                            {conv.lastMessage}
+                          </p>
+                          {conv.unread > 0 && (
+                            <div className="w-5 h-5 rounded-full bg-[#1952c4] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                              {conv.unread}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Right Main Area (Active Chat) */}
+            <div className="hidden md:flex flex-grow flex-col bg-[#f4f7f9]/30 h-full">
+              {activeChat ? (
+                <>
+                  {/* Chat Header */}
+                  <div className="h-[76px] px-6 border-b border-[#e2e8f0]/60 bg-white flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img src={activeChat.avatar} alt={activeChat.name} className="w-10 h-10 rounded-full object-cover" />
+                        {activeChat.online && (
+                          <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10b981] border-2 border-white rounded-full"></div>
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="text-[16px] font-extrabold text-[#0f172a]">{activeChat.name}</h2>
+                        <div className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-500">
+                          {activeChat.property}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors border-none">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                      </button>
+                      <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors border-none">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Messages Area */}
+                  <div className="flex-grow p-6 overflow-y-auto flex flex-col gap-4">
+                    {/* Date Divider */}
+                    <div className="flex justify-center my-2">
+                      <span className="bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                        {activeChat.messages[0]?.date || "Today"}
+                      </span>
+                    </div>
+
+                    {activeChat.messages.map((msg, index) => {
+                      const isMe = msg.sender === 'me';
+                      const showDate = index > 0 && activeChat.messages[index-1].date !== msg.date;
+                      
+                      return (
+                        <React.Fragment key={msg.id}>
+                          {showDate && (
+                            <div className="flex justify-center my-4">
+                              <span className="bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                                {msg.date}
+                              </span>
+                            </div>
+                          )}
+                          <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[75%] sm:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                              <div 
+                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
+                                  isMe 
+                                    ? 'bg-[#1952c4] text-white rounded-br-none' 
+                                    : 'bg-white border border-[#e2e8f0]/60 text-[#0f172a] rounded-bl-none'
+                                }`}
+                              >
+                                {msg.text}
+                              </div>
+                              <span className="text-[11px] font-semibold text-slate-400 mt-1 mx-1">
+                                {msg.time}
+                              </span>
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="p-4 bg-white border-t border-[#e2e8f0]/60 flex-shrink-0">
+                    <form onSubmit={handleSendMessage} className="flex items-end gap-3">
+                      <button type="button" className="p-3 text-slate-400 hover:text-[#1952c4] transition-colors rounded-full hover:bg-slate-100 flex-shrink-0 border-none cursor-pointer">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                      </button>
+                      
+                      <div className="flex-grow bg-[#f4f7f9] rounded-2xl border border-transparent focus-within:border-[#1952c4]/30 focus-within:bg-white transition-all">
+                        <textarea 
+                          rows="1"
+                          placeholder="Type a message to the student..."
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendMessage(e);
+                            }
+                          }}
+                          className="w-full bg-transparent border-none px-4 py-3 text-[14px] text-[#0f172a] focus:outline-none resize-none max-h-32"
+                          style={{ minHeight: '46px' }}
+                        />
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        disabled={!newMessage.trim()}
+                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${
+                          newMessage.trim() 
+                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer' 
+                            : 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <svg className="w-5 h-5 translate-x-0.5 -translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                        </svg>
+                      </button>
+                    </form>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-grow flex flex-col items-center justify-center text-center p-8 bg-transparent">
+                  <div className="w-20 h-20 bg-[#ebf3ff] rounded-full flex items-center justify-center text-[#1952c4] mb-5 shadow-sm">
+                    <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-[#0f172a] mb-2">Student Messages</h3>
+                  <p className="text-slate-500 text-[15px] max-w-sm">Select a conversation from the sidebar to view details or send a new message to your tenants.</p>
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
