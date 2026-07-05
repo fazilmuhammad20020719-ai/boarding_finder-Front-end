@@ -18,6 +18,8 @@ const RegisterPage = () => {
 
   // Step 2 Fields (Property Owner)
   const [propertyName, setPropertyName] = useState('');
+  const [propertyType, setPropertyType] = useState('dormitory');
+  const [permitNumber, setPermitNumber] = useState('');
   const [propertyAddress, setPropertyAddress] = useState('');
 
   // Common Fields
@@ -49,7 +51,7 @@ const RegisterPage = () => {
           alert('Please fill all fields');
         }
       } else {
-        if (propertyName && propertyAddress && password) {
+        if (propertyName && propertyType && permitNumber && propertyAddress && password) {
           alert('Account created successfully! Please login.');
           navigate('/login');
         } else {
@@ -264,7 +266,48 @@ const RegisterPage = () => {
                         type="text"
                         value={propertyName}
                         onChange={(e) => setPropertyName(e.target.value)}
-                        placeholder="Diliman Boarding House"
+                        placeholder="e.g. Mabuhay Dormitory"
+                        className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                        required
+                      />
+                    </div>
+
+                    {/* Property Type Dropdown */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        Property Type
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={propertyType}
+                          onChange={(e) => setPropertyType(e.target.value)}
+                          className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px] appearance-none"
+                          required
+                        >
+                          <option value="dormitory">Dormitory</option>
+                          <option value="apartment">Apartment</option>
+                          <option value="bedspace">Bedspace</option>
+                          <option value="room_for_rent">Room for Rent</option>
+                          <option value="house">Single House</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
+                          <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Business Permit / TIN */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        Business Permit / TIN
+                      </label>
+                      <input
+                        type="text"
+                        value={permitNumber}
+                        onChange={(e) => setPermitNumber(e.target.value)}
+                        placeholder="e.g. BP-2026-123456"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
@@ -279,7 +322,7 @@ const RegisterPage = () => {
                         type="text"
                         value={propertyAddress}
                         onChange={(e) => setPropertyAddress(e.target.value)}
-                        placeholder="123 Katipunan Ave, Quezon City"
+                        placeholder="e.g. 123 Katipunan Ave, Quezon City"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
