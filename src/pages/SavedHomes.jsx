@@ -121,7 +121,7 @@ const MOCK_LISTINGS = [
 
 const SavedHomesPage = () => {
   const [listings, setListings] = useState([]);
-  const [selectedListing, setSelectedListing] = useState(null);
+
   const navigate = useNavigate();
 
   // Load listings from localStorage
@@ -181,7 +181,7 @@ const SavedHomesPage = () => {
             {savedListings.map((listing) => (
               <div
                 key={listing.id}
-                onClick={() => setSelectedListing(listing)}
+                onClick={() => navigate(`/property/${listing.id}`)}
                 className="bg-white rounded-[24px] overflow-hidden border border-[#e2e8f0]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
               >
                 {/* Photo Overlay */}
@@ -284,132 +284,6 @@ const SavedHomesPage = () => {
         )}
 
       </main>
-
-      {/* ===== DETAILS MODAL ===== */}
-      {selectedListing && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
-          <div 
-            onClick={() => setSelectedListing(null)}
-            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
-          ></div>
-
-          <div className="relative bg-white rounded-[32px] w-full max-w-4xl p-6 sm:p-8 md:p-10 shadow-2xl z-10 border border-[#e2e8f0]/80 flex flex-col gap-8 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedListing(null)}
-              className="absolute top-6 right-6 w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full flex items-center justify-center font-bold text-base transition-colors cursor-pointer border-none"
-            >
-              ✕
-            </button>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="flex flex-col gap-5">
-                <div className="h-64 sm:h-72 w-full rounded-2xl overflow-hidden bg-slate-100 shadow-inner">
-                  <img
-                    src={selectedListing.image}
-                    alt={selectedListing.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                <div>
-                  <span className="text-[11px] font-bold text-[#1952c4] uppercase tracking-wider mb-2.5 block">
-                    {selectedListing.university}
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight leading-none mb-3">
-                    {selectedListing.name}
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-[#475569] font-semibold mb-5">
-                    <span className="bg-[#f0f4f9] px-3 py-1 rounded-md">🛏️ {selectedListing.beds} {selectedListing.beds === 1 ? 'bed' : 'beds'}</span>
-                    <span className="bg-[#f0f4f9] px-3 py-1 rounded-md">📍 {selectedListing.location}</span>
-                    <span className="bg-[#f0f4f9] px-3 py-1 rounded-md">🚻 {selectedListing.gender}</span>
-                    <span className="bg-[#ebf3ff] text-[#1952c4] px-3 py-1 rounded-md shadow-sm">⭐ {selectedListing.rating} ({selectedListing.reviews} reviews)</span>
-                  </div>
-
-                  <h4 className="font-bold text-slate-800 text-base mb-2">Description</h4>
-                  <p className="text-slate-500 text-[14px] leading-relaxed mb-6 font-normal">
-                    {selectedListing.description}
-                  </p>
-
-                  <h4 className="font-bold text-slate-800 text-base mb-3.5">Included Amenities</h4>
-                  <div className="grid grid-cols-2 gap-3.5">
-                    {selectedListing.amenities.map((amenity, idx) => (
-                      <div key={idx} className="flex items-center gap-2.5 text-[14px] text-slate-600 font-medium">
-                        <span className="w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center flex-shrink-0 text-xs">✓</span>
-                        {amenity}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#f0f4f9] rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-[#e2e8f0]/40">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-1">Book a Room</h3>
-                  <p className="text-xs text-slate-400 mb-6">Coordinate direct viewing or reservation with verified owner</p>
-                  
-                  <div className="flex justify-between items-center bg-white p-4 rounded-2xl mb-6 shadow-sm border border-[#e2e8f0]/40">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rent Price</span>
-                      <span className="text-2xl font-black text-[#1952c4]">
-                        Rs. {selectedListing.price.toLocaleString()}
-                      </span>
-                    </div>
-                    <span className="text-slate-400 font-bold text-xs uppercase bg-[#f0f4f9] px-3 py-1.5 rounded-lg border border-[#e2e8f0]/30">per month</span>
-                  </div>
-
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    alert('Viewing Request Submitted! The owner will contact you shortly.');
-                    setSelectedListing(null);
-                  }} className="space-y-4">
-                    <div>
-                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2 uppercase">
-                        Preferred Viewing Date
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#e2e8f0]/80 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 text-[14px]"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2 uppercase">
-                        Message to Landlord
-                      </label>
-                      <textarea
-                        rows="3"
-                        placeholder="Hi! I am interested in booking a viewing slot..."
-                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#e2e8f0]/80 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 text-[14px] resize-none"
-                        required
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-4 mt-2 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-2xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer border-none"
-                    >
-                      Request Booking slot
-                    </button>
-                  </form>
-                </div>
-
-                <div className="mt-6 border-t border-[#e2e8f0]/60 pt-6 flex flex-col gap-3">
-                  <button
-                    onClick={() => alert('Launching Virtual VR Room Tour...')}
-                    className="w-full py-3.5 border border-[#1952c4]/40 hover:bg-[#ebf3ff]/40 text-[#1952c4] font-bold rounded-2xl text-xs transition-all flex items-center justify-center gap-2 bg-transparent cursor-pointer"
-                  >
-                    🕶️ View 3D Virtual Tour
-                  </button>
-                  <p className="text-[11px] text-center text-slate-400 font-semibold uppercase tracking-wider">
-                    🔒 Payment Secured via BoardingFinder Escrow
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

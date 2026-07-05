@@ -40,10 +40,10 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
           {/* Desktop Navigation Links */}
           {isLoggedIn && (
             <div className="hidden lg:flex items-center gap-2">
-              <Link to="/" className={getLinkClass('home')}>
+              <Link to="/home" className={getLinkClass('home')}>
                 Home
               </Link>
-              <Link to="/home" className={getLinkClass('search')}>
+              <Link to="/search" className={getLinkClass('search')}>
                 Search
               </Link>
               <Link to="/map" className={getLinkClass('map')}>
@@ -162,14 +162,14 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'sea
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-[#e2e8f0] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-4">
             <Link 
-              to="/" 
+              to="/home" 
               onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
               Home
             </Link>
             <Link 
-              to="/home" 
+              to="/search" 
               onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit"
             >
