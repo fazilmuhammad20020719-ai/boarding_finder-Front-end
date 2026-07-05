@@ -125,6 +125,7 @@ const PropertyDetails = () => {
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [activeDuration, setActiveDuration] = useState('6 mo');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Fetch from localStorage or use fallback
@@ -398,10 +399,16 @@ const PropertyDetails = () => {
 
                   {/* Actions */}
                   <div className="space-y-3">
-                    <button className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none">
+                    <button 
+                      onClick={() => navigate(`/book/${listing.id}`)}
+                      className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none"
+                    >
                       Book Now
                     </button>
-                    <button className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#0f172a] font-bold rounded-xl transition-colors shadow-sm cursor-pointer">
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#0f172a] font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                    >
                       Send Inquiry
                     </button>
                   </div>
@@ -415,6 +422,34 @@ const PropertyDetails = () => {
           </div>
         </div>
       </main>
+
+      {/* ===== SEND INQUIRY MODAL ===== */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="relative bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl z-10 animate-modalIn border border-slate-100">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 w-8 h-8 bg-slate-50 hover:bg-slate-100 text-[#1952c4] rounded-full flex items-center justify-center font-bold text-sm transition-colors cursor-pointer border-none">
+              ✕
+            </button>
+            <h3 className="text-[17px] font-bold text-[#0f172a] mb-0.5">Send Inquiry</h3>
+            <p className="text-[13px] text-[#1952c4] mb-6">{listing.name}</p>
+            
+            <textarea
+              rows="4"
+              placeholder="Type your message to the owner..."
+              className="w-full px-4 py-4 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1952c4] focus:border-[#1952c4] text-[14px] resize-none mb-4 font-medium"
+            ></textarea>
+            
+            <button onClick={() => { alert('Inquiry sent!'); setIsModalOpen(false); }} className="w-full py-3.5 bg-[#96baf7] hover:bg-[#1952c4] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none mb-4">
+              Send
+            </button>
+            
+            <p className="text-center text-[10px] text-slate-400 font-medium">
+              No payment charged until approved by owner
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

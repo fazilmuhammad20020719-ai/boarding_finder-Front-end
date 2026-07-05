@@ -13,7 +13,11 @@ const LoginPage = () => {
     if (email && password) {
       localStorage.setItem('userLoggedIn', 'true');
       alert(`Successfully signed in as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}`);
-      navigate('/home'); // Login success -> Home/Search page
+      if (role === 'owner') {
+        navigate('/owner-dashboard');
+      } else {
+        navigate('/home');
+      }
     } else {
       alert('Please fill all fields');
     }
@@ -22,13 +26,21 @@ const LoginPage = () => {
   const handleGoogleLogin = () => {
     localStorage.setItem('userLoggedIn', 'true');
     alert(`Signing in with Google as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    navigate('/home');
+    if (role === 'owner') {
+      navigate('/owner-dashboard');
+    } else {
+      navigate('/home');
+    }
   };
 
   const handleFacebookLogin = () => {
     localStorage.setItem('userLoggedIn', 'true');
     alert(`Signing in with Facebook as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    navigate('/home');
+    if (role === 'owner') {
+      navigate('/owner-dashboard');
+    } else {
+      navigate('/home');
+    }
   };
 
   return (
