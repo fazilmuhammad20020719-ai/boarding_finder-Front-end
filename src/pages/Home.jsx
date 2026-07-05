@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -120,7 +120,22 @@ const MOCK_LISTINGS = [
 ];
 
 const HomePage = () => {
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] = useState(() => {
+    const local = localStorage.getItem('listings');
+    if (local) {
+      try {
+        return JSON.parse(local);
+      } catch (e) {
+        return MOCK_LISTINGS;
+      }
+    }
+    return MOCK_LISTINGS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('listings', JSON.stringify(listings));
+  }, [listings]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list', 'map'
   const [selectedListing, setSelectedListing] = useState(null);
