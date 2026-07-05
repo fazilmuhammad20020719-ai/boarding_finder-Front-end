@@ -12,6 +12,7 @@ import MapViewPage from './pages/MapView';
 import PropertyDetails from './pages/PropertyDetails';
 import BookingPage from './pages/BookingPage';
 import OwnerDashboard from './pages/OwnerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
       <Route path="/property/:id" element={<PropertyDetails />} />
       <Route path="/book/:id" element={<BookingPage />} />
       <Route path="/owner-dashboard" element={<OwnerDashboard />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
     </Routes>
   );
 }

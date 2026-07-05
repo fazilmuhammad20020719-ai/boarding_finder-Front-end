@@ -317,6 +317,85 @@ const OwnerDashboard = () => {
           </div>
         )}
 
+        {/* Bookings Area */}
+        {activeTab === 'bookings' && (
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                    <th className="px-6 py-5 rounded-tl-3xl">STUDENT</th>
+                    <th className="px-6 py-5">LISTING</th>
+                    <th className="px-6 py-5">PERIOD</th>
+                    <th className="px-6 py-5">STATUS</th>
+                    <th className="px-6 py-5">AMOUNT</th>
+                    <th className="px-6 py-5 rounded-tr-3xl">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[14px] font-medium text-[#0f172a]">
+                  {/* Row 1 */}
+                  <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-5 font-bold">Maria Reyes</td>
+                    <td className="px-6 py-5 text-[#64748b]">Room 3A</td>
+                    <td className="px-6 py-5 text-[#64748b]">Jul-Dec 2025</td>
+                    <td className="px-6 py-5">
+                      <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>
+                    </td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱4,500</td>
+                    <td className="px-6 py-5">
+                      <div className="flex gap-2">
+                        <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
+                        <button className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  {/* Row 2 */}
+                  <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-5 font-bold">Jose Santos</td>
+                    <td className="px-6 py-5 text-[#64748b]">Room 2B</td>
+                    <td className="px-6 py-5 text-[#64748b]">Aug 2025-Jan 2026</td>
+                    <td className="px-6 py-5">
+                      <span className="bg-[#e8f7ec] text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">active</span>
+                    </td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱6,200</td>
+                    <td className="px-6 py-5 text-[#94a3b8]">—</td>
+                  </tr>
+
+                  {/* Row 3 */}
+                  <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-5 font-bold">Ana Cruz</td>
+                    <td className="px-6 py-5 text-[#64748b]">Room 1C</td>
+                    <td className="px-6 py-5 text-[#64748b]">Jul-Sep 2025</td>
+                    <td className="px-6 py-5">
+                      <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>
+                    </td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱3,800</td>
+                    <td className="px-6 py-5">
+                      <div className="flex gap-2">
+                        <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
+                        <button className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Row 4 */}
+                  <tr className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-5 font-bold">Lisa Tan</td>
+                    <td className="px-6 py-5 text-[#64748b]">Room 4D</td>
+                    <td className="px-6 py-5 text-[#64748b]">Jan-Jun 2025</td>
+                    <td className="px-6 py-5">
+                      <span className="bg-[#f1f5f9] text-[#64748b] px-3 py-1.5 rounded-full text-xs font-bold">completed</span>
+                    </td>
+                    <td className="px-6 py-5 font-bold text-[#1952c4]">₱4,500</td>
+                    <td className="px-6 py-5 text-[#94a3b8]">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

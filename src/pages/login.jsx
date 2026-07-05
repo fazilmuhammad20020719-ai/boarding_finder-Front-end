@@ -13,7 +13,9 @@ const LoginPage = () => {
     if (email && password) {
       localStorage.setItem('userLoggedIn', 'true');
       alert(`Successfully signed in as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}`);
-      if (role === 'owner') {
+      if (role === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (role === 'owner') {
         navigate('/owner-dashboard');
       } else {
         navigate('/home');
@@ -26,7 +28,9 @@ const LoginPage = () => {
   const handleGoogleLogin = () => {
     localStorage.setItem('userLoggedIn', 'true');
     alert(`Signing in with Google as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    if (role === 'owner') {
+    if (role === 'admin') {
+      navigate('/admin-dashboard');
+    } else if (role === 'owner') {
       navigate('/owner-dashboard');
     } else {
       navigate('/home');
@@ -36,7 +40,9 @@ const LoginPage = () => {
   const handleFacebookLogin = () => {
     localStorage.setItem('userLoggedIn', 'true');
     alert(`Signing in with Facebook as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    if (role === 'owner') {
+    if (role === 'admin') {
+      navigate('/admin-dashboard');
+    } else if (role === 'owner') {
       navigate('/owner-dashboard');
     } else {
       navigate('/home');
