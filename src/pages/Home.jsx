@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 const MOCK_LISTINGS = [
@@ -518,7 +518,180 @@ const HomePage = () => {
           </div>
         )}
 
-      </main>
+      {/* ===== HOW IT WORKS SECTION ===== */}
+      <div className="my-20 border-t border-[#e2e8f0]/60 pt-16">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold text-[#0f172a] tracking-tight mb-3">
+            How BoardingFinder Works
+          </h2>
+          <p className="text-slate-500 text-[15px] font-normal">
+            Simple steps to find your ideal boarding house
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {/* Step 1 */}
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1">Step 01</span>
+              <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">Search & Filter</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-normal">
+                Search for boarding houses near your university. Filter by price, gender policy, facilities, and more.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1">Step 02</span>
+              <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">View & Compare</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-normal">
+                Browse photos, read reviews from real students, and compare boarding houses side by side.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 11 2 2 4-4" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1">Step 03</span>
+              <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">Book Securely</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-normal">
+                Send a booking request directly to the owner and confirm your stay with secure payment options.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== OWN A BOARDING HOUSE CTA BANNER ===== */}
+      <div className="bg-[#1952c4] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 mb-10 shadow-md relative overflow-hidden">
+        {/* Abstract SVG overlay design on the right */}
+        <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
+          <svg className="w-full h-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6"/>
+            <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6"/>
+            <circle cx="50" cy="50" r="10" fill="white"/>
+            <circle cx="50" cy="90" r="10" fill="white"/>
+            <circle cx="50" cy="130" r="10" fill="white"/>
+            <circle cx="150" cy="70" r="10" fill="white"/>
+            <circle cx="150" cy="110" r="10" fill="white"/>
+          </svg>
+        </div>
+
+        <div className="max-w-xl text-left relative z-10">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Own a boarding house?
+          </h2>
+          <p className="text-white/80 text-sm sm:text-base leading-relaxed font-normal">
+            List your property and connect with thousands of students looking for a place near campus.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-4 flex-shrink-0 relative z-10">
+          <button
+            onClick={() => navigate('/register')}
+            className="px-6 py-3 bg-white hover:bg-slate-100 text-[#1952c4] font-bold rounded-xl transition-all shadow-sm text-sm cursor-pointer border-none font-medium"
+          >
+            List Your Property
+          </button>
+          <button
+            onClick={() => navigate('/register')}
+            className="px-6 py-3 border border-white hover:bg-white/10 text-white font-bold rounded-xl transition-all text-sm cursor-pointer bg-transparent font-medium"
+          >
+            Learn More
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    {/* ===== FOOTER ===== */}
+    <footer className="bg-[#133076] text-white pt-16 pb-8 border-t border-[#1952c4]/20 mt-auto">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+          
+          {/* Brand column */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white shadow-sm border border-white/10">
+                <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
+                  <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
+                  <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
+                  <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
+                  <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
+                </svg>
+              </div>
+              <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>
+            </div>
+            <p className="text-[#cbd5e1] text-sm leading-relaxed max-w-sm font-normal">
+              Find verified boarding houses near universities across Sri Lanka.
+            </p>
+          </div>
+
+          {/* Students column */}
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-bold">For Students</h4>
+            <ul className="flex flex-col gap-3 text-[#cbd5e1] text-sm font-normal">
+              <li><Link to="/home" className="hover:text-white transition-colors">Search Listings</Link></li>
+              <li><Link to="/home" className="hover:text-white transition-colors">Map View</Link></li>
+              <li><Link to="/home" className="hover:text-white transition-colors">Saved Listings</Link></li>
+              <li><Link to="/home" className="hover:text-white transition-colors">Reviews</Link></li>
+            </ul>
+          </div>
+
+          {/* Owners column */}
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-bold">For Owners</h4>
+            <ul className="flex flex-col gap-3 text-[#cbd5e1] text-sm font-normal">
+              <li><Link to="/register" className="hover:text-white transition-colors">List Property</Link></li>
+              <li><Link to="/register" className="hover:text-white transition-colors">Owner Dashboard</Link></li>
+              <li><Link to="/register" className="hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link to="/register" className="hover:text-white transition-colors">Support</Link></li>
+            </ul>
+          </div>
+
+          {/* Company column */}
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-bold">Company</h4>
+            <ul className="flex flex-col gap-3 text-[#cbd5e1] text-sm font-normal">
+              <li><Link to="/" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link to="/" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div className="border-t border-[#1e40af]/60 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[#94a3b8] text-xs font-normal">
+            © 2026 BoardingFinder. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
 
       {/* ===== LISTING DETAILS MODAL ===== */}
       {selectedListing && (
