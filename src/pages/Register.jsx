@@ -4,19 +4,32 @@ import bgImage from '../assets/Image/Image.png';
 
 const RegisterPage = () => {
   const [step, setStep] = useState(1);
+  const [role, setRole] = useState('student'); // 'student' or 'owner'
+  
+  // Step 1 Fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
+  // Step 2 Fields (Student)
   const [university, setUniversity] = useState('');
   const [course, setCourse] = useState('');
   const [studentId, setStudentId] = useState('');
+
+  // Step 2 Fields (Property Owner)
+  const [propertyName, setPropertyName] = useState('');
+  const [propertyAddress, setPropertyAddress] = useState('');
+
+  // Common Fields
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
   const navigate = useNavigate();
 
   const handleNextOrRegister = (e) => {
     e.preventDefault();
     if (step === 1) {
-      if (name && email) {
+      if (name && email && phone) {
         setStep(2);
       } else {
         alert('Please fill all fields');
@@ -26,11 +39,22 @@ const RegisterPage = () => {
         alert('Passwords do not match');
         return;
       }
-      if (university && course && studentId && password) {
-        alert('Account created successfully! Please login.');
-        navigate('/login');
+      
+      // Validation based on role
+      if (role === 'student') {
+        if (university && course && studentId && password) {
+          alert('Account created successfully! Please login.');
+          navigate('/login');
+        } else {
+          alert('Please fill all fields');
+        }
       } else {
-        alert('Please fill all fields');
+        if (propertyName && propertyAddress && password) {
+          alert('Account created successfully! Please login.');
+          navigate('/login');
+        } else {
+          alert('Please fill all fields');
+        }
       }
     }
   };
@@ -104,6 +128,37 @@ const RegisterPage = () => {
           <form onSubmit={handleNextOrRegister} className="w-full">
             {step === 1 ? (
               <div className="space-y-5">
+                {/* Role Selector */}
+                <div>
+                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                    I Am A
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setRole('student')}
+                      className={`py-3.5 px-5 rounded-[16px] border font-semibold flex items-center justify-center gap-2 text-[15px] transition-all duration-200 ${
+                        role === 'student'
+                          ? 'border-2 border-[#1952c4] bg-[#ebf3ff] text-[#1952c4] shadow-sm'
+                          : 'border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      🎓 Student
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole('owner')}
+                      className={`py-3.5 px-5 rounded-[16px] border font-semibold flex items-center justify-center gap-2 text-[15px] transition-all duration-200 ${
+                        role === 'owner'
+                          ? 'border-2 border-[#1952c4] bg-[#ebf3ff] text-[#1952c4] shadow-sm'
+                          : 'border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      🏠 Property Owner
+                    </button>
+                  </div>
+                </div>
+
                 {/* Full Name */}
                 <div>
                   <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
@@ -113,7 +168,7 @@ const RegisterPage = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Juan dela Cruz"
+                    placeholder="Juan Dela Cruz"
                     className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                     required
                   />
@@ -133,53 +188,104 @@ const RegisterPage = () => {
                     required
                   />
                 </div>
+
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+63 9XX XXX XXXX"
+                    className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                    required
+                  />
+                </div>
               </div>
             ) : (
               <div className="space-y-5">
-                {/* University */}
-                <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
-                    University
-                  </label>
-                  <input
-                    type="text"
-                    value={university}
-                    onChange={(e) => setUniversity(e.target.value)}
-                    placeholder="University of the Philippines Diliman"
-                    className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
-                    required
-                  />
-                </div>
+                {role === 'student' ? (
+                  <>
+                    {/* University */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        University
+                      </label>
+                      <input
+                        type="text"
+                        value={university}
+                        onChange={(e) => setUniversity(e.target.value)}
+                        placeholder="University of the Philippines Diliman"
+                        className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                        required
+                      />
+                    </div>
 
-                {/* Course */}
-                <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
-                    Course
-                  </label>
-                  <input
-                    type="text"
-                    value={course}
-                    onChange={(e) => setCourse(e.target.value)}
-                    placeholder="BS Computer Science"
-                    className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
-                    required
-                  />
-                </div>
+                    {/* Course */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        Course
+                      </label>
+                      <input
+                        type="text"
+                        value={course}
+                        onChange={(e) => setCourse(e.target.value)}
+                        placeholder="BS Computer Science"
+                        className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                        required
+                      />
+                    </div>
 
-                {/* Student ID */}
-                <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
-                    Student ID
-                  </label>
-                  <input
-                    type="text"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="2021-12345"
-                    className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
-                    required
-                  />
-                </div>
+                    {/* Student ID */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        Student ID
+                      </label>
+                      <input
+                        type="text"
+                        value={studentId}
+                        onChange={(e) => setStudentId(e.target.value)}
+                        placeholder="2021-12345"
+                        className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                        required
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Property Name */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        Property Name
+                      </label>
+                      <input
+                        type="text"
+                        value={propertyName}
+                        onChange={(e) => setPropertyName(e.target.value)}
+                        placeholder="Diliman Boarding House"
+                        className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                        required
+                      />
+                    </div>
+
+                    {/* Property Address */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
+                        Property Address
+                      </label>
+                      <input
+                        type="text"
+                        value={propertyAddress}
+                        onChange={(e) => setPropertyAddress(e.target.value)}
+                        placeholder="123 Katipunan Ave, Quezon City"
+                        className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
 
                 {/* Password */}
                 <div>
@@ -221,9 +327,15 @@ const RegisterPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm font-medium"
+              className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm font-medium flex items-center justify-center gap-2"
             >
-              {step === 1 ? 'Continue' : 'Create Account'}
+              {step === 1 ? (
+                <>
+                  Continue <span className="text-lg">→</span>
+                </>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
 
