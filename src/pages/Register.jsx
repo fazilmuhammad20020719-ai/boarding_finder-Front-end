@@ -170,7 +170,7 @@ const RegisterPage = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Juan Dela Cruz"
+                    placeholder="Saman Perera"
                     className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                     required
                   />
@@ -185,7 +185,7 @@ const RegisterPage = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="juan@university.edu.ph"
+                    placeholder="saman@mrt.ac.lk"
                     className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                     required
                   />
@@ -200,7 +200,7 @@ const RegisterPage = () => {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+63 9XX XXX XXXX"
+                    placeholder="+94 77 123 4567"
                     className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                     required
                   />
@@ -219,7 +219,7 @@ const RegisterPage = () => {
                         type="text"
                         value={university}
                         onChange={(e) => setUniversity(e.target.value)}
-                        placeholder="University of the Philippines Diliman"
+                        placeholder="University of Moratuwa"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
@@ -234,7 +234,7 @@ const RegisterPage = () => {
                         type="text"
                         value={course}
                         onChange={(e) => setCourse(e.target.value)}
-                        placeholder="BS Computer Science"
+                        placeholder="BSc Engineering"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
@@ -249,7 +249,7 @@ const RegisterPage = () => {
                         type="text"
                         value={studentId}
                         onChange={(e) => setStudentId(e.target.value)}
-                        placeholder="2021-12345"
+                        placeholder="210123A"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
@@ -266,7 +266,7 @@ const RegisterPage = () => {
                         type="text"
                         value={propertyName}
                         onChange={(e) => setPropertyName(e.target.value)}
-                        placeholder="e.g. Mabuhay Dormitory"
+                        placeholder="e.g. Moratuwa Student Residency"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
@@ -301,13 +301,13 @@ const RegisterPage = () => {
                     {/* Business Permit / TIN */}
                     <div>
                       <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
-                        Business Permit / TIN
+                        Business Registration / TIN
                       </label>
                       <input
                         type="text"
                         value={permitNumber}
                         onChange={(e) => setPermitNumber(e.target.value)}
-                        placeholder="e.g. BP-2026-123456"
+                        placeholder="e.g. BR-123456789"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />
@@ -322,7 +322,7 @@ const RegisterPage = () => {
                         type="text"
                         value={propertyAddress}
                         onChange={(e) => setPropertyAddress(e.target.value)}
-                        placeholder="e.g. 123 Katipunan Ave, Quezon City"
+                        placeholder="e.g. 123 Katubedda Road, Moratuwa"
                         className="w-full px-5 py-4 rounded-[16px] bg-white border border-[#e2e8f0]/80 shadow-sm text-slate-800 placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-[15px]"
                         required
                       />

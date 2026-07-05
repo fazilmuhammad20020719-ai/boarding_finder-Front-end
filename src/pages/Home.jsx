@@ -5,9 +5,9 @@ import Navbar from '../components/Navbar';
 const MOCK_LISTINGS = [
   {
     id: 1,
-    name: "Sunset Heights Dormitory",
-    university: "University of the Philippines Diliman",
-    price: 3200,
+    name: "Moratuwa Heights Dormitory",
+    university: "University of Moratuwa",
+    price: 12000,
     rating: 4.8,
     reviews: 24,
     type: "dormitory",
@@ -16,14 +16,14 @@ const MOCK_LISTINGS = [
     beds: 2,
     gender: "Co-ed",
     image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-    description: "A comfortable and secure dormitory designed specifically for students. Features 24/7 security, high-speed fiber internet, and comfortable study halls.",
+    description: "A comfortable and secure dormitory designed specifically for University of Moratuwa students. Features 24/7 security, high-speed fiber internet, and comfortable study halls.",
     mapCoords: { top: '35%', left: '28%' }
   },
   {
     id: 2,
-    name: "Ateneo Vista Bedspace",
-    university: "Ateneo de Manila University",
-    price: 4500,
+    name: "Colombo Vista Bedspace",
+    university: "University of Colombo",
+    price: 15000,
     rating: 4.9,
     reviews: 18,
     type: "bedspace",
@@ -32,14 +32,14 @@ const MOCK_LISTINGS = [
     beds: 1,
     gender: "Female only",
     image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    description: "Located right across Ateneo, this premium bedspace offers quiet study rooms, a fully equipped gym, and friendly female-only lodging with modern security.",
+    description: "Located close to the University of Colombo, this premium bedspace offers quiet study rooms, a fully equipped gym, and friendly female-only lodging with modern security.",
     mapCoords: { top: '48%', left: '55%' }
   },
   {
     id: 3,
-    name: "Taft Residences Apartment",
-    university: "De La Salle University",
-    price: 6000,
+    name: "Jayewardenepura Residency Apartment",
+    university: "University of Sri Jayewardenepura",
+    price: 18000,
     rating: 4.6,
     reviews: 32,
     type: "apartment",
@@ -48,14 +48,14 @@ const MOCK_LISTINGS = [
     beds: 2,
     gender: "Co-ed",
     image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-    description: "Modern high-rise apartment spaces perfect for students who want premium amenities including a swimming pool, private kitchen, and top-tier security access codes.",
+    description: "Modern apartment spaces perfect for students who want premium amenities including a swimming pool, private kitchen, and top-tier security access codes near USJ.",
     mapCoords: { top: '75%', left: '38%' }
   },
   {
     id: 4,
-    name: "Thomasian Haven Bedspace",
-    university: "University of Santo Tomas",
-    price: 2800,
+    name: "Kelaniya Haven Bedspace",
+    university: "University of Kelaniya",
+    price: 8500,
     rating: 4.5,
     reviews: 15,
     type: "bedspace",
@@ -64,14 +64,14 @@ const MOCK_LISTINGS = [
     beds: 4,
     gender: "Male only",
     image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600",
-    description: "Affordable bedspace lodging for male UST students. A clean community area, unlimited drinking water, and high-speed Wi-Fi are fully included in the rent.",
+    description: "Affordable bedspace lodging for male Kelaniya students. A clean community area, unlimited drinking water, and high-speed Wi-Fi are fully included in the rent.",
     mapCoords: { top: '22%', left: '70%' }
   },
   {
     id: 5,
-    name: "Diliman Cozy Suites",
-    university: "University of the Philippines Diliman",
-    price: 5200,
+    name: "Moratuwa Cozy Suites",
+    university: "University of Moratuwa",
+    price: 16500,
     rating: 4.7,
     reviews: 9,
     type: "apartment",
@@ -80,14 +80,14 @@ const MOCK_LISTINGS = [
     beds: 1,
     gender: "Co-ed",
     image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-    description: "Spacious studio apartments near UP Diliman. Fully furnished with private kitchen and bathroom, perfect for students seeking privacy and a quiet study atmosphere.",
+    description: "Spacious studio apartments near Moratuwa. Fully furnished with private kitchen and bathroom, perfect for students seeking privacy and a quiet study atmosphere.",
     mapCoords: { top: '28%', left: '42%' }
   },
   {
     id: 6,
-    name: "Katipunan Crest Dorm",
-    university: "Ateneo de Manila University",
-    price: 3800,
+    name: "Colombo Crest Dorm",
+    university: "University of Colombo",
+    price: 11000,
     rating: 4.7,
     reviews: 21,
     type: "dormitory",
@@ -96,7 +96,7 @@ const MOCK_LISTINGS = [
     beds: 3,
     gender: "Co-ed",
     image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    description: "A lively student community dorm with shared study halls, fast fiber Wi-Fi, an in-house study cafe, and a convenient location just a short walk to Ateneo.",
+    description: "A lively student community dorm with shared study halls, fast fiber Wi-Fi, an in-house study cafe, and a convenient location just a short walk to UOC.",
     mapCoords: { top: '55%', left: '68%' }
   }
 ];
@@ -104,7 +104,7 @@ const MOCK_LISTINGS = [
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all', 'dormitory', 'apartment', 'bedspace'
-  const [priceFilter, setPriceFilter] = useState('all'); // 'all', 'under_4k', '4k_to_5.5k', 'over_5.5k'
+  const [priceFilter, setPriceFilter] = useState('all'); // 'all', 'under_10k', '10k_to_15k', 'over_15k'
   const [viewMode, setViewMode] = useState('list'); // 'list', 'map'
   const [selectedListing, setSelectedListing] = useState(null);
   
@@ -128,12 +128,12 @@ const HomePage = () => {
       const matchesType = filterType === 'all' || listing.type === filterType;
 
       let matchesPrice = true;
-      if (priceFilter === 'under_4k') {
-        matchesPrice = listing.price < 4000;
-      } else if (priceFilter === '4k_to_5.5k') {
-        matchesPrice = listing.price >= 4000 && listing.price <= 5500;
-      } else if (priceFilter === 'over_5.5k') {
-        matchesPrice = listing.price > 5500;
+      if (priceFilter === 'under_10k') {
+        matchesPrice = listing.price < 10000;
+      } else if (priceFilter === '10k_to_15k') {
+        matchesPrice = listing.price >= 10000 && listing.price <= 15000;
+      } else if (priceFilter === 'over_15k') {
+        matchesPrice = listing.price > 15000;
       }
 
       return matchesSearch && matchesType && matchesPrice;
@@ -157,7 +157,7 @@ const HomePage = () => {
               Find your home away <br />from campus
             </h1>
             <p className="text-white/80 text-base sm:text-lg mb-8 font-normal max-w-xl">
-              Search verified student dormitories, bedspaces, and apartments near top universities.
+              Search verified student dormitories, bedspaces, and apartments near top universities in Sri Lanka.
             </p>
 
             {/* Search Input Bar */}
@@ -224,9 +224,9 @@ const HomePage = () => {
                 className="pl-5 pr-10 py-2.5 rounded-full bg-white border border-[#e2e8f0]/80 shadow-sm font-semibold text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 appearance-none cursor-pointer"
               >
                 <option value="all">Any Price</option>
-                <option value="under_4k">Under ₱4,000 /mo</option>
-                <option value="4k_to_5.5k">₱4,000 - ₱5,500 /mo</option>
-                <option value="over_5.5k">Above ₱5,500 /mo</option>
+                <option value="under_10k">Under Rs. 10,000 /mo</option>
+                <option value="10k_to_15k">Rs. 10,000 - Rs. 15,000 /mo</option>
+                <option value="over_15k">Above Rs. 15,000 /mo</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -347,7 +347,7 @@ const HomePage = () => {
                         <div className="flex flex-col">
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Starting at</span>
                           <span className="text-lg font-extrabold text-[#0f172a] leading-none">
-                            ₱{listing.price.toLocaleString()}<span className="text-xs font-semibold text-slate-500">/mo</span>
+                            Rs. {listing.price.toLocaleString()}<span className="text-xs font-semibold text-slate-500">/mo</span>
                           </span>
                         </div>
 
@@ -404,7 +404,7 @@ const HomePage = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[14px] font-extrabold text-[#1952c4]">
-                        ₱{listing.price.toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
+                        Rs. {listing.price.toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
                       </span>
                       <span className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5">
                         ⭐ {listing.rating}
@@ -427,13 +427,13 @@ const HomePage = () => {
                 
                 {/* University Shaded Zones */}
                 <rect x="30" y="30" width="180" height="80" rx="10" fill="#22c55e" fillOpacity="0.15" stroke="#22c55e" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="40" y="55" fill="#15803d" className="text-[11px] font-bold">UP DILIMAN ZONE</text>
+                <text x="40" y="55" fill="#15803d" className="text-[11px] font-bold">MORATUWA ZONE</text>
                 
                 <rect x="380" y="240" width="180" height="100" rx="10" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="390" y="265" fill="#1d4ed8" className="text-[11px] font-bold">ATENEO ZONE</text>
+                <text x="390" y="265" fill="#1d4ed8" className="text-[11px] font-bold">COLOMBO ZONE</text>
 
                 <rect x="260" y="10" width="150" height="80" rx="10" fill="#f59e0b" fillOpacity="0.1" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="270" y="35" fill="#b45309" className="text-[11px] font-bold">UST ZONE</text>
+                <text x="270" y="35" fill="#b45309" className="text-[11px] font-bold">KELANIYA ZONE</text>
               </svg>
 
               <span className="absolute bottom-4 left-4 z-10 bg-white/80 backdrop-blur-sm border border-slate-200 text-[10px] text-slate-500 font-semibold px-3 py-1.5 rounded-md shadow-sm">
@@ -474,7 +474,7 @@ const HomePage = () => {
                       <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                       </svg>
-                      ₱{(listing.price / 1000).toFixed(1)}k
+                      Rs. {(listing.price / 1000).toFixed(0)}k
                     </button>
 
                     {/* Pop-up Box over Marker if Selected */}
@@ -498,7 +498,7 @@ const HomePage = () => {
                         </div>
                         <div>
                           <h5 className="font-bold text-slate-800 text-[12px] truncate">{listing.name}</h5>
-                          <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">₱{listing.price.toLocaleString()}/mo</span>
+                          <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">Rs. {listing.price.toLocaleString()}/mo</span>
                         </div>
                         <button
                           onClick={(e) => {
@@ -594,7 +594,7 @@ const HomePage = () => {
                     <div className="flex flex-col">
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rent Price</span>
                       <span className="text-2xl font-black text-[#1952c4]">
-                        ₱{selectedListing.price.toLocaleString()}
+                        Rs. {selectedListing.price.toLocaleString()}
                       </span>
                     </div>
                     <span className="text-slate-400 font-bold text-xs uppercase bg-[#f0f4f9] px-3 py-1.5 rounded-lg border border-[#e2e8f0]/30">per month</span>
