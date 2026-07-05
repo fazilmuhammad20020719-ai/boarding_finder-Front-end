@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -15,40 +16,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f0f4f9] font-sans antialiased">
-      {/* ===== WHITE TOP NAVBAR ===== */}
-      <nav className="w-full bg-white border-b border-[#e2e8f0]/80 shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#1952c4] flex items-center justify-center text-white shadow-sm">
-                <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
-                  <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                  <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                  <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
-                  <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
-                  <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
-                </svg>
-              </div>
-              <span className="font-bold text-[22px] text-[#0f172a] tracking-tight">BoardingFinder</span>
-            </Link>
-
-            {/* Navigation Links with inline styles for bulletproof layout */}
-            <div className="flex items-center" style={{ gap: '24px' }}>
-              <Link to="/" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
-                Home
-              </Link>
-              <Link to="/home" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
-                Search
-              </Link>
-              <Link to="/home" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
-                Map View
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex-grow flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
@@ -56,7 +24,7 @@ const ForgotPassword = () => {
           {/* Card Container - Removed border classes to prevent browser rendering borders */}
           <div className="bg-white rounded-[32px] p-8 sm:p-10 shadow-md flex flex-col">
             {/* Envelope Icon */}
-            <div className="w-14 h-14 bg-[#ebf3ff] text-[#1952c4] rounded-2xl flex items-center justify-center mb-6">
+            <div className="w-14 h-14 bg-[#ebf3ff] text-[#1952c4] rounded-2xl flex items-center justify-center mb-6 self-center">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <rect width="20" height="16" x="2" y="4" rx="2"/>
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
@@ -64,10 +32,10 @@ const ForgotPassword = () => {
             </div>
 
             {/* Header Texts */}
-            <h2 className="text-[28px] font-bold text-[#0f172a] tracking-tight leading-none mb-3">
+            <h2 className="text-[28px] font-bold text-[#0f172a] tracking-tight leading-none mb-3 text-center">
               Forgot Password?
             </h2>
-            <p className="text-[#64748b] text-[15px] leading-relaxed mb-6 font-normal">
+            <p className="text-[#64748b] text-[15px] leading-relaxed mb-6 font-normal text-center">
               No worries! Enter your registered email and we'll send you a reset link.
             </p>
 
