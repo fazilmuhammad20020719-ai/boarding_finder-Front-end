@@ -7,6 +7,7 @@ import HomePage from './pages/Home';
 import ForgotPassword from './pages/ForgotPassword';
 import ProfilePage from './pages/Profile';
 import SavedHomesPage from './pages/SavedHomes';
+import MapViewPage from './pages/MapView';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/saved-homes" element={<SavedHomesPage />} />
+      <Route path="/map" element={<MapViewPage />} />
     </Routes>
   );
 }

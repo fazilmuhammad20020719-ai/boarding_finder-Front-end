@@ -284,20 +284,17 @@ const HomePage = () => {
             >
               Price ↓
             </button>
-            <button
-              onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
-              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer flex items-center gap-1.5 ${
-                viewMode === 'map'
-                  ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
-                  : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Map View
-            </button>
+            <Link to="/map">
+              <button
+                className="px-5 py-3 bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm rounded-full font-bold text-[13px] transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Map View
+              </button>
+            </Link>
           </div>
         </div>
 

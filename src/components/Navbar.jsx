@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/Image/Logo.png';
 
-const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
+const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2, activeTab = 'search' }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -14,6 +14,13 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
     } else {
       navigate('/');
     }
+  };
+
+  const getLinkClass = (tabName) => {
+    const isActive = activeTab === tabName;
+    return isActive
+      ? "text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-1.5 rounded-full shadow-sm transition-all"
+      : "text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors px-4 py-1.5";
   };
 
   return (
@@ -30,20 +37,20 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-6">
-            <Link to="/home" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
+          <div className="hidden lg:flex items-center gap-2">
+            <Link to="/home" className={getLinkClass('home')}>
               Home
             </Link>
-            <Link to="/home" className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-1.5 rounded-full shadow-sm transition-all">
+            <Link to="/home" className={getLinkClass('search')}>
               Search
             </Link>
-            <Link to="/home" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
+            <Link to="/map" className={getLinkClass('map')}>
               Map View
             </Link>
-            <Link to="/home" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
+            <Link to="/home" className={getLinkClass('about')}>
               About us
             </Link>
-            <Link to="/home" className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors">
+            <Link to="/home" className={getLinkClass('contact')}>
               Contact us
             </Link>
           </div>
@@ -164,7 +171,7 @@ const Navbar = ({ isLoggedIn = false, onLogout, likedCount = 2 }) => {
               Search
             </Link>
             <Link 
-              to="/home" 
+              to="/map" 
               onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
