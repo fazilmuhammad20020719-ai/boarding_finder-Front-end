@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 
 const LoginPage = () => {
   const [role, setRole] = useState('student'); // 'student', 'owner', 'admin'
@@ -51,7 +50,6 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f0f4f9] font-sans antialiased">
-      <Navbar isLoggedIn={false} />
       
       <div className="flex-grow flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-[440px] flex flex-col items-center">

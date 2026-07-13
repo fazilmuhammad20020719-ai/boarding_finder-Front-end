@@ -112,7 +112,7 @@ const Notifications = () => {
     try {
       const l = localStorage.getItem('listings');
       if (l) return JSON.parse(l).filter(x => x.liked).length;
-    } catch (e) {}
+    } catch (e) { }
     return 2;
   })();
 
@@ -128,7 +128,7 @@ const Notifications = () => {
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="" />
 
       <main className="flex-grow max-w-4xl w-full mx-auto px-6 md:px-8 py-10">
-        
+
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
@@ -137,22 +137,20 @@ const Notifications = () => {
               You have <span className="font-bold text-[#1952c4]">{unreadCount} unread</span> alerts.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="bg-white rounded-full p-1 border border-[#e2e8f0]/80 shadow-sm flex">
-              <button 
+              <button
                 onClick={() => setActiveTab('all')}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-colors cursor-pointer border-none ${
-                  activeTab === 'all' ? 'bg-[#f4f7f9] text-[#0f172a]' : 'bg-transparent text-[#64748b] hover:text-[#0f172a]'
-                }`}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-colors cursor-pointer border-none ${activeTab === 'all' ? 'bg-[#f4f7f9] text-[#0f172a]' : 'bg-transparent text-[#64748b] hover:text-[#0f172a]'
+                  }`}
               >
                 All
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('unread')}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-colors cursor-pointer border-none flex items-center gap-2 ${
-                  activeTab === 'unread' ? 'bg-[#f4f7f9] text-[#0f172a]' : 'bg-transparent text-[#64748b] hover:text-[#0f172a]'
-                }`}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-colors cursor-pointer border-none flex items-center gap-2 ${activeTab === 'unread' ? 'bg-[#f4f7f9] text-[#0f172a]' : 'bg-transparent text-[#64748b] hover:text-[#0f172a]'
+                  }`}
               >
                 Unread
                 {unreadCount > 0 && (
@@ -160,13 +158,13 @@ const Notifications = () => {
                 )}
               </button>
             </div>
-            
+
             {unreadCount > 0 && (
-              <button 
+              <button
                 onClick={markAllAsRead}
                 className="hidden sm:block text-[#1952c4] hover:text-[#1546a8] text-sm font-bold hover:underline transition-all bg-transparent border-none cursor-pointer whitespace-nowrap"
               >
-                Muslima all as read
+                all as read
               </button>
             )}
           </div>
@@ -183,35 +181,34 @@ const Notifications = () => {
               </div>
               <h3 className="text-lg font-bold text-[#0f172a] mb-2">You're all caught up!</h3>
               <p className="text-[#64748b] text-sm max-w-xs mx-auto">
-                {activeTab === 'unread' 
-                  ? "You don't have any unread notifications right now." 
+                {activeTab === 'unread'
+                  ? "You don't have any unread notifications right now."
                   : "You don't have any notifications yet."}
               </p>
             </div>
           ) : (
             filteredNotifications.map((notification) => (
-              <div 
-                key={notification.id} 
+              <div
+                key={notification.id}
                 onClick={() => {
                   markAsRead(notification.id);
                   if (notification.link !== '#') navigate(notification.link);
                 }}
-                className={`relative bg-white rounded-2xl p-5 border transition-all cursor-pointer group flex items-start gap-4 ${
-                  !notification.read 
-                    ? 'border-[#1952c4]/30 shadow-md bg-gradient-to-r from-white to-[#f0f4ff]/40' 
-                    : 'border-[#e2e8f0]/60 shadow-sm hover:border-[#cbd5e1]'
-                }`}
+                className={`relative bg-white rounded-2xl p-5 border transition-all cursor-pointer group flex items-start gap-4 ${!notification.read
+                  ? 'border-[#1952c4]/30 shadow-md bg-gradient-to-r from-white to-[#f0f4ff]/40'
+                  : 'border-[#e2e8f0]/60 shadow-sm hover:border-[#cbd5e1]'
+                  }`}
               >
                 {/* Unread dot indicator */}
                 {!notification.read && (
                   <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-8 bg-[#1952c4] rounded-r-full"></div>
                 )}
-                
+
                 {/* Icon */}
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${notification.bgColor}`}>
                   {notification.icon}
                 </div>
-                
+
                 {/* Content */}
                 <div className="flex-grow">
                   <div className="flex justify-between items-start gap-4 mb-1">
@@ -232,7 +229,7 @@ const Notifications = () => {
 
                 {/* Actions (Hover) */}
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                  <button 
+                  <button
                     onClick={(e) => handleDelete(notification.id, e)}
                     className="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors border-none cursor-pointer"
                     title="Remove notification"
@@ -246,7 +243,7 @@ const Notifications = () => {
             ))
           )}
         </div>
-        
+
       </main>
     </div>
   );
