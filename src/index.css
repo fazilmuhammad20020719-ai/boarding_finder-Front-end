@@ -8,7 +8,7 @@ body {
 }
 
 /* Make all page wrapper divs transparent so gradient shows through */
-div[class*="min-h-screen"] {
+div[class*="min-h-screen"]:not(.bg-slate-950) {
   background: transparent !important;
 }
 
