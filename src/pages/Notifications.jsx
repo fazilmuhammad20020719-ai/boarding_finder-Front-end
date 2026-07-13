@@ -7,7 +7,7 @@ const MOCK_NOTIFICATIONS = [
     id: 1,
     type: 'booking_approved',
     title: 'Booking Approved!',
-    message: 'Roberto Cruz has approved your booking request for BlueSky Residences.',
+    message: 'Nuha has approved your booking request for BlueSky Residences.',
     time: '2 hours ago',
     date: 'July 5, 2026',
     read: false,
@@ -22,8 +22,8 @@ const MOCK_NOTIFICATIONS = [
   {
     id: 2,
     type: 'message',
-    title: 'New Message from Sarah',
-    message: 'Hi Juan! Just checking what time you plan to move in next week?',
+    title: 'New Message from Muslima',
+    message: 'Hi Nuha! Just checking what time you plan to move in next week?',
     time: '5 hours ago',
     date: 'July 5, 2026',
     read: false,
@@ -166,7 +166,7 @@ const Notifications = () => {
                 onClick={markAllAsRead}
                 className="hidden sm:block text-[#1952c4] hover:text-[#1546a8] text-sm font-bold hover:underline transition-all bg-transparent border-none cursor-pointer whitespace-nowrap"
               >
-                Mark all as read
+                Muslima all as read
               </button>
             )}
           </div>

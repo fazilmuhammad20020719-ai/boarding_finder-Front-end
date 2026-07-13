@@ -5,48 +5,48 @@ import { Link } from 'react-router-dom';
 const MOCK_USERS = [
   {
     id: "USR-001",
-    name: "Alex Johnson",
-    email: "alex.j@example.com",
+    name: "Muslima",
+    email: "muslima@example.com",
     role: "Tenant",
     status: "Active",
     joined: "Jan 12, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Alex+Johnson&background=ebf3ff&color=1952c4"
+    avatar: "https://ui-avatars.com/api/?name=Muslima&background=ebf3ff&color=1952c4"
   },
   {
     id: "USR-002",
-    name: "Maria Garcia",
-    email: "m.garcia@example.com",
+    name: "Nuha",
+    email: "nuha@example.com",
     role: "Owner",
     status: "Active",
     joined: "Feb 05, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Maria+Garcia&background=e8f7ec&color=10b981"
+    avatar: "https://ui-avatars.com/api/?name=Nuha&background=e8f7ec&color=10b981"
   },
   {
     id: "USR-003",
-    name: "James Smith",
-    email: "james.s@example.com",
+    name: "Fazil",
+    email: "fazil@example.com",
     role: "Tenant",
     status: "Banned",
     joined: "Mar 20, 2026",
-    avatar: "https://ui-avatars.com/api/?name=James+Smith&background=fee2e2&color=ef4444"
+    avatar: "https://ui-avatars.com/api/?name=Fazil&background=fee2e2&color=ef4444"
   },
   {
     id: "USR-004",
-    name: "Linda Lee",
-    email: "linda.l@example.com",
+    name: "Naja",
+    email: "naja@example.com",
     role: "Owner",
     status: "Locked",
     joined: "Apr 10, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Linda+Lee&background=fef3c7&color=d97706"
+    avatar: "https://ui-avatars.com/api/?name=Naja&background=fef3c7&color=d97706"
   },
   {
     id: "USR-005",
-    name: "Robert Brown",
-    email: "rbrown@example.com",
+    name: "Farha",
+    email: "farha@example.com",
     role: "Tenant",
     status: "Active",
     joined: "May 01, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Robert+Brown&background=f3e8ff&color=9333ea"
+    avatar: "https://ui-avatars.com/api/?name=Farha&background=f3e8ff&color=9333ea"
   }
 ];
 

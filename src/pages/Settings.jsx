@@ -100,7 +100,7 @@ const Settings = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">First Name</label>
-                      <input type="text" defaultValue="Juan" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 transition-all bg-slate-50 focus:bg-white" />
+                      <input type="text" defaultValue="Nuha" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 transition-all bg-slate-50 focus:bg-white" />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">Last Name</label>
@@ -110,7 +110,7 @@ const Settings = () => {
 
                   <div className="mb-6">
                     <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
-                    <input type="email" defaultValue="juan.fernando@mrt.ac.lk" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 transition-all bg-slate-50 focus:bg-white" />
+                    <input type="email" defaultValue="nuha@mrt.ac.lk" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 transition-all bg-slate-50 focus:bg-white" />
                   </div>
 
                   <div className="mb-8">

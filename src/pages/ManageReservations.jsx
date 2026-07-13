@@ -16,8 +16,8 @@ const MOCK_RESERVATIONS = [
   },
   {
     id: "RES-1030",
-    tenant: "Sarah Connor",
-    avatar: "https://ui-avatars.com/api/?name=Sarah+Connor&background=e8f7ec&color=10b981",
+    tenant: "Muslima Connor",
+    avatar: "https://ui-avatars.com/api/?name=Muslima+Connor&background=e8f7ec&color=10b981",
     property: "Sunset Apartment - Unit A",
     checkIn: "Jul 20, 2026",
     checkOut: "Dec 20, 2026",
@@ -27,8 +27,8 @@ const MOCK_RESERVATIONS = [
   },
   {
     id: "RES-1031",
-    tenant: "David Miller",
-    avatar: "https://ui-avatars.com/api/?name=David+Miller&background=fef3c7&color=d97706",
+    tenant: "Krishnan Miller",
+    avatar: "https://ui-avatars.com/api/?name=Krishnan+Miller&background=fef3c7&color=d97706",
     property: "Cozy Room - 101",
     checkIn: "Jul 10, 2026",
     checkOut: "Jul 15, 2026",

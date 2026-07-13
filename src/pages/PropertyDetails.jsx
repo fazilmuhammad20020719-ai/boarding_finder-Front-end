@@ -114,10 +114,10 @@ const MOCK_LISTINGS = [
 ];
 
 const REVIEWS = [
-  { id: 1, name: "Anna Lim", date: "March 2025", initial: "A", rating: 5, text: "Very clean and the owner is super accommodating. WiFi is fast enough for video calls. Highly recommended!" },
-  { id: 2, name: "Marco Bautista", date: "Feb 2025", initial: "M", rating: 4, text: "Great location, just a 5-minute walk to campus. Room is a bit small but very clean." },
-  { id: 3, name: "Sheila Cruz", date: "Jan 2025", initial: "S", rating: 5, text: "Best boarding house I've stayed in. Homey atmosphere and safe neighborhood." },
-  { id: 4, name: "Ryan Tan", date: "Dec 2024", initial: "R", rating: 4, text: "Good value for money. Internet could be faster during peak hours but overall satisfied." }
+  { id: 1, name: "Nuha", date: "March 2025", initial: "A", rating: 5, text: "Very clean and the owner is super accommodating. WiFi is fast enough for video calls. Highly recommended!" },
+  { id: 2, name: "Fazil", date: "Feb 2025", initial: "M", rating: 4, text: "Great location, just a 5-minute walk to campus. Room is a bit small but very clean." },
+  { id: 3, name: "Naja", date: "Jan 2025", initial: "S", rating: 5, text: "Best boarding house I've stayed in. Homey atmosphere and safe neighborhood." },
+  { id: 4, name: "Farha", date: "Dec 2024", initial: "R", rating: 4, text: "Good value for money. Internet could be faster during peak hours but overall satisfied." }
 ];
 
 const PropertyDetails = () => {

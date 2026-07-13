@@ -52,8 +52,8 @@ const BookingConfirmation = () => {
   const propertyId = parseInt(searchParams.get('propertyId') || '2');
   const duration = parseInt(searchParams.get('duration') || '6');
   const paymentMethod = searchParams.get('payment') || 'Cash on Move-in';
-  const bookingName = searchParams.get('name') || 'Juan Fernando';
-  const bookingEmail = searchParams.get('email') || 'juan.fernando@mrt.ac.lk';
+  const bookingName = searchParams.get('name') || 'Krishnan';
+  const bookingEmail = searchParams.get('email') || 'nuha@mrt.ac.lk';
 
   // Find the listing
   const localListings = localStorage.getItem('listings');

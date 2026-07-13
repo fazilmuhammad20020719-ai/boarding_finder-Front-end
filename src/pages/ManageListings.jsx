@@ -6,7 +6,7 @@ const MOCK_LISTINGS = [
   {
     id: "LST-5091",
     title: "Luxury Loft in City Center",
-    owner: "Elena Rodriguez",
+    owner: "Muslima",
     address: "123 Main St, Apt 4B, Cityville",
     price: 1500,
     type: "Apartment",
@@ -17,7 +17,7 @@ const MOCK_LISTINGS = [
   {
     id: "LST-5092",
     title: "Cozy Student Room Near Campus",
-    owner: "Mark Johnson",
+    owner: "Nuha",
     address: "45 College Ave, Room 12",
     price: 450,
     type: "Private Room",
@@ -28,7 +28,7 @@ const MOCK_LISTINGS = [
   {
     id: "LST-5093",
     title: "Spacious Family Home with Garden",
-    owner: "Sarah Williams",
+    owner: "Fazil",
     address: "789 Oak Lane, Suburbia",
     price: 2200,
     type: "House",
@@ -39,7 +39,7 @@ const MOCK_LISTINGS = [
   {
     id: "LST-5094",
     title: "Budget Shared Room",
-    owner: "David Chen",
+    owner: "Naja",
     address: "101 Budget St, Apt 2",
     price: 200,
     type: "Shared Room",

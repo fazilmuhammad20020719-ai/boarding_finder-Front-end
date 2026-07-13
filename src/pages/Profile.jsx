@@ -12,8 +12,8 @@ const ProfilePage = () => {
       return JSON.parse(localProfile);
     }
     return {
-      name: "Juan Fernando",
-      email: "juan.fernando@mrt.ac.lk",
+      name: "Krishnan",
+      email: "nuha@mrt.ac.lk",
       phone: "+94 77 123 4567",
       university: "University of Moratuwa",
       department: "Computer Science & Engineering",
@@ -65,7 +65,7 @@ const ProfilePage = () => {
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-10">
-        
+
         {/* Page title */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">Account & Profile</h1>
@@ -73,10 +73,10 @@ const ProfilePage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          
+
           {/* LEFT COLUMN: PROFILE CARD */}
           <div className="bg-white rounded-[28px] border border-[#e2e8f0]/60 p-8 shadow-sm flex flex-col items-center text-center">
-            
+
             {/* Avatar Circle */}
             <div className="w-24 h-24 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-black text-3xl shadow-md mb-4 border border-[#e2e8f0]">
               {profile.name.charAt(0)}
@@ -126,7 +126,7 @@ const ProfilePage = () => {
 
           {/* RIGHT COLUMN: DETAILS FORM */}
           <div className="lg:col-span-2 bg-white rounded-[28px] border border-[#e2e8f0]/60 p-8 shadow-sm">
-            
+
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-slate-800">Personal Information</h3>
               {!isEditing ? (
@@ -159,7 +159,7 @@ const ProfilePage = () => {
 
             <form onSubmit={handleSave} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                
+
                 {/* Full name */}
                 <div>
                   <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2.5 uppercase">
