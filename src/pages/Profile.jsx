@@ -13,7 +13,7 @@ const ProfilePage = () => {
     }
     return {
       name: "Krishnan",
-      email: "nuha@mrt.ac.lk",
+      email: "Krishna@gmail.com",
       phone: "+94 77 123 4567",
       university: "University of Moratuwa",
       department: "Computer Science & Engineering",

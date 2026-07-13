@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@layer base {
+  /* Enforce light blue background for all main page containers, excluding the landing page (which uses bg-slate-950) */
+  .min-h-screen:not(.bg-slate-950) {
+    background-color: #e0edff !important;
+  }
+}
+
+@layer utilities {
+  /* Global card hover effect with dark blue shadow */
+  /* Targets elements with white background, rounded corners, and shadows, excluding interactive inputs/buttons and navbars */
+  .bg-white[class*="rounded-"][class*="shadow-"]:not(button):not(input):not(nav):not(header) {
+    transition: all 0.3s ease-in-out !important;
+  }
+  
+  .bg-white[class*="rounded-"][class*="shadow-"]:not(button):not(input):not(nav):not(header):hover {
+    transform: translateY(-4px) !important;
+    border-color: #1952c4 !important;
+    box-shadow: 0 14px 35px -5px rgba(15, 53, 138, 0.45), 0 10px 15px -6px rgba(15, 53, 138, 0.25) !important;
+  }
+}
