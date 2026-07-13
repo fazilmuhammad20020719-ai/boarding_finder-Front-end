@@ -18,7 +18,7 @@ const LandingPage = () => {
   return (
     <div className="relative min-h-screen w-full bg-slate-950 font-sans antialiased overflow-x-hidden">
       {/* ===== NAVBAR ===== */}
-      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} activeTab="home" />
+      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} activeTab="home" transparent={true} />
 
       {/* ===== HERO SECTION ===== */}
       <main
