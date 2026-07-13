@@ -22,7 +22,7 @@ const LandingPage = () => {
 
       {/* ===== HERO SECTION ===== */}
       <main
-        className="min-h-screen w-full flex items-center relative bg-cover bg-center bg-no-repeat"
+        className="landing-hero min-h-screen w-full flex items-center relative bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         {/* Content Container */}
