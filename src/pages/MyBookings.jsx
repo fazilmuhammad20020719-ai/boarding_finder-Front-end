@@ -108,7 +108,7 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-[#f4f6fa] flex flex-col font-sans antialiased text-[#0f172a]">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="" />
 
       <main className="flex-grow max-w-5xl w-full mx-auto px-6 md:px-8 py-10">
@@ -116,7 +116,7 @@ const MyBookings = () => {
         <p className="text-[#64748b] font-medium text-sm mb-8">Manage your boarding requests, active stays, and past history.</p>
 
         {/* Tabs */}
-        <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-[#e2e8f0]/60 w-fit">
+        <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-8 bg-white p-2 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-[#cbd5e1]/45 w-fit">
           {[
             { id: 'upcoming', label: 'Upcoming', count: bookings.filter(b => b.status === 'pending').length },
             { id: 'active', label: 'Active', count: bookings.filter(b => b.status === 'active').length },
@@ -145,7 +145,7 @@ const MyBookings = () => {
         {/* Bookings List */}
         <div className="space-y-6">
           {displayedBookings.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-[#e2e8f0]/60 flex flex-col items-center justify-center">
+            <div className="bg-white rounded-3xl p-12 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-[#cbd5e1]/45 flex flex-col items-center justify-center">
               <div className="w-16 h-16 bg-[#f4f7f9] rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -166,7 +166,7 @@ const MyBookings = () => {
             </div>
           ) : (
             displayedBookings.map(booking => (
-              <div key={booking.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60 hover:shadow-md transition-shadow group">
+              <div key={booking.id} className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-[#cbd5e1]/45 hover:shadow-[0_20px_40px_rgba(0,0,0,0.055)] hover:border-[#1952c4]/20 transition-all duration-300 group">
                 <div className="flex flex-col sm:flex-row">
                   
                   {/* Property Image */}

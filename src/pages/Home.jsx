@@ -139,7 +139,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-[#eaedf2] flex flex-col font-sans antialiased text-[#0f172a]">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="home" />
 
       {/* ===== HERO SECTION ===== */}
@@ -238,7 +238,7 @@ const HomePage = () => {
               <button
                 key={uni.name}
                 onClick={() => navigate('/search')}
-                className="flex flex-col items-center gap-3 p-4 bg-white rounded-2xl border border-[#e2e8f0]/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer group"
+                className="flex flex-col items-center gap-3 p-4 bg-white rounded-2xl border-2 border-[#c9d4e8] shadow-[0_4px_18px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.09)] hover:-translate-y-1.5 hover:border-[#1952c4]/60 transition-all duration-300 cursor-pointer group"
               >
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm"
@@ -272,7 +272,7 @@ const HomePage = () => {
               <div
                 key={listing.id}
                 onClick={() => navigate(`/property/${listing.id}`)}
-                className="bg-white rounded-[24px] overflow-hidden border border-[#e2e8f0]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+                className="bg-white rounded-[24px] overflow-hidden border-2 border-[#c9d4e8] shadow-[0_4px_18px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.10)] hover:-translate-y-2 hover:border-[#1952c4]/50 transition-all duration-300 flex flex-col group cursor-pointer relative"
               >
                 {/* Photo */}
                 <div className="h-48 w-full relative overflow-hidden bg-slate-100">

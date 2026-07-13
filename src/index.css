@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+/* ===== OPTION 2: COOL BLUE TINT GRADIENT BACKGROUND ===== */
+body {
+  background: linear-gradient(135deg, #EEF2FF 0%, #F0F4FC 50%, #E8EEFF 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Make all page wrapper divs transparent so gradient shows through */
+div[class*="min-h-screen"] {
+  background: transparent !important;
+}
+
+/* ===== GLOBAL CARD SHADOW + HOVER (Cards only, not buttons) ===== */
+div[class*="bg-white"][class*="rounded-2xl"],
+div[class*="bg-white"][class*="rounded-3xl"],
+div[class*="bg-white"][class*="rounded-[24px]"],
+div[class*="bg-white"][class*="rounded-[28px]"],
+div[class*="bg-white"][class*="rounded-[32px]"] {
+  box-shadow: 0 4px 20px rgba(25, 82, 196, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+  transition: box-shadow 0.3s ease, transform 0.3s ease !important;
+}
+
+/* Hover: lift up + deeper blue gradient glow shadow */
+div[class*="bg-white"][class*="rounded-2xl"]:hover,
+div[class*="bg-white"][class*="rounded-3xl"]:hover,
+div[class*="bg-white"][class*="rounded-[24px]"]:hover,
+div[class*="bg-white"][class*="rounded-[28px]"]:hover,
+div[class*="bg-white"][class*="rounded-[32px]"]:hover {
+  box-shadow:
+    0 8px 36px rgba(25, 82, 196, 0.32),
+    0 2px 14px rgba(25, 82, 196, 0.22),
+    0 0 0 1px rgba(25, 82, 196, 0.14) !important;
+  transform: translateY(-4px) !important;
+}

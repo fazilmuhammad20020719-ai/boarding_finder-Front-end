@@ -156,7 +156,7 @@ const SavedHomesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-[#f4f6fa] flex flex-col font-sans antialiased text-[#0f172a]">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={savedListings.length} />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-10">
@@ -182,7 +182,7 @@ const SavedHomesPage = () => {
               <div
                 key={listing.id}
                 onClick={() => navigate(`/property/${listing.id}`)}
-                className="bg-white rounded-[24px] overflow-hidden border border-[#e2e8f0]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+                className="bg-white rounded-[24px] overflow-hidden border border-[#cbd5e1]/45 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.055)] hover:-translate-y-1.5 hover:border-[#1952c4]/30 transition-all duration-300 flex flex-col group cursor-pointer relative"
               >
                 {/* Photo Overlay */}
                 <div className="h-52 w-full relative overflow-hidden bg-slate-100">
