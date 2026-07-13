@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 
 const MOCK_LISTINGS = [
   {
@@ -221,7 +220,6 @@ const SearchPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
-      <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="search" />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-8">
         
