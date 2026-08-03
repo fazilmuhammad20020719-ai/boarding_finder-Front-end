@@ -1,51 +1,51 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
 
 const LoginPage = () => {
   const [role, setRole] = useState('student'); // 'student', 'owner', 'admin'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email && password) {
-      localStorage.setItem('userLoggedIn', 'true');
-      alert(`Successfully signed in as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}`);
-      if (role === 'admin') {
-        navigate('/admin-dashboard');
-      } else if (role === 'owner') {
+    setError('');
+
+    if (!email || !password) {
+      setError('Please fill all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const data = await login({ email, password });
+
+      // Redirect based on the role returned from the backend
+      const userRole = data.user.role;
+      if (userRole === 'owner') {
         navigate('/owner-dashboard');
       } else {
         navigate('/home');
       }
-    } else {
-      alert('Please fill all fields');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    localStorage.setItem('userLoggedIn', 'true');
-    alert(`Signing in with Google as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    if (role === 'admin') {
-      navigate('/admin-dashboard');
-    } else if (role === 'owner') {
-      navigate('/owner-dashboard');
-    } else {
-      navigate('/home');
-    }
+    alert('Google login is not yet implemented. Please use email/password.');
   };
 
   const handleFacebookLogin = () => {
-    localStorage.setItem('userLoggedIn', 'true');
-    alert(`Signing in with Facebook as ${role === 'student' ? 'Student' : role === 'owner' ? 'Property Owner' : 'Administrator'}...`);
-    if (role === 'admin') {
-      navigate('/admin-dashboard');
-    } else if (role === 'owner') {
-      navigate('/owner-dashboard');
-    } else {
-      navigate('/home');
-    }
+    alert('Facebook login is not yet implemented. Please use email/password.');
   };
 
   return (
@@ -66,6 +66,13 @@ const LoginPage = () => {
               {role === 'admin' && 'Access the administrative control center'}
             </p>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-5 px-4 py-3 rounded-[12px] bg-red-50 border border-red-200 text-red-600 text-sm font-medium w-full">
+              {error}
+            </div>
+          )}
 
         {/* ===== FORM SECTION ===== */}
         <form onSubmit={handleLogin} className="w-full">
@@ -109,11 +116,24 @@ const LoginPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-4 mt-6 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm cursor-pointer"
+            disabled={isLoading}
+            className={`w-full py-4 mt-6 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
           >
-            {role === 'student' && 'Sign In as Student'}
-            {role === 'owner' && 'Sign In as Property Owner'}
-            {role === 'admin' && 'Sign In as Administrator'}
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Signing In...
+              </>
+            ) : (
+              <>
+                {role === 'student' && 'Sign In as Student'}
+                {role === 'owner' && 'Sign In as Property Owner'}
+                {role === 'admin' && 'Sign In as Administrator'}
+              </>
+            )}
           </button>
         </form>
 

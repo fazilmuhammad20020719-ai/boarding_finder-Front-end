@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import bgImage from '../assets/Image/Image.png';
 
 const RegisterPage = () => {
@@ -26,37 +27,60 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const navigate = useNavigate();
+  // UI States
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleNextOrRegister = (e) => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+
+  const handleNextOrRegister = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (step === 1) {
       if (name && email && phone) {
         setStep(2);
       } else {
-        alert('Please fill all fields');
+        setError('Please fill all fields');
       }
     } else {
       if (password !== confirmPassword) {
-        alert('Passwords do not match');
+        setError('Passwords do not match');
         return;
       }
-      
-      // Validation based on role
-      if (role === 'student') {
-        if (university && course && studentId && password) {
-          alert('Account created successfully! Please login.');
-          navigate('/login');
+
+      // Validate role-specific fields
+      if (role === 'student' && (!university || !course || !studentId || !password)) {
+        setError('Please fill all fields');
+        return;
+      }
+      if (role === 'owner' && (!propertyName || !propertyType || !permitNumber || !propertyAddress || !password)) {
+        setError('Please fill all fields');
+        return;
+      }
+
+      // Build payload and call API
+      setIsLoading(true);
+      try {
+        const payload = {
+          name, email, phone, password, role,
+          ...(role === 'student' && { university, course, studentId }),
+          ...(role === 'owner' && { propertyName, propertyType, permitNumber, propertyAddress }),
+        };
+
+        await register(payload);
+
+        // Redirect based on role
+        if (role === 'owner') {
+          navigate('/owner-dashboard');
         } else {
-          alert('Please fill all fields');
+          navigate('/home');
         }
-      } else {
-        if (propertyName && propertyType && permitNumber && propertyAddress && password) {
-          alert('Account created successfully! Please login.');
-          navigate('/login');
-        } else {
-          alert('Please fill all fields');
-        }
+      } catch (err) {
+        setError(err.message || 'Registration failed. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -125,6 +149,13 @@ const RegisterPage = () => {
           <p className="text-[#64748b] text-[15px] mb-8 font-normal">
             Join BoardingFinder for free
           </p>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-5 px-4 py-3 rounded-[12px] bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
+              {error}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleNextOrRegister} className="w-full">
@@ -370,9 +401,18 @@ const RegisterPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm font-medium flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className={`w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              {step === 1 ? (
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Creating Account...
+                </>
+              ) : step === 1 ? (
                 <>
                   Continue <span className="text-lg">→</span>
                 </>
