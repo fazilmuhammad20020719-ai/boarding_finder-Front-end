@@ -26,7 +26,7 @@ const ContactUs = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans antialiased text-[#0f172a] flex flex-col">
-      <Navbar isLoggedIn={true} activeTab="contact" />
+      <Navbar activeTab="contact" />
 
       <main className="flex-grow pt-16 pb-24 max-w-7xl mx-auto px-6 md:px-12 w-full">
         

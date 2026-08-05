@@ -36,7 +36,7 @@ const TermsPrivacy = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col">
-      <Navbar isLoggedIn={false} activeTab="" />
+      <Navbar activeTab="" />
 
       {/* Hero Header */}
       <div className="bg-[#0f172a] py-16 text-center">

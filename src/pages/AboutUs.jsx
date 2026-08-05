@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans antialiased text-[#0f172a] flex flex-col">
-      <Navbar isLoggedIn={true} activeTab="about" />
+      <Navbar activeTab="about" />
 
       <main className="flex-grow pt-16 pb-20">
         

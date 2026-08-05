@@ -65,7 +65,7 @@ const PaymentHistory = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col">
-      <Navbar isLoggedIn={true} activeTab="" />
+      <Navbar activeTab="" />
 
       <main className="flex-grow max-w-6xl w-full mx-auto px-6 py-12">
         

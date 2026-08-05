@@ -44,51 +44,62 @@ import AdminDashboard from './pages/AdminDashboard';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 function App() {
   return (
     <Routes>
+      {/* ─── Public Routes ─────────────────────── */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/search" element={<SearchPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-account" element={<VerifyAccount />} />
-      <Route path="/identity-verification" element={<IdentityVerification />} />
-      <Route path="/virtual-tour/:id" element={<VirtualTour />} />
-      <Route path="/neighborhood/:id" element={<NeighborhoodDetails />} />
-      <Route path="/roommate-matcher" element={<RoommateMatcher />} />
-      <Route path="/community-forum" element={<CommunityForum />} />
-      <Route path="/maintenance-portal" element={<MaintenancePortal />} />
-      <Route path="/digital-lease" element={<DigitalLease />} />
-      <Route path="/calendar" element={<CalendarManagement />} />
-      <Route path="/promote" element={<PromoteProperty />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/saved-homes" element={<SavedHomesPage />} />
-      <Route path="/map" element={<MapViewPage />} />
-      <Route path="/property/:id" element={<PropertyDetails />} />
-      <Route path="/book/:id" element={<BookingPage />} />
-      <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-      <Route path="/my-bookings" element={<MyBookings />} />
-      <Route path="/notifications" element={<Notifications />} />
-      <Route path="/messages" element={<Messages />} />
-      <Route path="/add-listing" element={<OwnerListingForm />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/write-review" element={<ReviewPage />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/terms" element={<TermsPrivacy />} />
-      <Route path="/compare" element={<CompareListings />} />
-      <Route path="/payment-history" element={<PaymentHistory />} />
-      <Route path="/earnings" element={<Earnings />} />
-      <Route path="/manage-reservations" element={<ManageReservations />} />
-      <Route path="/manage-listings" element={<ManageListings />} />
-      <Route path="/manage-users" element={<ManageUsers />} />
-      <Route path="/owner-dashboard" element={<OwnerDashboard />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
+
+      {/* ─── Protected Routes (any authenticated user) ── */}
+      <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+      <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/saved-homes" element={<ProtectedRoute><SavedHomesPage /></ProtectedRoute>} />
+      <Route path="/map" element={<ProtectedRoute><MapViewPage /></ProtectedRoute>} />
+      <Route path="/property/:id" element={<ProtectedRoute><PropertyDetails /></ProtectedRoute>} />
+      <Route path="/book/:id" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
+      <Route path="/booking-confirmation" element={<ProtectedRoute><BookingConfirmation /></ProtectedRoute>} />
+      <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+      <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/write-review" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
+      <Route path="/compare" element={<ProtectedRoute><CompareListings /></ProtectedRoute>} />
+      <Route path="/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
+      <Route path="/identity-verification" element={<ProtectedRoute><IdentityVerification /></ProtectedRoute>} />
+      <Route path="/virtual-tour/:id" element={<ProtectedRoute><VirtualTour /></ProtectedRoute>} />
+      <Route path="/neighborhood/:id" element={<ProtectedRoute><NeighborhoodDetails /></ProtectedRoute>} />
+      <Route path="/roommate-matcher" element={<ProtectedRoute><RoommateMatcher /></ProtectedRoute>} />
+      <Route path="/community-forum" element={<ProtectedRoute><CommunityForum /></ProtectedRoute>} />
+      <Route path="/maintenance-portal" element={<ProtectedRoute><MaintenancePortal /></ProtectedRoute>} />
+      <Route path="/digital-lease" element={<ProtectedRoute><DigitalLease /></ProtectedRoute>} />
+
+      {/* ─── Owner-only Routes ─────────────────── */}
+      <Route path="/owner-dashboard" element={<ProtectedRoute role="owner"><OwnerDashboard /></ProtectedRoute>} />
+      <Route path="/add-listing" element={<ProtectedRoute role="owner"><OwnerListingForm /></ProtectedRoute>} />
+      <Route path="/calendar" element={<ProtectedRoute role="owner"><CalendarManagement /></ProtectedRoute>} />
+      <Route path="/promote" element={<ProtectedRoute role="owner"><PromoteProperty /></ProtectedRoute>} />
+      <Route path="/earnings" element={<ProtectedRoute role="owner"><Earnings /></ProtectedRoute>} />
+      <Route path="/manage-reservations" element={<ProtectedRoute role="owner"><ManageReservations /></ProtectedRoute>} />
+      <Route path="/manage-listings" element={<ProtectedRoute role="owner"><ManageListings /></ProtectedRoute>} />
+
+      {/* ─── Admin-only Routes ─────────────────── */}
+      <Route path="/admin-dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/manage-users" element={<ProtectedRoute role="admin"><ManageUsers /></ProtectedRoute>} />
+
+      {/* ─── 404 Catch-all ─────────────────────── */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

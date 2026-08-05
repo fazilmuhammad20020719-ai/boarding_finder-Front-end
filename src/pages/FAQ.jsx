@@ -73,7 +73,7 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col">
-      <Navbar isLoggedIn={false} activeTab="" />
+      <Navbar activeTab="" />
 
       {/* Hero Section */}
       <div className="bg-[#1952c4] py-16 text-center relative overflow-hidden">

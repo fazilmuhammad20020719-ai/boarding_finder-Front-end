@@ -62,7 +62,7 @@ const CompareListings = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] pb-20">
-      <Navbar isLoggedIn={true} activeTab="" />
+      <Navbar activeTab="" />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         
