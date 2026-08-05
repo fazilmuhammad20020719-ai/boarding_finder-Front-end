@@ -17,8 +17,8 @@ const MOCK_POSTS = [
   {
     id: 2,
     title: "Best local coffee shops with good WiFi for studying?",
-    author: "Mark S.",
-    avatar: "https://ui-avatars.com/api/?name=Mark+S&background=e8f7ec&color=10b981",
+    author: "Muslima S.",
+    avatar: "https://ui-avatars.com/api/?name=Muslima+S&background=e8f7ec&color=10b981",
     category: "Local Recommendations",
     replies: 8,
     views: 156,
@@ -28,8 +28,8 @@ const MOCK_POSTS = [
   {
     id: 3,
     title: "Anyone else dealing with loud construction on Oak Street?",
-    author: "David L.",
-    avatar: "https://ui-avatars.com/api/?name=David+L&background=fee2e2&color=ef4444",
+    author: "Krishnan L.",
+    avatar: "https://ui-avatars.com/api/?name=Krishnan+L&background=fee2e2&color=ef4444",
     category: "General Discussion",
     replies: 22,
     views: 890,

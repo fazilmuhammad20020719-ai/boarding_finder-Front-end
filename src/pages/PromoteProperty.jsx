@@ -186,7 +186,7 @@ const PromoteProperty = () => {
                     <input 
                       type="text" 
                       required
-                      defaultValue="Roberto Cruz"
+                      defaultValue="Nuha"
                       className="w-full px-4 py-3 bg-white border border-[#cbd5e1] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1952c4]/40"
                     />
                   </div>

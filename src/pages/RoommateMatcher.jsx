@@ -5,45 +5,45 @@ import { Link } from 'react-router-dom';
 const MOCK_ROOMMATES = [
   {
     id: "RM-1",
-    name: "Alex",
+    name: "Naja",
     age: 22,
     occupation: "Student",
     budget: "LKR 400 - LKR 550/mo",
     matchScore: 92,
-    avatar: "https://ui-avatars.com/api/?name=Alex&background=ebf3ff&color=1952c4",
+    avatar: "https://ui-avatars.com/api/?name=Naja&background=ebf3ff&color=1952c4",
     bio: "Hi! I'm a third-year engineering student. Looking for a quiet place to study and sleep. I keep things very clean and respect personal space.",
     tags: ["Non-smoker", "Early bird", "Very tidy", "Quiet"]
   },
   {
     id: "RM-2",
-    name: "Samantha",
+    name: "Farha",
     age: 25,
     occupation: "Graphic Designer",
     budget: "LKR 500 - LKR 700/mo",
     matchScore: 85,
-    avatar: "https://ui-avatars.com/api/?name=Samantha&background=e8f7ec&color=10b981",
+    avatar: "https://ui-avatars.com/api/?name=Farha&background=e8f7ec&color=10b981",
     bio: "Working professional who occasionally works from home. I love cooking and don't mind sharing meals. Have a small, friendly cat.",
     tags: ["Has Pets", "Night owl", "Social", "Clean"]
   },
   {
     id: "RM-3",
-    name: "David",
+    name: "Krishnan",
     age: 24,
     occupation: "Software Dev",
     budget: "LKR 600 - LKR 800/mo",
     matchScore: 78,
-    avatar: "https://ui-avatars.com/api/?name=David&background=fef3c7&color=d97706",
+    avatar: "https://ui-avatars.com/api/?name=Krishnan&background=fef3c7&color=d97706",
     bio: "Mostly at the office during the week. Weekends I'm usually out hiking or playing games. Easy going and flexible.",
     tags: ["Non-smoker", "Gamer", "Relaxed", "Occasional drinker"]
   },
   {
     id: "RM-4",
-    name: "Mia",
+    name: "Muslima",
     age: 21,
     occupation: "Student",
     budget: "LKR 350 - LKR 450/mo",
     matchScore: 95,
-    avatar: "https://ui-avatars.com/api/?name=Mia&background=fee2e2&color=ef4444",
+    avatar: "https://ui-avatars.com/api/?name=Muslima&background=fee2e2&color=ef4444",
     bio: "Nursing student looking for a chill roommate to split a 2-bedroom. I study a lot but love watching movies in my downtime.",
     tags: ["Student", "Non-smoker", "Early bird", "Clean"]
   }

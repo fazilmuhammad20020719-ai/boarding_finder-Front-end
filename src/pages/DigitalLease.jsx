@@ -75,7 +75,7 @@ const DigitalLease = () => {
                  <div className="bg-white shadow-md p-8 md:p-12 mx-auto max-w-2xl min-h-full border border-gray-200">
                     <h2 className="text-2xl font-black text-center mb-6">RESIDENTIAL LEASE AGREEMENT</h2>
                     <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                      This Residential Lease Agreement ("Agreement") made this 1st day of August, 2026 is between <strong>Roberto Cruz</strong> ("Landlord") and <strong>Tenant Name</strong> ("Tenant").
+                      This Residential Lease Agreement ("Agreement") made this 1st day of August, 2026 is between <strong>Nuha</strong> ("Landlord") and <strong>Tenant Name</strong> ("Tenant").
                     </p>
                     <h3 className="font-bold mt-6 mb-2">1. PROPERTY</h3>
                     <p className="text-sm text-gray-700 leading-relaxed mb-4">

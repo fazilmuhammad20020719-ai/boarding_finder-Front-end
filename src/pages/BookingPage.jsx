@@ -276,7 +276,7 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Full Name</label>
                       <input 
                         type="text" 
-                        placeholder="Juan Dela Cruz"
+                        placeholder="Nuha Dela Cruz"
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400" 
                         required
                       />
@@ -287,7 +287,7 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Email Address</label>
                       <input 
                         type="email" 
-                        placeholder="juan@up.edu.ph"
+                        placeholder="nuha@up.edu.ph"
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400" 
                         required
                       />
@@ -367,7 +367,7 @@ const BookingPage = () => {
                         alert('Please select a payment method');
                         return;
                       }
-                      navigate(`/booking-confirmation?propertyId=${listing.id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}&name=${encodeURIComponent('Juan Fernando')}&email=${encodeURIComponent('juan.fernando@mrt.ac.lk')}`);
+                      navigate(`/booking-confirmation?propertyId=${listing.id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}&name=${encodeURIComponent('Krishnan')}&email=${encodeURIComponent('nuha@mrt.ac.lk')}`);
                     }}
                     className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none text-[15px]"
                   >

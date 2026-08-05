@@ -305,7 +305,7 @@ const AdminDashboard = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">J</div>
-                          <span className="font-bold">Juan Dela Cruz</span>
+                          <span className="font-bold">Nuha Dela Cruz</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
@@ -361,7 +361,7 @@ const AdminDashboard = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">R</div>
-                          <span className="font-bold">Roberto Cruz</span>
+                          <span className="font-bold">Nuha</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
@@ -526,7 +526,7 @@ const AdminDashboard = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Metro Haven</h3>
-                <div className="text-[13px] font-medium text-[#64748b] mb-6">Taft Avenue, Manila • Roberto Cruz</div>
+                <div className="text-[13px] font-medium text-[#64748b] mb-6">Taft Avenue, Manila • Nuha</div>
                 
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 6,200/mo</div>

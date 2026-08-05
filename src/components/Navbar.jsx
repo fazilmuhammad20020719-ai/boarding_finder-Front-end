@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/Image/Logo.png';
 
-const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
+const Navbar = ({ likedCount = 0, activeTab = 'search', transparent = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -23,21 +23,25 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
   const getLinkClass = (tabName) => {
     const isActive = activeTab === tabName;
     return isActive
-      ? "text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-1.5 rounded-full shadow-sm transition-all"
-      : "text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors px-4 py-1.5";
+      ? "text-[15px] font-semibold text-[#133076] bg-white px-4 py-1.5 rounded-full shadow-sm transition-all"
+      : "text-[15px] font-semibold text-white/80 hover:text-white transition-colors px-4 py-1.5";
   };
 
   return (
-    <nav className="w-full bg-white border-b border-[#e2e8f0]/80 shadow-sm z-50 sticky top-0">
+    <nav className={`w-full border-b border-white/10 shadow-sm z-50 sticky top-0 ${
+      transparent
+        ? 'bg-transparent backdrop-blur-none'
+        : 'bg-[#133076]/80 backdrop-blur-md'
+    }`}>
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-full overflow-hidden border border-[#e2e8f0] bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
               <img src={logoImg} alt="BoardingFinder Logo" className="w-11 h-11 object-contain" />
             </div>
-            <span className="font-bold text-[22px] text-[#0f172a] tracking-tight">BoardingFinder</span>
+            <span className="font-bold text-[22px] text-white tracking-tight">BoardingFinder</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -67,27 +71,27 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
               <>
                 {/* Messages Badge */}
                 <Link to="/messages" className="relative cursor-pointer hover:scale-105 transition-transform block">
-                  <svg className="w-6 h-6 text-[#475569] hover:text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-white/80 hover:text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-white"></span>
+                  <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-[#133076]"></span>
                 </Link>
 
                 {/* Notifications Badge */}
                 <Link to="/notifications" className="relative cursor-pointer hover:scale-105 transition-transform block">
-                  <svg className="w-6 h-6 text-[#475569] hover:text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-white/80 hover:text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
-                  <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-white"></span>
+                  <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-[#133076]"></span>
                 </Link>
 
                 {/* Saved Hearts Badge */}
                 <Link to="/saved-homes" className="relative cursor-pointer hover:scale-105 transition-transform block">
-                  <svg className="w-6 h-6 text-[#475569] hover:text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-white/80 hover:text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                   </svg>
                   {likedCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-[#133076]">
                       {likedCount}
                     </span>
                   )}
@@ -97,7 +101,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
                 <div className="relative">
                   <button 
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="flex items-center gap-2.5 px-3 py-1.5 border border-[#e2e8f0] bg-slate-50 hover:bg-slate-100 rounded-full text-slate-700 text-sm font-semibold transition-all cursor-pointer"
+                    className="flex items-center gap-2.5 px-3 py-1.5 border border-white/20 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-semibold transition-all cursor-pointer"
                   >
                     <div className="w-7 h-7 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-xs shadow-sm">
                       {userInitial}
@@ -168,7 +172,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
             ) : (
               <Link 
                 to="/login" 
-                className="inline-block px-5 py-2 sm:px-6 sm:py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-xs sm:text-sm rounded-full transition-all shadow-sm"
+                className="inline-block px-5 py-2 sm:px-6 sm:py-2.5 bg-white hover:bg-slate-100 text-[#133076] font-bold text-xs sm:text-sm rounded-full transition-all shadow-sm"
               >
                 Sign In
               </Link>
@@ -178,7 +182,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
             {isAuthenticated && (
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all cursor-pointer border-none bg-transparent"
+                className="lg:hidden p-2 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all cursor-pointer border-none bg-transparent"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
@@ -201,35 +205,35 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
             <Link 
               to="/home" 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className="text-[15px] font-semibold text-white/80 hover:text-white py-2 border-b border-white/10"
             >
               Home
             </Link>
             <Link 
               to="/search" 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit"
+              className="text-[15px] font-semibold text-[#133076] bg-white px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit"
             >
               Search
             </Link>
             <Link 
               to="/map" 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className="text-[15px] font-semibold text-white/80 hover:text-white py-2 border-b border-white/10"
             >
               Map View
             </Link>
             <Link 
               to="/about" 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className="text-[15px] font-semibold text-white/80 hover:text-white py-2 border-b border-white/10"
             >
               About us
             </Link>
             <Link 
               to="/contact" 
               onClick={() => setIsMobileMenuOpen(false)} 
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className="text-[15px] font-semibold text-white/80 hover:text-white py-2 border-b border-white/10"
             >
               Contact us
             </Link>
@@ -237,7 +241,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
               <Link 
                 to="/login" 
                 onClick={() => setIsMobileMenuOpen(false)} 
-                className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit text-center mt-2"
+                className="text-[15px] font-semibold text-[#133076] bg-white px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit text-center mt-2"
               >
                 Sign In
               </Link>

@@ -4,22 +4,22 @@ import { useNavigate } from 'react-router-dom';
 const OWNER_MOCK_CONVERSATIONS = [
   {
     id: 1,
-    name: "Juan Fernando",
+    name: "Krishnan",
     property: "Tranquil Lodge - Room 2B",
-    avatar: "https://ui-avatars.com/api/?name=Juan+Fernando&background=e8f7ec&color=10b981",
-    lastMessage: "Hi Sarah, just confirming if the WiFi is already set up?",
+    avatar: "https://ui-avatars.com/api/?name=Nuha+Fernando&background=e8f7ec&color=10b981",
+    lastMessage: "Hi Muslima, just confirming if the WiFi is already set up?",
     time: "09:15 AM",
     unread: 1,
     online: true,
     messages: [
-      { id: 101, sender: "them", text: "Hi Sarah, just confirming if the WiFi is already set up?", time: "09:15 AM", date: "Today" }
+      { id: 101, sender: "them", text: "Hi Muslima, just confirming if the WiFi is already set up?", time: "09:15 AM", date: "Today" }
     ]
   },
   {
     id: 2,
-    name: "Emily Chen",
+    name: "Muslima",
     property: "BlueSky Residences - Studio",
-    avatar: "https://ui-avatars.com/api/?name=Emily+Chen&background=ebf3ff&color=1952c4",
+    avatar: "https://ui-avatars.com/api/?name=Fazil&background=ebf3ff&color=1952c4",
     lastMessage: "Thank you for the quick response!",
     time: "Yesterday",
     unread: 0,
@@ -95,7 +95,7 @@ const OwnerDashboard = () => {
           </div>
           <div>
             <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">Owner Dashboard</div>
-            <div className="text-xl font-extrabold">Roberto Cruz</div>
+            <div className="text-xl font-extrabold">Nuha</div>
           </div>
         </div>
 

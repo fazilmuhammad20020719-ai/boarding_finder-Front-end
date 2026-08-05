@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import heroImg from '../assets/Image/LightHero.png';
 
 const MOCK_LISTINGS = [
   {
@@ -139,69 +140,129 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen flex flex-col font-sans antialiased text-[#0f172a]">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="home" />
 
       {/* ===== HERO SECTION ===== */}
-      <section className="relative bg-gradient-to-br from-[#0f2d7a] via-[#1952c4] to-[#2563eb] text-white overflow-hidden">
-        {/* Background decorative blobs */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-[#3b82f6]/20 blur-3xl" />
+      <section className="relative text-white overflow-hidden" style={{ background: 'linear-gradient(160deg, #060d1f 0%, #0c1f5c 20%, #1340aa 45%, #1e6fd4 70%, #38a9f5 100%)' }}>
+
+        {/* Radial glow center-right */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 75% 40%, rgba(56,169,245,0.22) 0%, transparent 70%)' }} />
+        {/* Radial glow bottom-left */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 60% at 10% 90%, rgba(30,111,212,0.25) 0%, transparent 65%)' }} />
+
+        {/* Floating SVG house illustration on the right */}
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] pointer-events-none hidden lg:flex items-center justify-center pr-12 opacity-80">
+          <svg viewBox="0 0 400 380" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-sm drop-shadow-2xl">
+            {/* Main building */}
+            <rect x="60" y="120" width="200" height="200" rx="8" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5"/>
+            {/* Roof */}
+            <polygon points="50,125 160,40 270,125" fill="rgba(99,149,255,0.25)" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+            {/* Roof ridge */}
+            <line x1="160" y1="40" x2="160" y2="125" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
+            {/* Windows row 1 */}
+            <rect x="85" y="145" width="45" height="40" rx="4" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2"/>
+            <rect x="190" y="145" width="45" height="40" rx="4" fill="rgba(99,200,255,0.2)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2"/>
+            {/* Window cross bars */}
+            <line x1="85" y1="165" x2="130" y2="165" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+            <line x1="107" y1="145" x2="107" y2="185" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+            <line x1="190" y1="165" x2="235" y2="165" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+            <line x1="212" y1="145" x2="212" y2="185" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+            {/* Windows row 2 */}
+            <rect x="85" y="200" width="45" height="40" rx="4" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.2"/>
+            <rect x="190" y="200" width="45" height="40" rx="4" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2"/>
+            {/* Door */}
+            <rect x="135" y="260" width="50" height="60" rx="4" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
+            <circle cx="177" cy="291" r="3" fill="rgba(255,255,255,0.5)"/>
+            {/* Ground */}
+            <line x1="30" y1="320" x2="300" y2="320" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
+            {/* Trees */}
+            <circle cx="30" cy="295" r="22" fill="rgba(100,220,100,0.15)" stroke="rgba(100,220,100,0.3)" strokeWidth="1"/>
+            <line x1="30" y1="317" x2="30" y2="332" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
+            <circle cx="295" cy="290" r="18" fill="rgba(100,220,100,0.1)" stroke="rgba(100,220,100,0.25)" strokeWidth="1"/>
+            <line x1="295" y1="308" x2="295" y2="322" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
+
+            {/* Floating card 1 - Price badge */}
+            <g transform="translate(280, 100)">
+              <rect width="105" height="52" rx="12" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+              <text x="12" y="20" fill="rgba(255,255,255,0.6)" fontSize="9" fontWeight="600">FROM</text>
+              <text x="12" y="38" fill="white" fontSize="16" fontWeight="800">LKR 8,500</text>
+              <text x="68" y="38" fill="rgba(255,255,255,0.5)" fontSize="9">/mo</text>
+            </g>
+
+            {/* Floating card 2 - Rating */}
+            <g transform="translate(-15, 200)">
+              <rect width="90" height="44" rx="12" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+              <text x="10" y="18" fill="rgba(255,220,50,1)" fontSize="14">★★★★★</text>
+              <text x="10" y="34" fill="rgba(255,255,255,0.7)" fontSize="9" fontWeight="600">Top Rated</text>
+            </g>
+
+            {/* Floating card 3 - Verified */}
+            <g transform="translate(295, 195)">
+              <rect width="80" height="42" rx="10" fill="rgba(50,200,120,0.2)" stroke="rgba(50,200,120,0.4)" strokeWidth="1"/>
+              <text x="10" y="17" fill="rgba(100,255,160,1)" fontSize="10">✓ Verified</text>
+              <text x="10" y="32" fill="rgba(255,255,255,0.6)" fontSize="9">1,240 listings</text>
+            </g>
+          </svg>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-20">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs font-semibold text-white/90">1,240+ verified listings available</span>
-          </div>
+        {/* Main hero content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-10">
+          <div className="max-w-2xl">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-7">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs font-semibold text-white/90 tracking-wide">1,240+ verified listings available</span>
+            </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-white max-w-2xl mb-4">
-            Find Your Home<br />Near Campus
-          </h1>
-          <p className="text-white/75 text-base sm:text-lg max-w-lg mb-8 font-normal leading-relaxed">
-            Discover verified boarding houses, dormitories, and studio units close to top Philippine universities.
-          </p>
+            <h1 className="text-4xl sm:text-5xl md:text-[60px] font-extrabold leading-[1.08] tracking-tight text-white mb-5 drop-shadow-lg">
+              Find Your Perfect<br />
+              <span style={{ color: '#7ec8f8' }}>Boarding House</span><br />
+              Near Campus
+            </h1>
+            <p className="text-white/80 text-base sm:text-lg max-w-md mb-8 font-normal leading-relaxed">
+              Discover verified boarding houses, dormitories, and studio units near top Sri Lankan universities. Safe, affordable &amp; student-friendly.
+            </p>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-white rounded-2xl shadow-2xl p-2 max-w-2xl mb-6">
-            <svg className="w-5 h-5 text-slate-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by university, location, or boarding name..."
-              className="flex-grow py-3 bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none text-[15px]"
-            />
-            <button
-              type="submit"
-              className="px-6 py-3 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl text-sm transition-all flex-shrink-0 cursor-pointer border-none"
-            >
-              Search Now
-            </button>
-          </form>
-
-          {/* Popular filters chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-white/60 text-xs font-semibold mr-1">Popular:</span>
-            {["Diliman QC", "UP La Salle Taft", "Katipunan Area"].map((chip) => (
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex items-center gap-3 bg-white rounded-2xl shadow-2xl p-2 max-w-xl mb-6" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+              <svg className="w-5 h-5 text-slate-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by university, location, or boarding name..."
+                className="flex-grow py-3 bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none text-[15px]"
+              />
               <button
-                key={chip}
-                onClick={() => navigate('/search')}
-                className="px-3.5 py-1.5 bg-white/15 hover:bg-white/25 border border-white/20 rounded-full text-white text-xs font-semibold transition-all cursor-pointer"
+                type="submit"
+                className="px-6 py-3 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl text-sm transition-all flex-shrink-0 cursor-pointer border-none shadow-md"
               >
-                {chip}
+                Search
               </button>
-            ))}
+            </form>
+
+            {/* Popular filters chips */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-white/50 text-xs font-semibold mr-1">Popular:</span>
+              {["Near Moratuwa", "Near Colombo", "Female Only", "With Meals"].map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => navigate('/search')}
+                  className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white text-xs font-semibold transition-all cursor-pointer backdrop-blur-sm"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Stats Row */}
-        <div className="relative z-10 bg-white/10 backdrop-blur-sm border-t border-white/10">
+        <div className="relative z-10 border-t border-white/10 backdrop-blur-sm" style={{ background: 'rgba(0,0,0,0.15)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
               { value: "1,240+", label: "Active listings" },
@@ -211,7 +272,7 @@ const HomePage = () => {
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-white/60 text-xs mt-1 font-normal">{stat.label}</div>
+                <div className="text-white/55 text-xs mt-1 font-normal">{stat.label}</div>
               </div>
             ))}
           </div>

@@ -16,13 +16,13 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-950 font-sans antialiased overflow-x-hidden">
+    <div className="landing-page relative min-h-screen w-full bg-slate-950 font-sans antialiased overflow-x-hidden">
       {/* ===== NAVBAR ===== */}
-      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} activeTab="home" />
+      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} activeTab="home" transparent={true} />
 
       {/* ===== HERO SECTION ===== */}
       <main
-        className="min-h-screen w-full flex items-center relative bg-cover bg-center bg-no-repeat"
+        className="landing-hero min-h-screen w-full flex items-center relative bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         {/* Content Container */}
@@ -40,15 +40,15 @@ const LandingPage = () => {
 
             <div className="mt-8 flex flex-wrap gap-4">
               {isLoggedIn ? (
-                <Link 
-                  to="/home" 
+                <Link
+                  to="/home"
                   className="px-8 py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-full shadow-lg transition-all text-center text-sm"
                 >
                   Explore Boarding Houses ➔
                 </Link>
               ) : (
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="px-8 py-4 bg-white hover:bg-slate-100 text-[#0f172a] font-bold rounded-full shadow-lg transition-all text-center text-sm"
                 >
                   Get Started ➔
