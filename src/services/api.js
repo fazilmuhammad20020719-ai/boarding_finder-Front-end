@@ -52,6 +52,15 @@ export async function getMe() {
   });
 }
 
+// ─── Listings API Methods ─────────────────────
+
+export async function createListing(listingData) {
+  return request("/listings", {
+    method: "POST",
+    body: JSON.stringify(listingData),
+  });
+}
+
 // ─── Profile API Methods ─────────────────────
 
 export async function updateProfile(profileData) {
