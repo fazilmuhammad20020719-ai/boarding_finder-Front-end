@@ -41,6 +41,7 @@ import ManageListings from './pages/ManageListings';
 import ManageUsers from './pages/ManageUsers';
 import OwnerDashboard from './pages/OwnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import DatabaseViewer from './pages/DatabaseViewer';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 
@@ -98,6 +99,7 @@ function App() {
       {/* ─── Admin-only Routes ─────────────────── */}
       <Route path="/admin-dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/manage-users" element={<ProtectedRoute role="admin"><ManageUsers /></ProtectedRoute>} />
+      <Route path="/db" element={<DatabaseViewer />} />
 
       {/* ─── 404 Catch-all ─────────────────────── */}
       <Route path="*" element={<NotFound />} />
