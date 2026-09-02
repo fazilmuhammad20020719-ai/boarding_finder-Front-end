@@ -166,7 +166,7 @@ const OwnerListingForm = () => {
         ))}
       </div>
       {/* Progress Bar Line */}
-      <div className="relative h-1.5 bg-slate-200 rounded-full mx-5 sm:mx-10 -mt-10 sm:-mt-16 z-0">
+      <div className="relative h-1.5 bg-slate-200 rounded-full mx-5 sm:mx-10 -mt-10 sm:-mt-16 mb-10 sm:mb-16 z-0">
         <div 
           className="absolute top-0 left-0 h-full bg-[#10b981] rounded-full transition-all duration-500 ease-out"
           style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
@@ -177,7 +177,23 @@ const OwnerListingForm = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] pb-20">
-      <Navbar isLoggedIn={true} onLogout={handleLogout} activeTab="" />
+      {/* Top Bar */}
+      <header className="bg-[#1e3a8a] text-white px-8 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/10">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">Owner Dashboard</div>
+            <div className="text-xl font-extrabold">Roberto Cruz</div>
+          </div>
+        </div>
+
+        <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          Logout
+        </button>
+      </header>
 
       <main className="max-w-3xl mx-auto px-6 md:px-8 py-12">
         

@@ -40,6 +40,7 @@ import ManageReservations from './pages/ManageReservations';
 import ManageListings from './pages/ManageListings';
 import ManageUsers from './pages/ManageUsers';
 import OwnerDashboard from './pages/OwnerDashboard';
+import MyListings from './pages/MyListings';
 import AdminDashboard from './pages/AdminDashboard';
 import DatabaseViewer from './pages/DatabaseViewer';
 import AboutUs from './pages/AboutUs';
@@ -89,6 +90,7 @@ function App() {
 
       {/* ─── Owner-only Routes ─────────────────── */}
       <Route path="/owner-dashboard" element={<ProtectedRoute role="owner"><OwnerDashboard /></ProtectedRoute>} />
+      <Route path="/my-listings" element={<ProtectedRoute role="owner"><MyListings /></ProtectedRoute>} />
       <Route path="/add-listing" element={<ProtectedRoute role="owner"><OwnerListingForm /></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute role="owner"><CalendarManagement /></ProtectedRoute>} />
       <Route path="/promote" element={<ProtectedRoute role="owner"><PromoteProperty /></ProtectedRoute>} />

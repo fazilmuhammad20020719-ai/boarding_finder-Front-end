@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,11 +35,38 @@ const OWNER_MOCK_CONVERSATIONS = [
 const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('listings');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [conversations, setConversations] = useState(OWNER_MOCK_CONVERSATIONS);
   const [activeChatId, setActiveChatId] = useState(OWNER_MOCK_CONVERSATIONS[0].id);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (activeTab !== 'listings') return;
+    const fetchListings = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+        const response = await fetch('http://localhost:5000/api/listings/owner/mine', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch listings');
+        const data = await response.json();
+        setListings(data.listings || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchListings();
+  }, [navigate, activeTab]);
 
   const activeChat = conversations.find(c => c.id === activeChatId);
 
@@ -72,13 +99,13 @@ const OwnerDashboard = () => {
 
   const handleSelectChat = (id) => {
     setActiveChatId(id);
-    setConversations(prev => prev.map(conv =>
+    setConversations(prev => prev.map(conv => 
       conv.id === id ? { ...conv, unread: 0 } : conv
     ));
   };
 
-  const filteredConversations = conversations.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredConversations = conversations.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     c.property.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -90,31 +117,66 @@ const OwnerDashboard = () => {
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
       {/* Top Bar */}
-      <header className="bg-[#1e3a8a] text-white px-8 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/10">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+      <header className="bg-[#1e3a8a] text-white px-8 py-4 flex items-center justify-between sticky top-0 z-50 shadow-md">
+        <div className="flex items-center gap-4 w-1/4">
+          <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center bg-white/10">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           </div>
           <div>
-            <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">Owner Dashboard</div>
-            <div className="text-xl font-extrabold">Roberto Cruz</div>
+            <div className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Owner Dashboard</div>
+            <div className="text-sm font-extrabold">Roberto Cruz</div>
           </div>
         </div>
 
-        <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          Logout
-        </button>
+        {/* Top Navigation Tabs */}
+        <div className="hidden lg:flex items-center gap-2 justify-center flex-1">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'overview' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('listings')}
+            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'listings' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            My Listings
+          </button>
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'bookings' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            Bookings
+          </button>
+          <button
+            onClick={() => setActiveTab('messages')}
+            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'messages' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            Messages
+          </button>
+        </div>
+
+        <div className="flex items-center justify-end w-1/4">
+          <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 md:px-8 py-10">
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
-              LKR
+              LKR 
             </div>
             <div>
               <div className="text-[22px] font-black text-[#0f172a]">LKR 38,500</div>
@@ -157,40 +219,86 @@ const OwnerDashboard = () => {
           </div>
 
         </div>
+        )}
 
-        {/* Tabs */}
-        <div className="flex border-b border-[#e2e8f0] mb-8">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 ${activeTab === 'overview' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('listings')}
-            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 ${activeTab === 'listings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-            My Listings
-          </button>
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 ${activeTab === 'bookings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            Bookings
-          </button>
-          <button
-            onClick={() => setActiveTab('messages')}
-            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 ${activeTab === 'messages' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-            Messages
-          </button>
-        </div>
+
 
         {/* Content Area */}
+        {activeTab === 'listings' && (
+          <div>
+            {error && (
+              <div className="bg-red-50 text-red-500 p-4 rounded-xl mb-6 font-medium">
+                {error}
+              </div>
+            )}
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
+              </div>
+            ) : listings.length === 0 ? (
+              <div className="bg-white rounded-[24px] p-12 text-center border border-[#e2e8f0]/60 shadow-sm">
+                <div className="w-16 h-16 bg-[#ebf3ff] text-[#1952c4] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </div>
+                <h3 className="text-lg font-bold text-[#0f172a] mb-1">No listings found</h3>
+                <p className="text-[#64748b] mb-6">You haven't added any properties yet.</p>
+                <button
+                  onClick={() => navigate('/add-listing')}
+                  className="bg-[#1952c4] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#1546a8] transition-colors border-none cursor-pointer"
+                >
+                  Add Your First Listing
+                </button>
+              </div>
+            ) : (
+              <>
+                <div
+                  onClick={() => navigate('/add-listing')}
+                  className="w-full mb-8 bg-transparent rounded-3xl border-2 border-dashed border-[#cbd5e1] hover:border-[#1952c4] hover:bg-[#ebf3ff]/50 transition-all cursor-pointer py-8 flex flex-col items-center justify-center gap-3 group"
+                >
+                  <div className="w-14 h-14 rounded-full bg-white text-slate-400 group-hover:text-[#1952c4] flex items-center justify-center transition-colors shadow-sm">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                  </div>
+                  <span className="text-[16px] font-bold text-[#64748b] group-hover:text-[#1952c4] transition-colors">Add New Listing</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {listings.map((listing) => (
+                    <div key={listing.listing_id} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
+                      <div className="h-48 bg-slate-200 relative">
+                        <img
+                          src={(listing.image_urls && listing.image_urls.length > 0) ? listing.image_urls[0] : "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800"}
+                          alt={listing.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-6 flex flex-col flex-grow">
+                        <h3 className="text-lg font-extrabold text-[#0f172a] mb-1 line-clamp-1">{listing.title}</h3>
+                        <div className="text-sm font-medium text-[#64748b] mb-2 line-clamp-1">
+                          {listing.location}
+                        </div>
+                        <div className="text-[17px] font-black text-[#1952c4] mb-4">
+                          LKR {Number(listing.price).toLocaleString()} <span className="text-sm font-medium text-[#64748b]">/mo</span>
+                        </div>
+
+                        <div className="mt-auto grid grid-cols-2 gap-3">
+                          <button className="py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                            Edit
+                          </button>
+                          <button className="py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-red-500 bg-white border border-[#e2e8f0] rounded-xl hover:bg-red-50 transition-colors cursor-pointer">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -304,106 +412,6 @@ const OwnerDashboard = () => {
           </div>
         )}
 
-        {/* My Listings Area */}
-        {activeTab === 'listings' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-[#64748b] font-medium">3 listings</span>
-              <button
-                onClick={() => navigate('/add-listing')}
-                className="flex items-center gap-2 bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-colors cursor-pointer border-none shadow-sm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                Add Listing
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              {/* Listing 1 */}
-              <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
-                <div className="h-48 bg-slate-200 relative">
-                  <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800" alt="BlueSky Residences" className="w-full h-full object-cover" />
-                  <div className="absolute top-4 right-4 bg-[#10b981] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Active</div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">BlueSky Residences</h3>
-                  <div className="text-sm font-medium text-[#64748b] mb-6">LKR 4,500/mo • Dormitory</div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                      View
-                    </button>
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                      Edit
-                    </button>
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-red-500 bg-white border border-[#e2e8f0] rounded-xl hover:bg-red-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Listing 2 */}
-              <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
-                <div className="h-48 bg-slate-200 relative">
-                  <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800" alt="Tranquil Lodge" className="w-full h-full object-cover" />
-                  <div className="absolute top-4 right-4 bg-[#10b981] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Active</div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Tranquil Lodge</h3>
-                  <div className="text-sm font-medium text-[#64748b] mb-6">LKR 3,800/mo • Boarding House</div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                      View
-                    </button>
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                      Edit
-                    </button>
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-red-500 bg-white border border-[#e2e8f0] rounded-xl hover:bg-red-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Listing 3 */}
-              <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
-                <div className="h-48 bg-[#d8e5f8] relative flex items-center justify-center">
-                  <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Full</div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Metro Haven</h3>
-                  <div className="text-sm font-medium text-[#64748b] mb-6">LKR 6,200/mo • Studio Unit</div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                      View
-                    </button>
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                      Edit
-                    </button>
-                    <button className="py-2 flex items-center justify-center gap-2 text-sm font-bold text-red-500 bg-white border border-[#e2e8f0] rounded-xl hover:bg-red-50 transition-colors cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
-
         {/* Bookings Area */}
         {activeTab === 'bookings' && (
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
@@ -486,24 +494,24 @@ const OwnerDashboard = () => {
         {/* Messages Content Area */}
         {activeTab === 'messages' && (
           <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 flex overflow-hidden min-h-[600px] h-[calc(100vh-250px)]">
-
+            
             {/* Left Sidebar (Conversation List) */}
             <div className="w-full md:w-[350px] border-r border-[#e2e8f0]/60 flex flex-col bg-white">
-
+              
               {/* Header */}
               <div className="p-5 border-b border-[#e2e8f0]/60">
                 <h2 className="text-xl font-extrabold text-[#0f172a] mb-4 tracking-tight">Student Messages</h2>
-
+                
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
-                  <input
-                    type="text"
+                  <input 
+                    type="text" 
                     placeholder="Search messages..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20"
+                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20" 
                   />
                 </div>
               </div>
@@ -514,7 +522,7 @@ const OwnerDashboard = () => {
                   <div className="p-8 text-center text-slate-500 text-sm">No conversations found.</div>
                 ) : (
                   filteredConversations.map(conv => (
-                    <div
+                    <div 
                       key={conv.id}
                       onClick={() => handleSelectChat(conv.id)}
                       className={`p-4 border-b border-[#e2e8f0]/40 cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-3 ${activeChatId === conv.id ? 'bg-[#ebf3ff]/50' : ''}`}
@@ -525,7 +533,7 @@ const OwnerDashboard = () => {
                           <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10b981] border-2 border-white rounded-full"></div>
                         )}
                       </div>
-
+                      
                       <div className="flex-grow min-w-0">
                         <div className="flex justify-between items-baseline mb-0.5">
                           <h3 className={`text-[15px] font-bold truncate ${conv.unread > 0 ? 'text-[#0f172a]' : 'text-[#334155]'}`}>
@@ -535,11 +543,11 @@ const OwnerDashboard = () => {
                             {conv.time}
                           </span>
                         </div>
-
+                        
                         <div className="text-[11px] font-bold text-[#1952c4] mb-1 truncate">
                           {conv.property}
                         </div>
-
+                        
                         <div className="flex justify-between items-center gap-2">
                           <p className={`text-[13px] truncate ${conv.unread > 0 ? 'font-semibold text-[#0f172a]' : 'text-slate-500'}`}>
                             {conv.lastMessage}
@@ -577,7 +585,7 @@ const OwnerDashboard = () => {
                         </div>
                       </div>
                     </div>
-
+                    
                     <div className="flex items-center gap-2">
                       <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors border-none">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -599,8 +607,8 @@ const OwnerDashboard = () => {
 
                     {activeChat.messages.map((msg, index) => {
                       const isMe = msg.sender === 'me';
-                      const showDate = index > 0 && activeChat.messages[index - 1].date !== msg.date;
-
+                      const showDate = index > 0 && activeChat.messages[index-1].date !== msg.date;
+                      
                       return (
                         <React.Fragment key={msg.id}>
                           {showDate && (
@@ -612,11 +620,12 @@ const OwnerDashboard = () => {
                           )}
                           <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[75%] sm:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                              <div
-                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe
-                                    ? 'bg-[#1952c4] text-white rounded-br-none'
+                              <div 
+                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
+                                  isMe 
+                                    ? 'bg-[#1952c4] text-white rounded-br-none' 
                                     : 'bg-white border border-[#e2e8f0]/60 text-[#0f172a] rounded-bl-none'
-                                  }`}
+                                }`}
                               >
                                 {msg.text}
                               </div>
@@ -638,9 +647,9 @@ const OwnerDashboard = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
                       </button>
-
+                      
                       <div className="flex-grow bg-[#f4f7f9] rounded-2xl border border-transparent focus-within:border-[#1952c4]/30 focus-within:bg-white transition-all">
-                        <textarea
+                        <textarea 
                           rows="1"
                           placeholder="Type a message to the student..."
                           value={newMessage}
@@ -656,13 +665,14 @@ const OwnerDashboard = () => {
                         />
                       </div>
 
-                      <button
-                        type="submit"
+                      <button 
+                        type="submit" 
                         disabled={!newMessage.trim()}
-                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${newMessage.trim()
-                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer'
+                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${
+                          newMessage.trim() 
+                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer' 
                             : 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed'
-                          }`}
+                        }`}
                       >
                         <svg className="w-5 h-5 translate-x-0.5 -translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
