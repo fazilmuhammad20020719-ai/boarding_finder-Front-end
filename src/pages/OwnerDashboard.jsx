@@ -53,7 +53,8 @@ const OwnerDashboard = () => {
           navigate('/login');
           return;
         }
-        const response = await fetch('http://localhost:5000/api/listings/owner/mine', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`/listings/owner/mine`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch listings');
