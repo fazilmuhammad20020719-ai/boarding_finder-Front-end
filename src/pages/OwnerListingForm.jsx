@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { createListing } from '../services/api';
 
 const OwnerListingForm = () => {
   const navigate = useNavigate();
@@ -13,13 +14,13 @@ const OwnerListingForm = () => {
     propertyName: '',
     propertyType: 'Dormitory', // Dormitory, Apartment, Room
     description: '',
-    
+
     // Step 2: Location
     address: '',
     city: '',
     nearestUniversity: '',
     distance: '',
-    
+
     // Step 3: Amenities
     amenities: {
       wifi: false,
@@ -34,17 +35,18 @@ const OwnerListingForm = () => {
       noPets: false,
       curfew: false,
     },
-    
+
     // Step 4: Pricing
     monthlyRent: '',
     securityDeposit: '',
     minimumStay: '6', // months
-    
+
     // Photos
     photos: []
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
@@ -108,13 +110,31 @@ const OwnerListingForm = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep()) {
-      // Show success briefly then navigate
-      setTimeout(() => {
-        navigate('/owner-dashboard');
-      }, 1500);
+      setIsSubmitting(true);
+
+      const payload = {
+        title: formData.propertyName,
+        description: formData.description,
+        price: formData.monthlyRent,
+        location: `${formData.address}, ${formData.city}`,
+        amenities: JSON.stringify(formData.amenities),
+        image_urls: formData.photos
+      };
+
+      try {
+        await createListing(payload);
+        setTimeout(() => {
+          navigate('/owner-dashboard');
+        }, 1500);
+      } catch (err) {
+        console.error("Failed to create listing:", err);
+        setErrors(prev => ({ ...prev, submit: err.message || "Failed to create listing" }));
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -140,14 +160,13 @@ const OwnerListingForm = () => {
       <div className="flex justify-between items-center mb-4">
         {[1, 2, 3, 4, 5].map((step) => (
           <div key={step} className="flex flex-col items-center relative z-10 w-full">
-            <div 
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                currentStep === step 
-                  ? 'bg-[#1952c4] text-white shadow-md shadow-[#1952c4]/30 ring-4 ring-[#ebf3ff]' 
-                  : currentStep > step 
-                    ? 'bg-[#10b981] text-white' 
-                    : 'bg-white text-slate-400 border-2 border-slate-200'
-              }`}
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${currentStep === step
+                ? 'bg-[#1952c4] text-white shadow-md shadow-[#1952c4]/30 ring-4 ring-[#ebf3ff]'
+                : currentStep > step
+                  ? 'bg-[#10b981] text-white'
+                  : 'bg-white text-slate-400 border-2 border-slate-200'
+                }`}
             >
               {currentStep > step ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
@@ -167,7 +186,7 @@ const OwnerListingForm = () => {
       </div>
       {/* Progress Bar Line */}
       <div className="relative h-1.5 bg-slate-200 rounded-full mx-5 sm:mx-10 -mt-10 sm:-mt-16 mb-10 sm:mb-16 z-0">
-        <div 
+        <div
           className="absolute top-0 left-0 h-full bg-[#10b981] rounded-full transition-all duration-500 ease-out"
           style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
         ></div>
@@ -196,9 +215,9 @@ const OwnerListingForm = () => {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 md:px-8 py-12">
-        
+
         <div className="mb-8">
-          <button 
+          <button
             onClick={() => navigate('/owner-dashboard')}
             className="flex items-center gap-2 text-slate-500 hover:text-[#1952c4] transition-colors font-semibold text-sm bg-transparent border-none cursor-pointer mb-4"
           >
@@ -212,17 +231,17 @@ const OwnerListingForm = () => {
         {renderStepIndicator()}
 
         <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 p-6 sm:p-10">
-          
+
           {/* STEP 1: BASIC INFO */}
           {currentStep === 1 && (
             <div className="animate-fade-in">
               <h2 className="text-xl font-bold text-[#0f172a] mb-6">1. Basic Information</h2>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Property Name *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="propertyName"
                     value={formData.propertyName}
                     onChange={handleInputChange}
@@ -240,11 +259,10 @@ const OwnerListingForm = () => {
                         key={type}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, propertyType: type }))}
-                        className={`py-3 px-4 rounded-xl font-bold text-sm transition-all border-2 cursor-pointer ${
-                          formData.propertyType === type 
-                            ? 'border-[#1952c4] bg-[#ebf3ff] text-[#1952c4]' 
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                        }`}
+                        className={`py-3 px-4 rounded-xl font-bold text-sm transition-all border-2 cursor-pointer ${formData.propertyType === type
+                          ? 'border-[#1952c4] bg-[#ebf3ff] text-[#1952c4]'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                          }`}
                       >
                         {type}
                       </button>
@@ -254,7 +272,7 @@ const OwnerListingForm = () => {
 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Description *</label>
-                  <textarea 
+                  <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
@@ -273,12 +291,12 @@ const OwnerListingForm = () => {
           {currentStep === 2 && (
             <div className="animate-fade-in">
               <h2 className="text-xl font-bold text-[#0f172a] mb-6">2. Location Details</h2>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Full Address *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
@@ -291,8 +309,8 @@ const OwnerListingForm = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">City *</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
@@ -303,8 +321,8 @@ const OwnerListingForm = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Distance to University</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="distance"
                       value={formData.distance}
                       onChange={handleInputChange}
@@ -316,8 +334,8 @@ const OwnerListingForm = () => {
 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Nearest University *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="nearestUniversity"
                     value={formData.nearestUniversity}
                     onChange={handleInputChange}
@@ -327,10 +345,22 @@ const OwnerListingForm = () => {
                   {errors.nearestUniversity && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.nearestUniversity}</p>}
                 </div>
 
-                <div className="bg-slate-100 rounded-2xl h-48 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 mt-4">
-                  <svg className="w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  <span className="text-sm font-bold text-slate-500">Map Pin Placement</span>
-                  <span className="text-xs text-slate-400">(Map integration available in production)</span>
+                <div className="rounded-2xl h-64 overflow-hidden border border-slate-200 shadow-inner mt-4 relative group">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    scrolling="no"
+                    marginHeight="0"
+                    marginWidth="0"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=79.84%2C6.91%2C79.88%2C6.95&amp;layer=mapnik&amp;marker=6.93%2C79.86"
+                    title="Location Map"
+                    className="w-full h-full grayscale-[30%] opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
+                  ></iframe>
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm px-5 py-2.5 rounded-full shadow-lg text-sm font-bold text-[#1952c4] pointer-events-none flex items-center gap-2 border border-[#1952c4]/10">
+                    <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Map pin placement ready
+                  </div>
                 </div>
               </div>
             </div>
@@ -341,7 +371,7 @@ const OwnerListingForm = () => {
           {currentStep === 3 && (
             <div className="animate-fade-in">
               <h2 className="text-xl font-bold text-[#0f172a] mb-6">3. Amenities & Rules</h2>
-              
+
               <div className="mb-8">
                 <label className="block text-sm font-bold text-slate-700 mb-4">Provided Amenities</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -353,17 +383,16 @@ const OwnerListingForm = () => {
                     { id: 'parking', label: 'Parking Space', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
                     { id: 'cctv', label: 'CCTV Security', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' },
                   ].map(amenity => (
-                    <label 
-                      key={amenity.id} 
-                      className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                        formData.amenities[amenity.id] 
-                          ? 'border-[#1952c4] bg-[#ebf3ff] text-[#1952c4]' 
-                          : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
-                      }`}
+                    <label
+                      key={amenity.id}
+                      className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${formData.amenities[amenity.id]
+                        ? 'border-[#1952c4] bg-[#ebf3ff] text-[#1952c4]'
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                        }`}
                     >
-                      <input 
-                        type="checkbox" 
-                        className="hidden" 
+                      <input
+                        type="checkbox"
+                        className="hidden"
                         checked={formData.amenities[amenity.id]}
                         onChange={() => handleCheckboxChange('amenities', amenity.id)}
                       />
@@ -385,8 +414,8 @@ const OwnerListingForm = () => {
                     { id: 'curfew', label: 'Strict Curfew (10 PM)' },
                   ].map(rule => (
                     <label key={rule.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={formData.rules[rule.id]}
                         onChange={() => handleCheckboxChange('rules', rule.id)}
                         className="w-5 h-5 text-[#1952c4] rounded border-slate-300 focus:ring-[#1952c4]"
@@ -404,12 +433,12 @@ const OwnerListingForm = () => {
           {currentStep === 4 && (
             <div className="animate-fade-in">
               <h2 className="text-xl font-bold text-[#0f172a] mb-6">4. Pricing & Photos</h2>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Monthly Rent (LKR ) *</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     name="monthlyRent"
                     value={formData.monthlyRent}
                     onChange={handleInputChange}
@@ -420,8 +449,8 @@ const OwnerListingForm = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Security Deposit (LKR ) *</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     name="securityDeposit"
                     value={formData.securityDeposit}
                     onChange={handleInputChange}
@@ -434,7 +463,7 @@ const OwnerListingForm = () => {
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Minimum Stay</label>
-                <select 
+                <select
                   name="minimumStay"
                   value={formData.minimumStay}
                   onChange={handleInputChange}
@@ -449,12 +478,12 @@ const OwnerListingForm = () => {
 
               <div className="mt-8">
                 <label className="block text-sm font-bold text-slate-700 mb-2">Property Photos</label>
-                
+
                 {/* Upload Zone */}
                 <div className="relative border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer mb-4">
-                  <input 
-                    type="file" 
-                    multiple 
+                  <input
+                    type="file"
+                    multiple
                     accept="image/*"
                     onChange={handlePhotoUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -471,8 +500,8 @@ const OwnerListingForm = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {formData.photos.map((src, idx) => (
                       <div key={idx} className="relative aspect-square rounded-xl overflow-hidden shadow-sm group">
-                        <img src={src} alt={`Upload ${idx+1}`} className="w-full h-full object-cover" />
-                        <button 
+                        <img src={src} alt={`Upload ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
                           type="button"
                           onClick={() => removePhoto(idx)}
                           className="absolute top-1 right-1 w-6 h-6 bg-black/50 hover:bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border-none cursor-pointer"
@@ -497,7 +526,7 @@ const OwnerListingForm = () => {
                 </div>
                 <h2 className="text-xl font-bold text-[#0f172a]">Ready to Publish!</h2>
               </div>
-              
+
               <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
                 <h3 className="font-extrabold text-[#0f172a] text-lg mb-1">{formData.propertyName}</h3>
                 <p className="text-sm font-semibold text-slate-500 mb-6">{formData.propertyType} • {formData.city}</p>
@@ -530,21 +559,25 @@ const OwnerListingForm = () => {
           )}
 
           {/* Navigation Buttons */}
+          {errors.submit && (
+            <div className="mt-4 p-4 rounded-xl bg-red-50 text-red-600 text-sm font-semibold border border-red-200">
+              {errors.submit}
+            </div>
+          )}
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-[#e2e8f0]">
-            <button 
+            <button
               type="button"
               onClick={prevStep}
-              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all border-none cursor-pointer ${
-                currentStep === 1 
-                  ? 'opacity-0 pointer-events-none' 
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all border-none cursor-pointer ${currentStep === 1
+                ? 'opacity-0 pointer-events-none'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
               Back
             </button>
 
             {currentStep < totalSteps ? (
-              <button 
+              <button
                 type="button"
                 onClick={nextStep}
                 className="px-8 py-3 rounded-xl font-bold text-sm bg-[#1952c4] hover:bg-[#1546a8] text-white transition-colors border-none cursor-pointer shadow-sm flex items-center gap-2"
@@ -553,13 +586,21 @@ const OwnerListingForm = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </button>
             ) : (
-              <button 
+              <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-8 py-3 rounded-xl font-bold text-sm bg-[#10b981] hover:bg-[#059669] text-white transition-colors border-none cursor-pointer shadow-sm flex items-center gap-2"
+                disabled={isSubmitting}
+                className="px-8 py-3 rounded-xl font-bold text-sm bg-[#10b981] hover:bg-[#059669] text-white transition-colors border-none cursor-pointer shadow-sm flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Publish Listing
+                {isSubmitting ? (
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                )}
+                {isSubmitting ? 'Publishing...' : 'Publish Listing'}
               </button>
             )}
           </div>
