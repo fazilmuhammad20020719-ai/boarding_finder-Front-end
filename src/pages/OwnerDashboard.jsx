@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const OWNER_MOCK_CONVERSATIONS = [
   {
     id: 1,
-    name: "Krishnan",
+    name: "Juan Fernando",
     property: "Tranquil Lodge - Room 2B",
-    avatar: "https://ui-avatars.com/api/?name=Nuha+Fernando&background=e8f7ec&color=10b981",
-    lastMessage: "Hi Muslima, just confirming if the WiFi is already set up?",
+    avatar: "https://ui-avatars.com/api/?name=Juan+Fernando&background=e8f7ec&color=10b981",
+    lastMessage: "Hi Sarah, just confirming if the WiFi is already set up?",
     time: "09:15 AM",
     unread: 1,
     online: true,
     messages: [
-      { id: 101, sender: "them", text: "Hi Muslima, just confirming if the WiFi is already set up?", time: "09:15 AM", date: "Today" }
+      { id: 101, sender: "them", text: "Hi Sarah, just confirming if the WiFi is already set up?", time: "09:15 AM", date: "Today" }
     ]
   },
   {
     id: 2,
-    name: "Muslima",
+    name: "Emily Chen",
     property: "BlueSky Residences - Studio",
-    avatar: "https://ui-avatars.com/api/?name=Fazil&background=ebf3ff&color=1952c4",
+    avatar: "https://ui-avatars.com/api/?name=Emily+Chen&background=ebf3ff&color=1952c4",
     lastMessage: "Thank you for the quick response!",
     time: "Yesterday",
     unread: 0,
@@ -33,6 +34,7 @@ const OWNER_MOCK_CONVERSATIONS = [
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('listings');
   const [conversations, setConversations] = useState(OWNER_MOCK_CONVERSATIONS);
   const [activeChatId, setActiveChatId] = useState(OWNER_MOCK_CONVERSATIONS[0].id);
@@ -70,19 +72,19 @@ const OwnerDashboard = () => {
 
   const handleSelectChat = (id) => {
     setActiveChatId(id);
-    setConversations(prev => prev.map(conv => 
+    setConversations(prev => prev.map(conv =>
       conv.id === id ? { ...conv, unread: 0 } : conv
     ));
   };
 
-  const filteredConversations = conversations.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredConversations = conversations.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.property.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleLogout = () => {
-    localStorage.removeItem('userLoggedIn');
-    navigate('/');
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -95,7 +97,7 @@ const OwnerDashboard = () => {
           </div>
           <div>
             <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">Owner Dashboard</div>
-            <div className="text-xl font-extrabold">Nuha</div>
+            <div className="text-xl font-extrabold">Roberto Cruz</div>
           </div>
         </div>
 
@@ -112,7 +114,7 @@ const OwnerDashboard = () => {
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
-              LKR 
+              LKR
             </div>
             <div>
               <div className="text-[22px] font-black text-[#0f172a]">LKR 38,500</div>
@@ -307,7 +309,7 @@ const OwnerDashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <span className="text-[#64748b] font-medium">3 listings</span>
-              <button 
+              <button
                 onClick={() => navigate('/add-listing')}
                 className="flex items-center gap-2 bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-colors cursor-pointer border-none shadow-sm"
               >
@@ -484,24 +486,24 @@ const OwnerDashboard = () => {
         {/* Messages Content Area */}
         {activeTab === 'messages' && (
           <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 flex overflow-hidden min-h-[600px] h-[calc(100vh-250px)]">
-            
+
             {/* Left Sidebar (Conversation List) */}
             <div className="w-full md:w-[350px] border-r border-[#e2e8f0]/60 flex flex-col bg-white">
-              
+
               {/* Header */}
               <div className="p-5 border-b border-[#e2e8f0]/60">
                 <h2 className="text-xl font-extrabold text-[#0f172a] mb-4 tracking-tight">Student Messages</h2>
-                
+
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Search messages..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20" 
+                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20"
                   />
                 </div>
               </div>
@@ -512,7 +514,7 @@ const OwnerDashboard = () => {
                   <div className="p-8 text-center text-slate-500 text-sm">No conversations found.</div>
                 ) : (
                   filteredConversations.map(conv => (
-                    <div 
+                    <div
                       key={conv.id}
                       onClick={() => handleSelectChat(conv.id)}
                       className={`p-4 border-b border-[#e2e8f0]/40 cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-3 ${activeChatId === conv.id ? 'bg-[#ebf3ff]/50' : ''}`}
@@ -523,7 +525,7 @@ const OwnerDashboard = () => {
                           <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10b981] border-2 border-white rounded-full"></div>
                         )}
                       </div>
-                      
+
                       <div className="flex-grow min-w-0">
                         <div className="flex justify-between items-baseline mb-0.5">
                           <h3 className={`text-[15px] font-bold truncate ${conv.unread > 0 ? 'text-[#0f172a]' : 'text-[#334155]'}`}>
@@ -533,11 +535,11 @@ const OwnerDashboard = () => {
                             {conv.time}
                           </span>
                         </div>
-                        
+
                         <div className="text-[11px] font-bold text-[#1952c4] mb-1 truncate">
                           {conv.property}
                         </div>
-                        
+
                         <div className="flex justify-between items-center gap-2">
                           <p className={`text-[13px] truncate ${conv.unread > 0 ? 'font-semibold text-[#0f172a]' : 'text-slate-500'}`}>
                             {conv.lastMessage}
@@ -575,7 +577,7 @@ const OwnerDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors border-none">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -597,8 +599,8 @@ const OwnerDashboard = () => {
 
                     {activeChat.messages.map((msg, index) => {
                       const isMe = msg.sender === 'me';
-                      const showDate = index > 0 && activeChat.messages[index-1].date !== msg.date;
-                      
+                      const showDate = index > 0 && activeChat.messages[index - 1].date !== msg.date;
+
                       return (
                         <React.Fragment key={msg.id}>
                           {showDate && (
@@ -610,12 +612,11 @@ const OwnerDashboard = () => {
                           )}
                           <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[75%] sm:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                              <div 
-                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
-                                  isMe 
-                                    ? 'bg-[#1952c4] text-white rounded-br-none' 
+                              <div
+                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe
+                                    ? 'bg-[#1952c4] text-white rounded-br-none'
                                     : 'bg-white border border-[#e2e8f0]/60 text-[#0f172a] rounded-bl-none'
-                                }`}
+                                  }`}
                               >
                                 {msg.text}
                               </div>
@@ -637,9 +638,9 @@ const OwnerDashboard = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
                       </button>
-                      
+
                       <div className="flex-grow bg-[#f4f7f9] rounded-2xl border border-transparent focus-within:border-[#1952c4]/30 focus-within:bg-white transition-all">
-                        <textarea 
+                        <textarea
                           rows="1"
                           placeholder="Type a message to the student..."
                           value={newMessage}
@@ -655,14 +656,13 @@ const OwnerDashboard = () => {
                         />
                       </div>
 
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         disabled={!newMessage.trim()}
-                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${
-                          newMessage.trim() 
-                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer' 
+                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${newMessage.trim()
+                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer'
                             : 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed'
-                        }`}
+                          }`}
                       >
                         <svg className="w-5 h-5 translate-x-0.5 -translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
   const handleLogout = () => {
-    localStorage.removeItem('userLoggedIn');
-    navigate('/');
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -23,7 +25,7 @@ const AdminDashboard = () => {
             <div className="text-xl font-extrabold text-white">BoardingFinder Admin</div>
           </div>
         </div>
-        
+
         <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           Logout
@@ -31,10 +33,10 @@ const AdminDashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 md:px-8 py-10">
-        
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          
+
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
@@ -70,7 +72,7 @@ const AdminDashboard = () => {
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#f5f3ff] text-[#8b5cf6] flex items-center justify-center text-2xl font-bold">
-              LKR 
+              LKR
             </div>
             <div>
               <div className="text-[22px] font-black text-[#0f172a]">LKR 2.4M</div>
@@ -83,28 +85,28 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <div className="flex border-b border-[#e2e8f0] mb-8 overflow-x-auto">
-          <button 
+          <button
             onClick={() => setActiveTab('overview')}
             className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             Overview
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('users')}
             className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             Users
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('listings')}
             className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'listings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             Listings
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('reports')}
             className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'reports' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
           >
@@ -116,10 +118,10 @@ const AdminDashboard = () => {
         {/* Content Area */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-8">
-              
+
               {/* Platform Growth Chart */}
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col h-[380px]">
                 <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Platform Growth (2025)</h3>
@@ -128,7 +130,7 @@ const AdminDashboard = () => {
                   <div className="absolute bottom-20 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
                   <div className="absolute bottom-36 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
                   <div className="absolute bottom-52 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
-                  
+
                   {[
                     { month: 'Jan', h: 'h-16' },
                     { month: 'Feb', h: 'h-24' },
@@ -149,9 +151,9 @@ const AdminDashboard = () => {
               {/* Recent Activity */}
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
                 <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Recent Activity</h3>
-                
+
                 <div className="space-y-6">
-                  
+
                   <div className="flex items-start justify-between pb-6 border-b border-[#e2e8f0]/60">
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center shrink-0">
@@ -211,27 +213,27 @@ const AdminDashboard = () => {
 
             {/* Right Column */}
             <div className="lg:col-span-1 space-y-8">
-              
+
               {/* Quick Actions */}
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
                 <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Quick Actions</h3>
-                
+
                 <div className="space-y-3">
                   <button className="w-full flex items-center gap-4 bg-[#f1f5f9] hover:bg-[#e2e8f0] px-5 py-4 rounded-xl transition-colors border-none cursor-pointer text-left">
                     <svg className="w-5 h-5 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                     <span className="font-bold text-[#0f172a] text-sm">Approve Pending Listings</span>
                   </button>
-                  
+
                   <button className="w-full flex items-center gap-4 bg-[#f1f5f9] hover:bg-[#e2e8f0] px-5 py-4 rounded-xl transition-colors border-none cursor-pointer text-left">
                     <svg className="w-5 h-5 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                     <span className="font-bold text-[#0f172a] text-sm">Review Flagged Users</span>
                   </button>
-                  
+
                   <button className="w-full flex items-center gap-4 bg-[#f1f5f9] hover:bg-[#e2e8f0] px-5 py-4 rounded-xl transition-colors border-none cursor-pointer text-left">
                     <svg className="w-5 h-5 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span className="font-bold text-[#0f172a] text-sm">Handle Reports</span>
                   </button>
-                  
+
                   <button className="w-full flex items-center gap-4 bg-[#f1f5f9] hover:bg-[#e2e8f0] px-5 py-4 rounded-xl transition-colors border-none cursor-pointer text-left">
                     <svg className="w-5 h-5 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                     <span className="font-bold text-[#0f172a] text-sm">View Analytics</span>
@@ -242,7 +244,7 @@ const AdminDashboard = () => {
               {/* System Status */}
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
                 <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">System Status</h3>
-                
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
                     <span className="text-[#64748b] font-semibold text-[15px]">API</span>
@@ -271,15 +273,15 @@ const AdminDashboard = () => {
         {/* Users Area */}
         {activeTab === 'users' && (
           <div className="space-y-6">
-            
+
             {/* Search Bar */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </div>
-              <input 
-                type="text" 
-                placeholder="Search users..." 
+              <input
+                type="text"
+                placeholder="Search users..."
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-[#e2e8f0]/60 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all text-sm font-medium placeholder-slate-400"
               />
             </div>
@@ -299,13 +301,13 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="text-[14px] font-medium text-[#0f172a]">
-                    
+
                     {/* Row 1 */}
                     <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">J</div>
-                          <span className="font-bold">Nuha Dela Cruz</span>
+                          <span className="font-bold">Juan Dela Cruz</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
@@ -361,7 +363,7 @@ const AdminDashboard = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">R</div>
-                          <span className="font-bold">Nuha</span>
+                          <span className="font-bold">Roberto Cruz</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
@@ -450,7 +452,7 @@ const AdminDashboard = () => {
         {/* Listings Area */}
         {activeTab === 'listings' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             {/* Listing 1 */}
             <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
               <div className="h-48 bg-slate-200 relative">
@@ -460,7 +462,7 @@ const AdminDashboard = () => {
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">BlueSky Residences</h3>
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Diliman, Quezon City • Maria Santos</div>
-                
+
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 4,500/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
@@ -494,7 +496,7 @@ const AdminDashboard = () => {
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Tranquil Lodge</h3>
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Sampaloc, Manila • Carmelita Reyes</div>
-                
+
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 3,800/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
@@ -526,8 +528,8 @@ const AdminDashboard = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Metro Haven</h3>
-                <div className="text-[13px] font-medium text-[#64748b] mb-6">Taft Avenue, Manila • Nuha</div>
-                
+                <div className="text-[13px] font-medium text-[#64748b] mb-6">Taft Avenue, Manila • Roberto Cruz</div>
+
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 6,200/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
@@ -561,7 +563,7 @@ const AdminDashboard = () => {
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Scholars' Den</h3>
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">España Blvd, Manila • Jose Mendoza</div>
-                
+
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 3,200/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
@@ -595,7 +597,7 @@ const AdminDashboard = () => {
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Lakeside Suites</h3>
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Calamba, Laguna • Ana Villanueva</div>
-                
+
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 2,900/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
@@ -629,7 +631,7 @@ const AdminDashboard = () => {
               <div className="p-6">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">Sunrise Apartments</h3>
                 <div className="text-[13px] font-medium text-[#64748b] mb-6">Katipunan Ave, QC • Patricia Gomez</div>
-                
+
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[15px] font-extrabold text-[#1952c4]">LKR 7,500/mo</div>
                   <div className="flex items-center gap-1 text-[13px] font-bold text-[#0f172a]">
@@ -660,7 +662,7 @@ const AdminDashboard = () => {
         {/* Reports Area */}
         {activeTab === 'reports' && (
           <div className="space-y-6">
-            
+
             {/* Report 1 */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-start gap-6 relative">
               <div className="absolute top-6 right-6 flex items-center gap-4">
@@ -676,7 +678,7 @@ const AdminDashboard = () => {
                   <span className="text-[#64748b]">By:</span> Student: Maria R. <span className="text-[#64748b]">• Target:</span> Happy Stay Dorm, Sampaloc
                 </div>
                 <p className="text-[#475569] text-[15px] font-medium mb-6">User claims photos are stolen and price/location is misrepresented.</p>
-                
+
                 <div className="flex items-center gap-3">
                   <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Investigate</button>
                   <button className="bg-red-50 hover:bg-red-100 text-red-500 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none">Remove Listing</button>
@@ -700,7 +702,7 @@ const AdminDashboard = () => {
                   <span className="text-[#64748b]">By:</span> Student: Jose T. <span className="text-[#64748b]">• Target:</span> Green Residences, Taft
                 </div>
                 <p className="text-[#475569] text-[15px] font-medium mb-6">Submitted photos do not match the described property.</p>
-                
+
                 <div className="flex items-center gap-3">
                   <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Investigate</button>
                   <button className="bg-red-50 hover:bg-red-100 text-red-500 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none">Remove Listing</button>
@@ -724,7 +726,7 @@ const AdminDashboard = () => {
                   <span className="text-[#64748b]">By:</span> Student: Ana M. <span className="text-[#64748b]">• Target:</span> Blue Haven Apt., Katipunan
                 </div>
                 <p className="text-[#475569] text-[15px] font-medium mb-6">Listed price differs from actual quoted price by owner.</p>
-                
+
                 <div className="flex items-center gap-3">
                   <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Investigate</button>
                   <button className="bg-red-50 hover:bg-red-100 text-red-500 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none">Remove Listing</button>
@@ -748,7 +750,7 @@ const AdminDashboard = () => {
                   <span className="text-[#64748b]">By:</span> Student: Carlo L. <span className="text-[#64748b]">• Target:</span> Scholar's Inn, España
                 </div>
                 <p className="text-[#475569] text-[15px] font-medium mb-6">Owner has not responded to 3 booking inquiries for over 7 days.</p>
-                
+
                 <div className="flex items-center gap-3">
                   <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Investigate</button>
                   <button className="bg-red-50 hover:bg-red-100 text-red-500 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer border-none">Remove Listing</button>
