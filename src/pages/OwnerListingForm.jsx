@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { createListing } from '../services/api';
+import { createListing, updateListing, uploadListingPhotos, getListing } from '../services/api';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -16,6 +16,8 @@ L.Icon.Default.mergeOptions({
 
 const OwnerListingForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
 
@@ -55,12 +57,63 @@ const OwnerListingForm = () => {
     minimumStay: '6', // months
 
     // Photos
-    photos: []
+    photos: [],      // preview URLs for display
+    photoFiles: [],   // actual File objects for upload
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(''); // '', 'uploading', 'done', 'error'
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch listing data if in edit mode
+  useEffect(() => {
+    if (isEditMode) {
+      const fetchListing = async () => {
+        try {
+          const data = await getListing(id);
+          const listing = data.listing || data;
+
+          let address = listing.location || '';
+          let city = '';
+          if (listing.location && listing.location.includes(',')) {
+            const parts = listing.location.split(',');
+            address = parts[0].trim();
+            city = parts[1].trim();
+          }
+
+          let parsedAmenities = { wifi: false, ac: false, kitchen: false, laundry: false, parking: false, cctv: false };
+          if (typeof listing.amenities === 'string') {
+            try { parsedAmenities = JSON.parse(listing.amenities); } catch (e) { }
+          } else if (typeof listing.amenities === 'object' && listing.amenities !== null) {
+            parsedAmenities = { ...parsedAmenities, ...listing.amenities };
+          }
+
+          setFormData({
+            propertyName: listing.title || '',
+            propertyType: 'Dormitory',
+            description: listing.description || '',
+            address: address,
+            city: city,
+            nearestUniversity: '',
+            distance: '',
+            latitude: listing.latitude || 6.9271,
+            longitude: listing.longitude || 79.8612,
+            amenities: parsedAmenities,
+            rules: { noSmoking: false, noPets: false, curfew: false },
+            monthlyRent: listing.price || '',
+            securityDeposit: listing.security_deposit || '',
+            minimumStay: '6',
+            photos: listing.image_urls || [],
+            photoFiles: [],
+          });
+        } catch (err) {
+          console.error("Failed to fetch listing:", err);
+        }
+      };
+      fetchListing();
+    }
+  }, [id, isEditMode]);
 
   // Map Click Component
   const MapClickComponent = () => {
@@ -186,26 +239,43 @@ const OwnerListingForm = () => {
     e.preventDefault();
     if (validateStep()) {
       setIsSubmitting(true);
-
-      const payload = {
-        title: formData.propertyName,
-        description: formData.description,
-        price: formData.monthlyRent,
-        security_deposit: formData.securityDeposit,
-        location: `${formData.address}, ${formData.city}`,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        amenities: JSON.stringify(formData.amenities),
-        image_urls: formData.photos
-      };
+      setUploadStatus('');
 
       try {
-        await createListing(payload);
+        // Step 1: Upload photos to Google Drive (if any)
+        let imageUrls = [];
+        if (formData.photoFiles.length > 0) {
+          setUploadStatus('uploading');
+          const uploadResult = await uploadListingPhotos(formData.photoFiles);
+          imageUrls = uploadResult.urls;
+          setUploadStatus('done');
+        }
+
+        // Step 2: Create or Update the listing with Drive URLs
+        const payload = {
+          title: formData.propertyName,
+          description: formData.description,
+          price: formData.monthlyRent,
+          security_deposit: formData.securityDeposit,
+          location: `${formData.address}, ${formData.city}`,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          amenities: JSON.stringify(formData.amenities),
+          image_urls: [...formData.photos.filter(p => p.startsWith('http')), ...imageUrls]
+        };
+
+        if (isEditMode) {
+          await updateListing(id, payload);
+        } else {
+          await createListing(payload);
+        }
+
         setTimeout(() => {
           navigate('/owner-dashboard');
         }, 1500);
       } catch (err) {
         console.error("Failed to create listing:", err);
+        setUploadStatus('error');
         setErrors(prev => ({ ...prev, submit: err.message || "Failed to create listing" }));
       } finally {
         setIsSubmitting(false);
@@ -213,20 +283,24 @@ const OwnerListingForm = () => {
     }
   };
 
-  // Mock Photo Upload Handler
+  // Photo Upload Handler — stores File objects for real upload + preview URLs for display
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newPhotos = files.map(file => URL.createObjectURL(file));
+    const newPreviews = files.map(file => URL.createObjectURL(file));
     setFormData(prev => ({
       ...prev,
-      photos: [...prev.photos, ...newPhotos].slice(0, 5) // max 5 photos
+      photos: [...prev.photos, ...newPreviews].slice(0, 5),
+      photoFiles: [...prev.photoFiles, ...files].slice(0, 5)
     }));
   };
 
   const removePhoto = (index) => {
+    // Revoke the object URL to free memory
+    URL.revokeObjectURL(formData.photos[index]);
     setFormData(prev => ({
       ...prev,
-      photos: prev.photos.filter((_, i) => i !== index)
+      photos: prev.photos.filter((_, i) => i !== index),
+      photoFiles: prev.photoFiles.filter((_, i) => i !== index)
     }));
   };
 
@@ -299,8 +373,8 @@ const OwnerListingForm = () => {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             Back to Dashboard
           </button>
-          <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">Create New Listing</h1>
-          <p className="text-slate-500 mt-2">Add your boarding house details to start receiving bookings.</p>
+          <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">{isEditMode ? 'Edit Listing' : 'Create New Listing'}</h1>
+          <p className="text-slate-500 mt-2">{isEditMode ? 'Update your boarding house details.' : 'Add your boarding house details to start receiving bookings.'}</p>
         </div>
 
         {renderStepIndicator()}
@@ -422,7 +496,7 @@ const OwnerListingForm = () => {
 
                 <div className="mt-6 border-t border-slate-200 pt-6">
                   <label className="block text-sm font-bold text-slate-700 mb-3">Pin Exact Location on Map *</label>
-                  
+
                   <div className="flex flex-col sm:flex-row gap-3 mb-4">
                     <button
                       type="button"
@@ -432,7 +506,7 @@ const OwnerListingForm = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" /></svg>
                       Use My Current Location
                     </button>
-                    
+
                     <div className="flex-1 flex gap-2">
                       <input
                         type="text"
@@ -453,10 +527,10 @@ const OwnerListingForm = () => {
                   </div>
 
                   <div className="rounded-2xl h-80 overflow-hidden border-2 border-slate-200 shadow-inner relative z-0">
-                    <MapContainer 
-                      center={[formData.latitude, formData.longitude]} 
-                      zoom={13} 
-                      scrollWheelZoom={true} 
+                    <MapContainer
+                      center={[formData.latitude, formData.longitude]}
+                      zoom={13}
+                      scrollWheelZoom={true}
                       style={{ height: '100%', width: '100%' }}
                     >
                       <TileLayer
@@ -671,6 +745,22 @@ const OwnerListingForm = () => {
           )}
 
           {/* Navigation Buttons */}
+          {/* Upload Status Indicator */}
+          {uploadStatus === 'uploading' && (
+            <div className="mt-4 p-4 rounded-xl bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-200 flex items-center gap-3">
+              <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Uploading photos to Google Drive... This may take a moment.
+            </div>
+          )}
+          {uploadStatus === 'done' && (
+            <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-700 text-sm font-semibold border border-green-200 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Photos uploaded to Google Drive successfully!
+            </div>
+          )}
           {errors.submit && (
             <div className="mt-4 p-4 rounded-xl bg-red-50 text-red-600 text-sm font-semibold border border-red-200">
               {errors.submit}
@@ -712,7 +802,7 @@ const OwnerListingForm = () => {
                 ) : (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 )}
-                {isSubmitting ? 'Publishing...' : 'Publish Listing'}
+                {isSubmitting ? 'Publishing...' : (isEditMode ? 'Update Listing' : 'Publish Listing')}
               </button>
             )}
           </div>

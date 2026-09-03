@@ -92,6 +92,7 @@ function App() {
       <Route path="/owner-dashboard" element={<ProtectedRoute role="owner"><OwnerDashboard /></ProtectedRoute>} />
       <Route path="/my-listings" element={<ProtectedRoute role="owner"><MyListings /></ProtectedRoute>} />
       <Route path="/add-listing" element={<ProtectedRoute role="owner"><OwnerListingForm /></ProtectedRoute>} />
+      <Route path="/edit-listing/:id" element={<ProtectedRoute role="owner"><OwnerListingForm /></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute role="owner"><CalendarManagement /></ProtectedRoute>} />
       <Route path="/promote" element={<ProtectedRoute role="owner"><PromoteProperty /></ProtectedRoute>} />
       <Route path="/earnings" element={<ProtectedRoute role="owner"><Earnings /></ProtectedRoute>} />

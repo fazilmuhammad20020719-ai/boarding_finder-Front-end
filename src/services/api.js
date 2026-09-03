@@ -61,6 +61,59 @@ export async function createListing(listingData) {
   });
 }
 
+export async function getListing(id) {
+  return request(`/listings/${id}`, {
+    method: "GET",
+  });
+}
+
+export async function updateListing(id, listingData) {
+  return request(`/listings/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(listingData),
+  });
+}
+
+export async function deleteListing(id) {
+  return request(`/listings/${id}`, {
+    method: "DELETE",
+  });
+}
+
+/**
+ * Upload listing photos to Google Drive via the backend.
+ * @param {File[]} files - Array of File objects from an <input type="file">
+ * @returns {Promise<{message: string, urls: string[]}>}
+ */
+export async function uploadListingPhotos(files) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("photos", file);
+  });
+
+  const url = `${API_URL}/listings/upload`;
+
+  const token = localStorage.getItem("token");
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  // Do NOT set Content-Type — browser will set it with the correct multipart boundary
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Photo upload failed");
+  }
+
+  return data;
+}
+
 // ─── Profile API Methods ─────────────────────
 
 export async function updateProfile(profileData) {
@@ -69,3 +122,4 @@ export async function updateProfile(profileData) {
     body: JSON.stringify(profileData),
   });
 }
+
