@@ -31,23 +31,45 @@ This roadmap provides a step-by-step guide to building a robust and scalable bac
 - [ ] Create authentication middleware (verify JWT token from headers).
 - [ ] Create role-based authorization middleware (e.g., only owners can create listings).
 
-## Step 4: Core API Endpoints (CRUD Operations)
-- [ ] **Users API**:
-   - GET /api/users/profile (Get current user)
-   - PUT /api/users/profile (Update profile)
-- [ ] **Listings API**:
-   - POST /api/listings (Create a new boarding)
-   - GET /api/listings (Get all listings with filtering, pagination, and sorting)
-   - GET /api/listings/:id (Get single listing details)
-   - PUT /api/listings/:id (Update listing)
-   - DELETE /api/listings/:id (Delete listing)
-- [ ] **Bookings API**:
-   - POST /api/bookings (Create a booking request)
-   - GET /api/bookings/my-bookings (Seeker's bookings)
-   - GET /api/bookings/manage (Owner's received requests)
-   - PATCH /api/bookings/:id/status (Approve/Reject booking)
-- [ ] **Forum API**:
-   - Endpoints for creating posts, commenting, and fetching community discussions.
+## Step 4: Route & Controller Implementation Plan
+Organize endpoints to match frontend services (src/services/api.js & page views):
+
+- [ ] **Auth & User** (Pages: `login.jsx`, `Register.jsx`, `VerifyAccount.jsx`, `Profile.jsx`)
+   - POST `/api/auth/register`
+   - POST `/api/auth/login`
+   - POST `/api/auth/verify-id`
+   - GET/PUT `/api/users/profile`
+- [ ] **Properties** (Pages: `Search.jsx`, `MapView.jsx`, `PropertyDetails.jsx`, `OwnerListingForm.jsx`)
+   - GET `/api/properties`
+   - GET `/api/properties/:id`
+   - POST `/api/properties` (Owner)
+   - PUT/DELETE `/api/properties/:id`
+- [ ] **Saved Homes** (Pages: `SavedHomes.jsx`)
+   - GET `/api/saved-homes`
+   - POST `/api/saved-homes/:id`
+   - DELETE `/api/saved-homes/:id`
+- [ ] **Bookings & Leases** (Pages: `BookingPage.jsx`, `MyBookings.jsx`, `DigitalLease.jsx`)
+   - POST `/api/bookings`
+   - GET `/api/bookings/my-bookings`
+   - GET/POST `/api/leases/:bookingId`
+- [ ] **Payments & Earnings** (Pages: `PaymentHistory.jsx`, `Earnings.jsx`)
+   - POST `/api/payments/checkout`
+   - GET `/api/payments/history`
+   - GET `/api/earnings/owner`
+- [ ] **Messages & Alerts** (Pages: `Messages.jsx`, `Notifications.jsx`)
+   - GET `/api/conversations`
+   - POST `/api/messages`
+   - GET `/api/notifications`
+- [ ] **Roommate & Forum** (Pages: `RoommateMatcher.jsx`, `CommunityForum.jsx`)
+   - GET/POST `/api/roommates/profile`
+   - GET/POST `/api/forum/posts`
+- [ ] **Maintenance & Reviews** (Pages: `MaintenancePortal.jsx`, `ReviewPage.jsx`)
+   - GET/POST `/api/maintenance`
+   - POST `/api/reviews`
+- [ ] **Admin Panel** (Pages: `AdminDashboard.jsx`, `ManageUsers.jsx`, `ManageListings.jsx`)
+   - GET `/api/admin/users`
+   - PUT `/api/admin/users/:id/role`
+   - GET `/api/admin/reports`
 
 ## Step 5: Advanced Features & Integrations
 - [ ] **Image Upload**:

@@ -54,7 +54,7 @@ const OwnerDashboard = () => {
           return;
         }
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const response = await fetch(`/listings/owner/mine`, {
+        const response = await fetch(`${API_URL}/listings/owner/mine`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch listings');
@@ -100,13 +100,13 @@ const OwnerDashboard = () => {
 
   const handleSelectChat = (id) => {
     setActiveChatId(id);
-    setConversations(prev => prev.map(conv => 
+    setConversations(prev => prev.map(conv =>
       conv.id === id ? { ...conv, unread: 0 } : conv
     ));
   };
 
-  const filteredConversations = conversations.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredConversations = conversations.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.property.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -175,51 +175,51 @@ const OwnerDashboard = () => {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
-              LKR 
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
+                LKR
+              </div>
+              <div>
+                <div className="text-[22px] font-black text-[#0f172a]">LKR 38,500</div>
+                <div className="text-xs font-semibold text-[#64748b]">Monthly Revenue</div>
+                <div className="text-xs font-bold text-[#10b981] mt-1">+12% this month</div>
+              </div>
             </div>
-            <div>
-              <div className="text-[22px] font-black text-[#0f172a]">LKR 38,500</div>
-              <div className="text-xs font-semibold text-[#64748b]">Monthly Revenue</div>
-              <div className="text-xs font-bold text-[#10b981] mt-1">+12% this month</div>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              </div>
+              <div>
+                <div className="text-[22px] font-black text-[#0f172a]">12/15</div>
+                <div className="text-xs font-semibold text-[#64748b]">Rooms Occupied</div>
+                <div className="text-xs font-bold text-[#10b981] mt-1">80% occupancy</div>
+              </div>
             </div>
-            <div>
-              <div className="text-[22px] font-black text-[#0f172a]">12/15</div>
-              <div className="text-xs font-semibold text-[#64748b]">Rooms Occupied</div>
-              <div className="text-xs font-bold text-[#10b981] mt-1">80% occupancy</div>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#fff8e6] text-[#f59e0b] flex items-center justify-center">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-[#fff8e6] text-[#f59e0b] flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+              </div>
+              <div>
+                <div className="text-[22px] font-black text-[#0f172a]">4.7★</div>
+                <div className="text-xs font-semibold text-[#64748b]">Average Rating</div>
+                <div className="text-xs font-bold text-[#10b981] mt-1">142 reviews</div>
+              </div>
             </div>
-            <div>
-              <div className="text-[22px] font-black text-[#0f172a]">4.7★</div>
-              <div className="text-xs font-semibold text-[#64748b]">Average Rating</div>
-              <div className="text-xs font-bold text-[#10b981] mt-1">142 reviews</div>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#f5f3ff] text-[#8b5cf6] flex items-center justify-center">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-[#f5f3ff] text-[#8b5cf6] flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+              </div>
+              <div>
+                <div className="text-[22px] font-black text-[#0f172a]">23</div>
+                <div className="text-xs font-semibold text-[#64748b]">Inquiries</div>
+                <div className="text-xs font-bold text-[#10b981] mt-1">8 unanswered</div>
+              </div>
             </div>
-            <div>
-              <div className="text-[22px] font-black text-[#0f172a]">23</div>
-              <div className="text-xs font-semibold text-[#64748b]">Inquiries</div>
-              <div className="text-xs font-bold text-[#10b981] mt-1">8 unanswered</div>
-            </div>
-          </div>
 
-        </div>
+          </div>
         )}
 
 
@@ -495,24 +495,24 @@ const OwnerDashboard = () => {
         {/* Messages Content Area */}
         {activeTab === 'messages' && (
           <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 flex overflow-hidden min-h-[600px] h-[calc(100vh-250px)]">
-            
+
             {/* Left Sidebar (Conversation List) */}
             <div className="w-full md:w-[350px] border-r border-[#e2e8f0]/60 flex flex-col bg-white">
-              
+
               {/* Header */}
               <div className="p-5 border-b border-[#e2e8f0]/60">
                 <h2 className="text-xl font-extrabold text-[#0f172a] mb-4 tracking-tight">Student Messages</h2>
-                
+
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Search messages..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20" 
+                    className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20"
                   />
                 </div>
               </div>
@@ -523,7 +523,7 @@ const OwnerDashboard = () => {
                   <div className="p-8 text-center text-slate-500 text-sm">No conversations found.</div>
                 ) : (
                   filteredConversations.map(conv => (
-                    <div 
+                    <div
                       key={conv.id}
                       onClick={() => handleSelectChat(conv.id)}
                       className={`p-4 border-b border-[#e2e8f0]/40 cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-3 ${activeChatId === conv.id ? 'bg-[#ebf3ff]/50' : ''}`}
@@ -534,7 +534,7 @@ const OwnerDashboard = () => {
                           <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10b981] border-2 border-white rounded-full"></div>
                         )}
                       </div>
-                      
+
                       <div className="flex-grow min-w-0">
                         <div className="flex justify-between items-baseline mb-0.5">
                           <h3 className={`text-[15px] font-bold truncate ${conv.unread > 0 ? 'text-[#0f172a]' : 'text-[#334155]'}`}>
@@ -544,11 +544,11 @@ const OwnerDashboard = () => {
                             {conv.time}
                           </span>
                         </div>
-                        
+
                         <div className="text-[11px] font-bold text-[#1952c4] mb-1 truncate">
                           {conv.property}
                         </div>
-                        
+
                         <div className="flex justify-between items-center gap-2">
                           <p className={`text-[13px] truncate ${conv.unread > 0 ? 'font-semibold text-[#0f172a]' : 'text-slate-500'}`}>
                             {conv.lastMessage}
@@ -586,7 +586,7 @@ const OwnerDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors border-none">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -608,8 +608,8 @@ const OwnerDashboard = () => {
 
                     {activeChat.messages.map((msg, index) => {
                       const isMe = msg.sender === 'me';
-                      const showDate = index > 0 && activeChat.messages[index-1].date !== msg.date;
-                      
+                      const showDate = index > 0 && activeChat.messages[index - 1].date !== msg.date;
+
                       return (
                         <React.Fragment key={msg.id}>
                           {showDate && (
@@ -621,12 +621,11 @@ const OwnerDashboard = () => {
                           )}
                           <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[75%] sm:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                              <div 
-                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
-                                  isMe 
-                                    ? 'bg-[#1952c4] text-white rounded-br-none' 
+                              <div
+                                className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe
+                                    ? 'bg-[#1952c4] text-white rounded-br-none'
                                     : 'bg-white border border-[#e2e8f0]/60 text-[#0f172a] rounded-bl-none'
-                                }`}
+                                  }`}
                               >
                                 {msg.text}
                               </div>
@@ -648,9 +647,9 @@ const OwnerDashboard = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
                       </button>
-                      
+
                       <div className="flex-grow bg-[#f4f7f9] rounded-2xl border border-transparent focus-within:border-[#1952c4]/30 focus-within:bg-white transition-all">
-                        <textarea 
+                        <textarea
                           rows="1"
                           placeholder="Type a message to the student..."
                           value={newMessage}
@@ -666,14 +665,13 @@ const OwnerDashboard = () => {
                         />
                       </div>
 
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         disabled={!newMessage.trim()}
-                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${
-                          newMessage.trim() 
-                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer' 
+                        className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 border-none ${newMessage.trim()
+                            ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer'
                             : 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed'
-                        }`}
+                          }`}
                       >
                         <svg className="w-5 h-5 translate-x-0.5 -translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />

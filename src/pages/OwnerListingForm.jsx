@@ -422,7 +422,7 @@ const OwnerListingForm = () => {
 
                 <div className="mt-6 border-t border-slate-200 pt-6">
                   <label className="block text-sm font-bold text-slate-700 mb-3">Pin Exact Location on Map *</label>
-
+                  
                   <div className="flex flex-col sm:flex-row gap-3 mb-4">
                     <button
                       type="button"
@@ -432,7 +432,7 @@ const OwnerListingForm = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" /></svg>
                       Use My Current Location
                     </button>
-
+                    
                     <div className="flex-1 flex gap-2">
                       <input
                         type="text"
@@ -453,10 +453,10 @@ const OwnerListingForm = () => {
                   </div>
 
                   <div className="rounded-2xl h-80 overflow-hidden border-2 border-slate-200 shadow-inner relative z-0">
-                    <MapContainer
-                      center={[formData.latitude, formData.longitude]}
-                      zoom={13}
-                      scrollWheelZoom={true}
+                    <MapContainer 
+                      center={[formData.latitude, formData.longitude]} 
+                      zoom={13} 
+                      scrollWheelZoom={true} 
                       style={{ height: '100%', width: '100%' }}
                     >
                       <TileLayer

@@ -31,7 +31,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
     <nav className="w-full bg-white border-b border-[#e2e8f0]/80 shadow-sm z-50 sticky top-0">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="flex justify-between items-center h-20">
-
+          
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden border border-[#e2e8f0] bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -84,7 +84,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
                 {/* Saved Hearts Badge */}
                 <Link to="/saved-homes" className="relative cursor-pointer hover:scale-105 transition-transform block">
                   <svg className="w-6 h-6 text-[#475569] hover:text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                   </svg>
                   {likedCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
@@ -95,7 +95,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
 
                 {/* Profile Dropdown */}
                 <div className="relative">
-                  <button
+                  <button 
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                     className="flex items-center gap-2.5 px-3 py-1.5 border border-[#e2e8f0] bg-slate-50 hover:bg-slate-100 rounded-full text-slate-700 text-sm font-semibold transition-all cursor-pointer"
                   >
@@ -104,50 +104,50 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
                     </div>
                     <span className="hidden sm:inline">{userName.split(' ')[0]}</span>
                     <svg className="w-3.5 h-3.5 fill-current text-slate-500 hidden sm:inline" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                     </svg>
                   </button>
-
+                  
                   {/* Click Toggled Dropdown Menu */}
                   {isProfileDropdownOpen && (
                     <>
                       {/* Invisible backdrop click-handler to close menu when clicking outside */}
-                      <div
+                      <div 
                         className="fixed inset-0 z-40 bg-transparent"
                         onClick={() => setIsProfileDropdownOpen(false)}
                       ></div>
-
+                      
                       <div className="absolute right-0 mt-2 w-48 bg-white border border-[#e2e8f0] rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
-                        <Link
-                          to="/profile"
+                        <Link 
+                          to="/profile" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
                         >
                           My Profile
                         </Link>
-                        <Link
-                          to="/saved-homes"
+                        <Link 
+                          to="/saved-homes" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
                         >
                           Saved Homes
                         </Link>
-                        <Link
-                          to="/my-bookings"
+                        <Link 
+                          to="/my-bookings" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
                         >
                           My Bookings
                         </Link>
-                        <Link
-                          to="/payment-history"
+                        <Link 
+                          to="/payment-history" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
                         >
                           Payment History
                         </Link>
-                        <Link
-                          to="/settings"
+                        <Link 
+                          to="/settings" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
                         >
@@ -166,8 +166,8 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
                 </div>
               </>
             ) : (
-              <Link
-                to="/login"
+              <Link 
+                to="/login" 
                 className="inline-block px-5 py-2 sm:px-6 sm:py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-xs sm:text-sm rounded-full transition-all shadow-sm"
               >
                 Sign In
@@ -198,45 +198,45 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
       {isAuthenticated && isMobileMenuOpen && (
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-[#e2e8f0] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-4">
-            <Link
-              to="/home"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <Link 
+              to="/home" 
+              onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
               Home
             </Link>
-            <Link
-              to="/search"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <Link 
+              to="/search" 
+              onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit"
             >
               Search
             </Link>
-            <Link
-              to="/map"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <Link 
+              to="/map" 
+              onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
               Map View
             </Link>
-            <Link
-              to="/about"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <Link 
+              to="/about" 
+              onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
               About us
             </Link>
-            <Link
-              to="/contact"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <Link 
+              to="/contact" 
+              onClick={() => setIsMobileMenuOpen(false)} 
               className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
             >
               Contact us
             </Link>
             {!isAuthenticated && (
-              <Link
-                to="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
+              <Link 
+                to="/login" 
+                onClick={() => setIsMobileMenuOpen(false)} 
                 className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit text-center mt-2"
               >
                 Sign In
