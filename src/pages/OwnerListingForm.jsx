@@ -261,7 +261,7 @@ const OwnerListingForm = () => {
           latitude: formData.latitude,
           longitude: formData.longitude,
           amenities: JSON.stringify(formData.amenities),
-          image_urls: [...formData.photos.filter(p => p.startsWith('http')), ...imageUrls]
+          image_urls: [...formData.photos.filter(p => p.startsWith('https://')), ...imageUrls]
         };
 
         if (isEditMode) {

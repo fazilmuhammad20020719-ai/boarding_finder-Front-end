@@ -45,9 +45,11 @@ const MyListings = () => {
     if (window.confirm('Are you sure you want to delete this listing?')) {
       try {
         await deleteListing(id);
-        setListings(listings.filter((listing) => listing.listing_id !== id));
+        // Use functional state update to ensure we always have the latest state
+        setListings(prevListings => prevListings.filter((listing) => listing.listing_id !== id));
       } catch (err) {
-        alert(err.message || 'Failed to delete listing');
+        console.error("Delete Error:", err);
+        alert('Failed to delete listing: ' + (err.message || 'Unknown error'));
       }
     }
   };
