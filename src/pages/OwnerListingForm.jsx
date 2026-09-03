@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { createListing } from '../services/api';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default leaflet marker icon issue in react
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const OwnerListingForm = () => {
   const navigate = useNavigate();
@@ -20,6 +31,8 @@ const OwnerListingForm = () => {
     city: '',
     nearestUniversity: '',
     distance: '',
+    latitude: 6.9271, // default to Colombo
+    longitude: 79.8612,
 
     // Step 3: Amenities
     amenities: {
@@ -47,6 +60,65 @@ const OwnerListingForm = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Map Click Component
+  const MapClickComponent = () => {
+    useMapEvents({
+      click(e) {
+        setFormData(prev => ({ ...prev, latitude: e.latlng.lat, longitude: e.latlng.lng }));
+      },
+    });
+    return null;
+  };
+
+  // Map Panner Component
+  const MapPanner = ({ lat, lng }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView([lat, lng], 14);
+    }, [lat, lng, map]);
+    return null;
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData(prev => ({
+            ...prev,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          }));
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert("Could not get your current location.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
+
+  const handleMapSearch = async () => {
+    if (!searchQuery.trim()) return;
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      if (data && data.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          latitude: parseFloat(data[0].lat),
+          longitude: parseFloat(data[0].lon)
+        }));
+      } else {
+        alert("Location not found.");
+      }
+    } catch (err) {
+      console.error("Search error:", err);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
@@ -119,7 +191,10 @@ const OwnerListingForm = () => {
         title: formData.propertyName,
         description: formData.description,
         price: formData.monthlyRent,
+        security_deposit: formData.securityDeposit,
         location: `${formData.address}, ${formData.city}`,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         amenities: JSON.stringify(formData.amenities),
         image_urls: formData.photos
       };
@@ -345,22 +420,59 @@ const OwnerListingForm = () => {
                   {errors.nearestUniversity && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.nearestUniversity}</p>}
                 </div>
 
-                <div className="rounded-2xl h-64 overflow-hidden border border-slate-200 shadow-inner mt-4 relative group">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    scrolling="no"
-                    marginHeight="0"
-                    marginWidth="0"
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=79.84%2C6.91%2C79.88%2C6.95&amp;layer=mapnik&amp;marker=6.93%2C79.86"
-                    title="Location Map"
-                    className="w-full h-full grayscale-[30%] opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
-                  ></iframe>
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm px-5 py-2.5 rounded-full shadow-lg text-sm font-bold text-[#1952c4] pointer-events-none flex items-center gap-2 border border-[#1952c4]/10">
-                    <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    Map pin placement ready
+                <div className="mt-6 border-t border-slate-200 pt-6">
+                  <label className="block text-sm font-bold text-slate-700 mb-3">Pin Exact Location on Map *</label>
+
+                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                    <button
+                      type="button"
+                      onClick={handleGetCurrentLocation}
+                      className="px-4 py-2 bg-[#ebf3ff] text-[#1952c4] font-bold text-sm rounded-xl border border-[#1952c4]/20 hover:bg-[#d6e5ff] transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" /></svg>
+                      Use My Current Location
+                    </button>
+
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search area (e.g. Kollupitiya)"
+                        className="flex-1 px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 text-sm"
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleMapSearch(); } }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleMapSearch}
+                        className="px-4 py-2 bg-slate-800 text-white font-bold text-sm rounded-xl hover:bg-slate-700 transition-colors"
+                      >
+                        Search
+                      </button>
+                    </div>
                   </div>
+
+                  <div className="rounded-2xl h-80 overflow-hidden border-2 border-slate-200 shadow-inner relative z-0">
+                    <MapContainer
+                      center={[formData.latitude, formData.longitude]}
+                      zoom={13}
+                      scrollWheelZoom={true}
+                      style={{ height: '100%', width: '100%' }}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <Marker position={[formData.latitude, formData.longitude]} />
+                      <MapClickComponent />
+                      <MapPanner lat={formData.latitude} lng={formData.longitude} />
+                    </MapContainer>
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm px-5 py-2.5 rounded-full shadow-lg text-sm font-bold text-[#1952c4] pointer-events-none flex items-center gap-2 border border-[#1952c4]/10 z-[1000]">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      Click map to move pin
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2 text-center">Selected Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}</p>
                 </div>
               </div>
             </div>
