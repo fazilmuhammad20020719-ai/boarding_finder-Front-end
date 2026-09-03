@@ -114,7 +114,12 @@ const MyListings = () => {
                 <div key={listing.listing_id} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
                   <div className="h-48 bg-slate-200 relative">
                     <img
-                      src={(listing.image_urls && listing.image_urls.length > 0) ? listing.image_urls[0] : "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800"}
+                      src={(listing.image_urls && listing.image_urls.length > 0)
+                        ? (listing.image_urls[0].includes('drive.google.com/uc?id=')
+                          ? listing.image_urls[0].replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000'
+                          : (listing.image_urls[0].startsWith('http') ? listing.image_urls[0] : `http://localhost:5000/${listing.image_urls[0].startsWith('/') ? listing.image_urls[0].substring(1) : listing.image_urls[0]}`)
+                        )
+                        : "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800"}
                       alt={listing.title}
                       className="w-full h-full object-cover"
                     />
@@ -128,7 +133,14 @@ const MyListings = () => {
                       LKR {Number(listing.price).toLocaleString()} <span className="text-sm font-medium text-[#64748b]">/mo</span>
                     </div>
 
-                    <div className="mt-auto grid grid-cols-2 gap-3">
+                    <div className="mt-auto grid grid-cols-3 gap-3">
+                      <button
+                        onClick={() => navigate(`/property/${listing.listing_id}`)}
+                        className="py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-[#10b981] bg-white border border-[#e2e8f0] rounded-xl hover:bg-emerald-50 transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        View
+                      </button>
                       <button
                         onClick={() => navigate(`/edit-listing/${listing.listing_id}`)}
                         className="py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-[#1952c4] bg-white border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
