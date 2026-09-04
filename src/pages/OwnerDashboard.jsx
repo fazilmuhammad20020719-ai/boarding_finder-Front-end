@@ -45,6 +45,9 @@ const OwnerDashboard = () => {
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [ownerBookings, setOwnerBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+
   useEffect(() => {
     if (activeTab !== 'listings') return;
     const fetchListings = async () => {
@@ -70,6 +73,29 @@ const OwnerDashboard = () => {
     fetchListings();
   }, [navigate, activeTab]);
 
+  useEffect(() => {
+    if (activeTab !== 'bookings') return;
+    const fetchBookings = async () => {
+      setBookingsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return navigate('/login');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_URL}/bookings/owner-bookings`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch bookings');
+        const data = await response.json();
+        setOwnerBookings(data.bookings || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setBookingsLoading(false);
+      }
+    };
+    fetchBookings();
+  }, [navigate, activeTab]);
+
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this listing?')) {
       try {
@@ -79,6 +105,28 @@ const OwnerDashboard = () => {
         console.error("Delete Error:", err);
         alert('Failed to delete listing: ' + (err.message || 'Unknown error'));
       }
+    }
+  };
+
+  const handleUpdateBookingStatus = async (bookingId, status) => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${API_URL}/bookings/${bookingId}/status`, {
+        method: "PUT",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+
+      setOwnerBookings(prev => prev.map(b =>
+        b.booking_id === bookingId ? { ...b, status } : b
+      ));
+    } catch (err) {
+      alert("Error: " + err.message);
     }
   };
 
@@ -283,7 +331,7 @@ const OwnerDashboard = () => {
                           src={(listing.image_urls && listing.image_urls.length > 0)
                             ? (listing.image_urls[0].includes('drive.google.com/uc?id=')
                               ? listing.image_urls[0].replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000'
-                              : (listing.image_urls[0].startsWith('http') ? listing.image_urls[0] : `http://localhost:5000/${listing.image_urls[0].startsWith('/') ? listing.image_urls[0].substring(1) : listing.image_urls[0]}`)
+                              : (listing.image_urls[0].startsWith('http') ? listing.image_urls[0] : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}/${listing.image_urls[0].startsWith('/') ? listing.image_urls[0].substring(1) : listing.image_urls[0]}`)
                             )
                             : "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800"}
                           alt={listing.title}
@@ -460,63 +508,46 @@ const OwnerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="text-[14px] font-medium text-[#0f172a]">
-                  {/* Row 1 */}
-                  <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-5 font-bold">Maria Reyes</td>
-                    <td className="px-6 py-5 text-[#64748b]">Room 3A</td>
-                    <td className="px-6 py-5 text-[#64748b]">Jul-Dec 2025</td>
-                    <td className="px-6 py-5">
-                      <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>
-                    </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 4,500</td>
-                    <td className="px-6 py-5">
-                      <div className="flex gap-2">
-                        <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
-                        <button className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Row 2 */}
-                  <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-5 font-bold">Jose Santos</td>
-                    <td className="px-6 py-5 text-[#64748b]">Room 2B</td>
-                    <td className="px-6 py-5 text-[#64748b]">Aug 2025-Jan 2026</td>
-                    <td className="px-6 py-5">
-                      <span className="bg-[#e8f7ec] text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">active</span>
-                    </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 6,200</td>
-                    <td className="px-6 py-5 text-[#94a3b8]">—</td>
-                  </tr>
-
-                  {/* Row 3 */}
-                  <tr className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-5 font-bold">Ana Cruz</td>
-                    <td className="px-6 py-5 text-[#64748b]">Room 1C</td>
-                    <td className="px-6 py-5 text-[#64748b]">Jul-Sep 2025</td>
-                    <td className="px-6 py-5">
-                      <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>
-                    </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 3,800</td>
-                    <td className="px-6 py-5">
-                      <div className="flex gap-2">
-                        <button className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
-                        <button className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Row 4 */}
-                  <tr className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-5 font-bold">Lisa Tan</td>
-                    <td className="px-6 py-5 text-[#64748b]">Room 4D</td>
-                    <td className="px-6 py-5 text-[#64748b]">Jan-Jun 2025</td>
-                    <td className="px-6 py-5">
-                      <span className="bg-[#f1f5f9] text-[#64748b] px-3 py-1.5 rounded-full text-xs font-bold">completed</span>
-                    </td>
-                    <td className="px-6 py-5 font-bold text-[#1952c4]">LKR 4,500</td>
-                    <td className="px-6 py-5 text-[#94a3b8]">—</td>
-                  </tr>
+                  {bookingsLoading ? (
+                    <tr>
+                      <td colSpan="6" className="px-6 py-10 text-center text-slate-500">Loading bookings...</td>
+                    </tr>
+                  ) : ownerBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="px-6 py-10 text-center text-slate-500">No bookings found.</td>
+                    </tr>
+                  ) : (
+                    ownerBookings.map(booking => (
+                      <tr key={booking.booking_id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-5 font-bold">
+                          {booking.seeker_name}
+                          <div className="text-xs text-[#64748b] font-normal">{booking.seeker_email}</div>
+                        </td>
+                        <td className="px-6 py-5 text-[#64748b]">{booking.title}</td>
+                        <td className="px-6 py-5 text-[#64748b]">
+                          {new Date(booking.move_in_date).toLocaleDateString()}
+                          <div className="text-xs">{booking.duration_months} Months</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          {booking.status === 'pending' && <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">pending</span>}
+                          {booking.status === 'approved' && <span className="bg-[#e8f7ec] text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">approved</span>}
+                          {booking.status === 'rejected' && <span className="bg-red-50 text-red-500 px-3 py-1.5 rounded-full text-xs font-bold">rejected</span>}
+                          {booking.status === 'cancelled' && <span className="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full text-xs font-bold">cancelled</span>}
+                        </td>
+                        <td className="px-6 py-5 font-bold text-[#1952c4]">LKR {Number(booking.total_amount).toLocaleString()}</td>
+                        <td className="px-6 py-5">
+                          {booking.status === 'pending' ? (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleUpdateBookingStatus(booking.booking_id, 'approved')} className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
+                              <button onClick={() => handleUpdateBookingStatus(booking.booking_id, 'rejected')} className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
+                            </div>
+                          ) : (
+                            <span className="text-[#94a3b8]">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

@@ -1,111 +1,70 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { getAllListings } from '../services/api';
 
-const MOCK_LISTINGS = [
-  {
-    id: 1,
-    name: "Metro Haven",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 18500,
-    rating: 4.9,
-    reviews: 203,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "Pool"],
-    distance: "0.2 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-    isFullyBooked: true,
-    liked: false
-  },
-  {
-    id: 2,
-    name: "BlueSky Residences",
-    university: "University of Colombo",
-    location: "Colombo 03",
-    price: 13500,
-    rating: 4.8,
-    reviews: 142,
-    type: "dormitory",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Laundry", "CCTV"],
-    distance: "0.3 km",
-    beds: 4,
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 3,
-    name: "Sunrise Apartments",
-    university: "University of Kelaniya",
-    location: "Kelaniya, Gampaha",
-    price: 22500,
-    rating: 4.7,
-    reviews: 178,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "CCTV"],
-    distance: "0.1 km",
-    beds: 1,
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 4,
-    name: "Lakeside Suites",
-    university: "University of Ruhuna",
-    location: "Galle",
-    price: 8500,
-    rating: 4.6,
-    reviews: 51,
-    type: "dormitory",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "Parking"],
-    distance: "1.2 km",
-    beds: 3,
-    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600",
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 5,
-    name: "Tranquil Lodge",
-    university: "University of Sri Jayewardenepura",
-    location: "Nugegoda",
-    price: 11500,
-    rating: 4.5,
-    reviews: 89,
-    type: "boarding_house",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "CCTV", "Curfew"],
-    distance: "0.5 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 6,
-    name: "Scholars' Den",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 9500,
-    rating: 4.3,
-    reviews: 67,
-    type: "boarding_house",
-    gender: "male",
-    amenities: ["Wifi", "CCTV", "Laundry"],
-    distance: "0.8 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    isFullyBooked: false,
-    liked: false
+// Remove MOCK_LISTINGS and map from API instead
+const mapListing = (dbListing) => {
+  let parsedAmenities = [];
+  if (Array.isArray(dbListing.amenities)) {
+    parsedAmenities = dbListing.amenities;
+  } else if (typeof dbListing.amenities === 'string') {
+    try {
+      const parsed = JSON.parse(dbListing.amenities);
+      if (Array.isArray(parsed)) {
+        parsedAmenities = parsed;
+      } else if (typeof parsed === 'object' && parsed !== null) {
+        parsedAmenities = Object.keys(parsed).filter(key => parsed[key]);
+      } else {
+        parsedAmenities = [String(parsed)];
+      }
+    } catch (e) {
+      if (dbListing.amenities.startsWith('{') && dbListing.amenities.endsWith('}')) {
+        parsedAmenities = dbListing.amenities.slice(1, -1).split(',').map(a => {
+          const key = a.split(':')[0];
+          return key ? key.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '') : '';
+        }).filter(Boolean);
+      } else {
+        parsedAmenities = dbListing.amenities.split(',').map(a => a.trim()).filter(Boolean);
+      }
+    }
   }
-];
+
+  if (!Array.isArray(parsedAmenities)) {
+    parsedAmenities = [];
+  }
+
+  let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+  if (dbListing.image_urls && dbListing.image_urls.length > 0) {
+    const firstImg = dbListing.image_urls[0];
+    if (firstImg.includes('drive.google.com/uc?id=')) {
+      imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+    } else if (firstImg.startsWith('http')) {
+      imageUrl = firstImg;
+    } else {
+      const API_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+      imageUrl = `${API_URL}/${firstImg.startsWith('/') ? firstImg.substring(1) : firstImg}`;
+    }
+  }
+
+  return {
+    id: dbListing.listing_id,
+    name: dbListing.title,
+    university: dbListing.university || 'Nearby University',
+    location: dbListing.location,
+    price: Number(dbListing.price) || 0,
+    rating: dbListing.rating || 0,
+    reviews: dbListing.reviews || 0,
+    type: dbListing.type || 'boarding_house',
+    gender: dbListing.gender || 'mixed',
+    amenities: parsedAmenities,
+    distance: dbListing.distance || 'N/A',
+    beds: dbListing.beds || 1,
+    image: imageUrl,
+    isFullyBooked: dbListing.status === 'booked',
+    liked: false
+  };
+};
 
 const UNIVERSITIES = [
   { name: "UP Diliman", listings: 12, icon: "🎓", color: "#1952c4" },
@@ -119,8 +78,25 @@ const UNIVERSITIES = [
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await getAllListings();
+        if (data.listings) {
+          setListings(data.listings.map(mapListing));
+        }
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
@@ -268,7 +244,15 @@ const HomePage = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {listings.map((listing) => (
+            {isLoading ? (
+              <div className="col-span-full py-12 flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
+              </div>
+            ) : listings.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-slate-500">
+                No listings available right now.
+              </div>
+            ) : listings.slice(0, 6).map((listing) => (
               <div
                 key={listing.id}
                 onClick={() => navigate(`/property/${listing.id}`)}
@@ -294,13 +278,12 @@ const HomePage = () => {
                     <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                       LKR {listing.price.toLocaleString()}/mo
                     </span>
-                    <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${
-                      listing.gender === 'female'
+                    <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
                         ? 'bg-[#ea4335] text-white'
                         : listing.gender === 'male'
-                        ? 'bg-[#4285f4] text-white'
-                        : 'bg-[#845ef7] text-white'
-                    }`}>
+                          ? 'bg-[#4285f4] text-white'
+                          : 'bg-[#845ef7] text-white'
+                      }`}>
                       {listing.gender}
                     </span>
                   </div>
@@ -320,7 +303,7 @@ const HomePage = () => {
                       strokeWidth="2.2"
                       viewBox="0 0 24 24"
                     >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                   </button>
                 </div>
@@ -372,7 +355,7 @@ const HomePage = () => {
                       <span className="text-slate-400 font-normal text-xs">({listing.reviews})</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
                         className="text-xs font-bold text-slate-500 hover:text-[#1952c4] transition-colors border border-slate-200 rounded-md px-2 py-1 bg-white cursor-pointer"
                       >
@@ -451,13 +434,13 @@ const HomePage = () => {
           <div className="bg-[#1952c4] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-md relative overflow-hidden">
             <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
               <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-                <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6"/>
-                <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6"/>
-                <circle cx="50" cy="50" r="10" fill="white"/>
-                <circle cx="50" cy="90" r="10" fill="white"/>
-                <circle cx="50" cy="130" r="10" fill="white"/>
-                <circle cx="150" cy="70" r="10" fill="white"/>
-                <circle cx="150" cy="110" r="10" fill="white"/>
+                <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6" />
+                <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6" />
+                <circle cx="50" cy="50" r="10" fill="white" />
+                <circle cx="50" cy="90" r="10" fill="white" />
+                <circle cx="50" cy="130" r="10" fill="white" />
+                <circle cx="150" cy="70" r="10" fill="white" />
+                <circle cx="150" cy="110" r="10" fill="white" />
               </svg>
             </div>
 
@@ -496,12 +479,12 @@ const HomePage = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white shadow-sm border border-white/10">
                   <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
+                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2" />
+                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2" />
                   </svg>
                 </div>
                 <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>

@@ -61,6 +61,14 @@ export async function createListing(listingData) {
   });
 }
 
+export async function getAllListings() {
+  return request("/listings", { method: "GET" });
+}
+
+export async function getListingById(id) {
+  return request(`/listings/${id}`, { method: "GET" });
+}
+
 export async function getListing(id) {
   return request(`/listings/${id}`, {
     method: "GET",
@@ -123,3 +131,26 @@ export async function updateProfile(profileData) {
   });
 }
 
+// ─── Bookings API Methods ─────────────────────
+
+export async function createBooking(bookingData) {
+  return request("/bookings", {
+    method: "POST",
+    body: JSON.stringify(bookingData),
+  });
+}
+
+export async function getMyBookings() {
+  return request("/bookings/my-bookings", { method: "GET" });
+}
+
+export async function getOwnerBookings() {
+  return request("/bookings/owner-bookings", { method: "GET" });
+}
+
+export async function updateBookingStatus(id, status) {
+  return request(`/bookings/${id}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}

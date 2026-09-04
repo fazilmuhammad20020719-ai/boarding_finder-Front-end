@@ -1,146 +1,101 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { getAllListings } from '../services/api';
 
-const MOCK_LISTINGS = [
-  {
-    id: 1,
-    name: "Metro Haven",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 18500,
-    rating: 4.9,
-    reviews: 203,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "Pool"],
-    distance: "0.2 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-    description: "A secure studio unit located right next to the University of Moratuwa. Features top-tier student amenities including a swimming pool and modern fitness center.",
-    mapCoords: { top: '35%', left: '28%' },
-    isFullyBooked: true,
-    liked: false
-  },
-  {
-    id: 2,
-    name: "BlueSky Residences",
-    university: "University of Colombo",
-    location: "Colombo 03",
-    price: 13500,
-    rating: 4.8,
-    reviews: 142,
-    type: "dormitory",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Laundry", "CCTV"],
-    distance: "0.3 km",
-    beds: 4,
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    description: "A lively student community dormitory in Colombo 03. Fully managed with shared study spaces, laundry services, and high-security CCTV cameras.",
-    mapCoords: { top: '48%', left: '55%' },
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 3,
-    name: "Sunrise Apartments",
-    university: "University of Kelaniya",
-    location: "Kelaniya, Gampaha",
-    price: 22500,
-    rating: 4.7,
-    reviews: 178,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "CCTV"],
-    distance: "0.1 km",
-    beds: 1,
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-    description: "A private studio room perfect for individuals wanting silent study spaces. Offers high-speed Wi-Fi and 24/7 CCTV surveillance near the campus.",
-    mapCoords: { top: '75%', left: '38%' },
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 4,
-    name: "Lakeside Suites",
-    university: "University of Ruhuna",
-    location: "Galle",
-    price: 8500,
-    rating: 4.6,
-    reviews: 51,
-    type: "dormitory",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "Parking"],
-    distance: "1.2 km",
-    beds: 3,
-    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600",
-    description: "Cozy female-only shared dormitory suites in Galle. Overlooks scenic areas and includes daily home-cooked Sri Lankan meals in the rent.",
-    mapCoords: { top: '22%', left: '70%' },
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 5,
-    name: "Tranquil Lodge",
-    university: "University of Sri Jayewardenepura",
-    location: "Nugegoda",
-    price: 11500,
-    rating: 4.5,
-    reviews: 89,
-    type: "boarding_house",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "CCTV", "Curfew"],
-    distance: "0.5 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-    description: "A quiet, secure boarding house for girls in Nugegoda. High-speed Wi-Fi, healthy meals, safety CCTV, and standard student curfew policies are maintained.",
-    mapCoords: { top: '28%', left: '42%' },
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 6,
-    name: "Scholars' Den",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 9500,
-    rating: 4.3,
-    reviews: 67,
-    type: "boarding_house",
-    gender: "male",
-    amenities: ["Wifi", "CCTV", "Laundry"],
-    distance: "0.8 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    description: "Affordable male-only boarding house near the University of Moratuwa. Ideal for students wanting a budget-friendly bedspace with laundry access.",
-    mapCoords: { top: '55%', left: '68%' },
-    isFullyBooked: false,
-    liked: false
-  }
-];
-
-const SearchPage = () => {
-  const [listings, setListings] = useState(() => {
-    const local = localStorage.getItem('listings');
-    if (local) {
-      try {
-        return JSON.parse(local);
-      } catch (e) {
-        return MOCK_LISTINGS;
+// Remove MOCK_LISTINGS and map from API instead
+const mapListing = (dbListing) => {
+  let parsedAmenities = [];
+  if (Array.isArray(dbListing.amenities)) {
+    parsedAmenities = dbListing.amenities;
+  } else if (typeof dbListing.amenities === 'string') {
+    try {
+      const parsed = JSON.parse(dbListing.amenities);
+      if (Array.isArray(parsed)) {
+        parsedAmenities = parsed;
+      } else if (typeof parsed === 'object' && parsed !== null) {
+        parsedAmenities = Object.keys(parsed).filter(key => parsed[key]);
+      } else {
+        parsedAmenities = [String(parsed)];
+      }
+    } catch (e) {
+      if (dbListing.amenities.startsWith('{') && dbListing.amenities.endsWith('}')) {
+        parsedAmenities = dbListing.amenities.slice(1, -1).split(',').map(a => {
+          const key = a.split(':')[0];
+          return key ? key.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '') : '';
+        }).filter(Boolean);
+      } else {
+        parsedAmenities = dbListing.amenities.split(',').map(a => a.trim()).filter(Boolean);
       }
     }
-    return MOCK_LISTINGS;
-  });
+  }
+
+  if (!Array.isArray(parsedAmenities)) {
+    parsedAmenities = [];
+  }
+
+  let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+  if (dbListing.image_urls && dbListing.image_urls.length > 0) {
+    const firstImg = dbListing.image_urls[0];
+    if (firstImg.includes('drive.google.com/uc?id=')) {
+      imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+    } else if (firstImg.startsWith('http')) {
+      imageUrl = firstImg;
+    } else {
+      const API_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+      imageUrl = `${API_URL}/${firstImg.startsWith('/') ? firstImg.substring(1) : firstImg}`;
+    }
+  }
+
+  // Randomize map coordinates slightly so they don't overlap completely if we have multiple
+  const randomTop = Math.floor(Math.random() * 60 + 20) + '%';
+  const randomLeft = Math.floor(Math.random() * 60 + 20) + '%';
+
+  return {
+    id: dbListing.listing_id,
+    name: dbListing.title,
+    university: dbListing.university || 'Nearby University',
+    location: dbListing.location,
+    price: Number(dbListing.price) || 0,
+    rating: dbListing.rating || 0,
+    reviews: dbListing.reviews || 0,
+    type: dbListing.type || 'boarding_house',
+    gender: dbListing.gender || 'mixed',
+    amenities: parsedAmenities,
+    distance: dbListing.distance || 'N/A',
+    beds: dbListing.beds || 1,
+    image: imageUrl,
+    isFullyBooked: dbListing.status === 'booked',
+    liked: false,
+    mapCoords: { top: randomTop, left: randomLeft }
+  };
+};
+
+const SearchPage = () => {
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('listings', JSON.stringify(listings));
-  }, [listings]);
+    const fetchListings = async () => {
+      try {
+        const data = await getAllListings();
+        if (data.listings) {
+          setListings(data.listings.map(mapListing));
+        }
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list', 'map'
 
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'price_asc', 'price_desc'
-  
+
   // Sidebar Filters States
   const [maxPrice, setMaxPrice] = useState(30000);
   const [genderFilter, setGenderFilter] = useState({
@@ -200,7 +155,7 @@ const SearchPage = () => {
 
       // Facilities
       const activeFacilities = Object.keys(facilitiesFilter).filter(k => facilitiesFilter[k]);
-      const matchesFacilities = activeFacilities.every(facility => 
+      const matchesFacilities = activeFacilities.every(facility =>
         listing.amenities.some(a => a.toLowerCase().includes(facility.toLowerCase()))
       );
 
@@ -224,7 +179,7 @@ const SearchPage = () => {
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="search" />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-8">
-        
+
         {/* ===== TOP SEARCH & SORT BAR ===== */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
           {/* Search Input */}
@@ -242,7 +197,7 @@ const SearchPage = () => {
                 className="w-full py-2.5 bg-transparent text-slate-800 placeholder-[#94a3b8] focus:outline-none text-[15px]"
               />
               {searchQuery && (
-                <button 
+                <button
                   onClick={() => setSearchQuery('')}
                   className="text-slate-400 hover:text-slate-600 font-bold p-1"
                 >
@@ -256,31 +211,28 @@ const SearchPage = () => {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setSortBy('rating')}
-              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${
-                sortBy === 'rating'
+              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'rating'
                   ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
                   : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
-              }`}
+                }`}
             >
               Top Rated
             </button>
             <button
               onClick={() => setSortBy('price_asc')}
-              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${
-                sortBy === 'price_asc'
+              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'price_asc'
                   ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
                   : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
-              }`}
+                }`}
             >
               Price ↑
             </button>
             <button
               onClick={() => setSortBy('price_desc')}
-              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${
-                sortBy === 'price_desc'
+              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'price_desc'
                   ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
                   : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
-              }`}
+                }`}
             >
               Price ↓
             </button>
@@ -290,7 +242,7 @@ const SearchPage = () => {
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Map View
               </button>
@@ -301,11 +253,11 @@ const SearchPage = () => {
         {/* ===== CONTENT BLOCK ===== */}
         {viewMode === 'list' ? (
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            
+
             {/* LEFT SIDEBAR FILTERS */}
             <aside className="w-full lg:w-[280px] bg-white rounded-[24px] p-6 border border-[#e2e8f0]/60 shadow-sm flex-shrink-0">
               <h3 className="text-xl font-bold text-[#0f172a] mb-6">Filters</h3>
-              
+
               <div className="space-y-6">
                 {/* Max Monthly Price */}
                 <div>
@@ -419,11 +371,15 @@ const SearchPage = () => {
             <div className="flex-grow w-full">
               <div className="mb-6">
                 <h3 className="font-extrabold text-[#0f172a] text-lg">
-                  {filteredListings.length} {filteredListings.length === 1 ? 'boarding house' : 'boarding houses'} found
+                  {isLoading ? 'Loading...' : `${filteredListings.length} ${filteredListings.length === 1 ? 'boarding house' : 'boarding houses'} found`}
                 </h3>
               </div>
 
-              {filteredListings.length > 0 ? (
+              {isLoading ? (
+                <div className="py-20 flex justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
+                </div>
+              ) : filteredListings.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredListings.map((listing) => (
                     <div
@@ -438,7 +394,7 @@ const SearchPage = () => {
                           alt={listing.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        
+
                         {/* Fully Booked Overlay */}
                         {listing.isFullyBooked && (
                           <div className="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-[2px] flex items-center justify-center z-10">
@@ -453,13 +409,12 @@ const SearchPage = () => {
                           <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                             LKR {listing.price.toLocaleString()}/mo
                           </span>
-                          <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${
-                            listing.gender === 'female'
+                          <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
                               ? 'bg-[#ea4335] text-white'
                               : listing.gender === 'male'
-                              ? 'bg-[#4285f4] text-white'
-                              : 'bg-[#845ef7] text-white'
-                          }`}>
+                                ? 'bg-[#4285f4] text-white'
+                                : 'bg-[#845ef7] text-white'
+                            }`}>
                             {listing.gender}
                           </span>
                         </div>
@@ -481,7 +436,7 @@ const SearchPage = () => {
                             strokeWidth="2.2"
                             viewBox="0 0 24 24"
                           >
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                           </svg>
                         </button>
                       </div>
@@ -497,11 +452,11 @@ const SearchPage = () => {
                               {listing.type.replace('_', ' ')}
                             </span>
                           </div>
-                          
+
                           <h3 className="text-lg font-bold text-[#0f172a] group-hover:text-[#1952c4] transition-colors line-clamp-1 mb-2">
                             {listing.name}
                           </h3>
-                          
+
                           {/* Distance & Location Info */}
                           <div className="flex items-center justify-between text-[13px] text-slate-500 mb-4 font-semibold">
                             <span className="truncate">📍 {listing.location}</span>
@@ -561,18 +516,17 @@ const SearchPage = () => {
                 <h3 className="font-bold text-[#0f172a] text-lg">Houses in this Area</h3>
                 <p className="text-xs text-slate-400 mt-0.5">{filteredListings.length} properties matches filters</p>
               </div>
-              
+
               {filteredListings.map((listing) => (
                 <div
                   key={listing.id}
                   onClick={() => navigate(`/property/${listing.id}`)}
                   onMouseEnter={() => setHoveredMapListing(listing.id)}
                   onMouseLeave={() => setHoveredMapListing(null)}
-                  className={`p-3 rounded-2xl border transition-all duration-200 flex gap-3 cursor-pointer ${
-                    selectedMapListing?.id === listing.id
+                  className={`p-3 rounded-2xl border transition-all duration-200 flex gap-3 cursor-pointer ${selectedMapListing?.id === listing.id
                       ? 'border-[#1952c4] bg-[#ebf3ff]/40 shadow-sm'
                       : 'border-[#e2e8f0]/60 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <img
                     src={listing.image}
@@ -605,11 +559,11 @@ const SearchPage = () => {
                 {/* Roads */}
                 <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="white" strokeWidth="12" strokeLinecap="round" />
                 <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeDasharray="5,5" />
-                
+
                 {/* University Shaded Zones */}
                 <rect x="30" y="30" width="180" height="80" rx="10" fill="#22c55e" fillOpacity="0.15" stroke="#22c55e" strokeWidth="1.5" strokeDasharray="3,3" />
                 <text x="40" y="55" fill="#15803d" className="text-[11px] font-bold">MORATUWA ZONE</text>
-                
+
                 <rect x="380" y="240" width="180" height="100" rx="10" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,3" />
                 <text x="390" y="265" fill="#1d4ed8" className="text-[11px] font-bold">COLOMBO ZONE</text>
 
@@ -643,16 +597,15 @@ const SearchPage = () => {
                       }}
                       onMouseEnter={() => setHoveredMapListing(listing.id)}
                       onMouseLeave={() => setHoveredMapListing(null)}
-                      className={`px-3 py-1.5 rounded-full font-bold text-xs shadow-md border flex items-center gap-1 transition-all cursor-pointer ${
-                        isSelected
+                      className={`px-3 py-1.5 rounded-full font-bold text-xs shadow-md border flex items-center gap-1 transition-all cursor-pointer ${isSelected
                           ? 'bg-[#1952c4] border-[#1952c4] text-white ring-4 ring-[#1952c4]/20'
                           : isHovered
-                          ? 'bg-[#1546a8] border-[#1546a8] text-white shadow-lg'
-                          : 'bg-white border-[#1952c4]/45 text-[#1952c4]'
-                      }`}
+                            ? 'bg-[#1546a8] border-[#1546a8] text-white shadow-lg'
+                            : 'bg-white border-[#1952c4]/45 text-[#1952c4]'
+                        }`}
                     >
                       <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                       </svg>
                       LKR {(listing.price / 1000).toFixed(0)}k
                     </button>
@@ -660,7 +613,7 @@ const SearchPage = () => {
                     {isSelected && (
                       <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-48 bg-white border border-[#e2e8f0] p-2.5 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-fadeIn">
                         <div className="relative">
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedMapListing(null);
@@ -766,13 +719,13 @@ const SearchPage = () => {
         <div className="bg-[#1952c4] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 mb-10 shadow-md relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
             <svg className="w-full h-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6"/>
-              <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6"/>
-              <circle cx="50" cy="50" r="10" fill="white"/>
-              <circle cx="50" cy="90" r="10" fill="white"/>
-              <circle cx="50" cy="130" r="10" fill="white"/>
-              <circle cx="150" cy="70" r="10" fill="white"/>
-              <circle cx="150" cy="110" r="10" fill="white"/>
+              <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6" />
+              <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6" />
+              <circle cx="50" cy="50" r="10" fill="white" />
+              <circle cx="50" cy="90" r="10" fill="white" />
+              <circle cx="50" cy="130" r="10" fill="white" />
+              <circle cx="150" cy="70" r="10" fill="white" />
+              <circle cx="150" cy="110" r="10" fill="white" />
             </svg>
           </div>
 
@@ -807,18 +760,18 @@ const SearchPage = () => {
       <footer className="bg-[#133076] text-white pt-16 pb-8 border-t border-[#1952c4]/20 mt-auto">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
-            
+
             {/* Brand column */}
             <div className="lg:col-span-2 flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white shadow-sm border border-white/10">
                   <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
-                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
+                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2" />
+                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2" />
+                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2" />
                   </svg>
                 </div>
                 <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>

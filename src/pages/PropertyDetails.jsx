@@ -1,117 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-
-const MOCK_LISTINGS = [
-  {
-    id: 1,
-    name: "Metro Haven",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 18500,
-    rating: 4.9,
-    reviews: 203,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "Pool"],
-    distance: "0.2 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-    description: "A secure studio unit located right next to the University of Moratuwa. Features top-tier student amenities including a swimming pool and modern fitness center.",
-    isFullyBooked: true,
-    liked: false
-  },
-  {
-    id: 2,
-    name: "BlueSky Residences",
-    university: "University of Colombo",
-    location: "Colombo 03",
-    price: 13500,
-    rating: 4.8,
-    reviews: 142,
-    type: "dormitory",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Laundry", "CCTV", "Meals"],
-    distance: "0.3 km",
-    beds: 4,
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    description: "Modern dormitory just 3 minutes walk from UP Diliman Gate 1. All rooms are air-conditioned with individual study areas. Common lounge, rooftop garden, and 24/7 security guard on duty. Perfect for students who value safety and convenience.",
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 3,
-    name: "Sunrise Apartments",
-    university: "University of Kelaniya",
-    location: "Kelaniya, Gampaha",
-    price: 22500,
-    rating: 4.7,
-    reviews: 178,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "CCTV"],
-    distance: "0.1 km",
-    beds: 1,
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-    description: "A private studio room perfect for individuals wanting silent study spaces. Offers high-speed Wi-Fi and 24/7 CCTV surveillance near the campus.",
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 4,
-    name: "Lakeside Suites",
-    university: "University of Ruhuna",
-    location: "Galle",
-    price: 8500,
-    rating: 4.6,
-    reviews: 51,
-    type: "dormitory",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "Parking"],
-    distance: "1.2 km",
-    beds: 3,
-    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600",
-    description: "Cozy female-only shared dormitory suites in Galle. Overlooks scenic areas and includes daily home-cooked Sri Lankan meals in the rent.",
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 5,
-    name: "Tranquil Lodge",
-    university: "University of Sri Jayewardenepura",
-    location: "Nugegoda",
-    price: 11500,
-    rating: 4.5,
-    reviews: 89,
-    type: "boarding_house",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "CCTV", "Curfew"],
-    distance: "0.5 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-    description: "A quiet, secure boarding house for girls in Nugegoda. High-speed Wi-Fi, healthy meals, safety CCTV, and standard student curfew policies are maintained.",
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 6,
-    name: "Scholars' Den",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 9500,
-    rating: 4.3,
-    reviews: 67,
-    type: "boarding_house",
-    gender: "male",
-    amenities: ["Wifi", "CCTV", "Laundry"],
-    distance: "0.8 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    description: "Affordable male-only boarding house near the University of Moratuwa. Ideal for students wanting a budget-friendly bedspace with laundry access.",
-    isFullyBooked: false,
-    liked: false
-  }
-];
+import { getListingById, createBooking } from '../services/api';
 
 const REVIEWS = [
   { id: 1, name: "Anna Lim", date: "March 2025", initial: "A", rating: 5, text: "Very clean and the owner is super accommodating. WiFi is fast enough for video calls. Highly recommended!" },
@@ -124,31 +14,114 @@ const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
-  const [activeDuration, setActiveDuration] = useState('6 mo');
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeDuration, setActiveDuration] = useState('6');
+  const [moveInDate, setMoveInDate] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch from localStorage or use fallback
-    const local = localStorage.getItem('listings');
-    let allListings = MOCK_LISTINGS;
-    if (local) {
+    const fetchListing = async () => {
       try {
-        allListings = JSON.parse(local);
-      } catch (e) {
-        console.error('Failed to parse listings', e);
+        const data = await getListingById(id);
+        if (data) {
+          // Normalize amenities string/array
+          let parsedAmenities = [];
+          if (Array.isArray(data.amenities)) {
+            parsedAmenities = data.amenities;
+          } else if (typeof data.amenities === 'string') {
+            if (data.amenities.startsWith('[') && data.amenities.endsWith(']')) {
+              try {
+                parsedAmenities = JSON.parse(data.amenities);
+              } catch (e) {
+                parsedAmenities = [];
+              }
+            } else {
+              parsedAmenities = data.amenities.split(',').map(a => a.trim()).filter(Boolean);
+            }
+          }
+
+          let rawImages = data.image_urls || data.images;
+          let parsedImages = [];
+          if (Array.isArray(rawImages)) {
+            parsedImages = rawImages;
+          } else if (typeof rawImages === 'string') {
+            try {
+              parsedImages = JSON.parse(rawImages);
+            } catch (e) {
+              parsedImages = [];
+            }
+          }
+
+          let allImages = ["https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600"];
+          if (parsedImages.length > 0) {
+            allImages = parsedImages.map(url => {
+              if (url.includes('drive.google.com/uc?id=')) {
+                return url.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+              } else if (url.startsWith('http')) {
+                return url;
+              } else {
+                const API_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+                return `${API_URL}/${url.startsWith('/') ? url.substring(1) : url}`;
+              }
+            });
+          }
+
+          setListing({
+            id: data.listing_id,
+            name: data.title,
+            university: data.university || "Nearby University",
+            location: data.location,
+            price: Number(data.price) || 0,
+            rating: data.rating || 4.5, // fallback if backend doesn't provide
+            reviews: data.reviews || 12, // fallback
+            type: data.type || "boarding_house",
+            gender: data.gender || "mixed",
+            amenities: parsedAmenities,
+            distance: data.distance || "0.5 km",
+            beds: data.beds || 1,
+            images: allImages,
+            image: allImages[0],
+            description: data.description,
+            isFullyBooked: data.status === 'booked',
+            liked: false
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load listing details", err);
+      } finally {
+        setLoading(false);
       }
-    }
-    const found = allListings.find(l => l.id.toString() === id);
-    if (found) {
-      setListing(found);
-    } else {
-      setListing(MOCK_LISTINGS[1]); // Fallback to BlueSky for demo if not found
-    }
+    };
+    fetchListing();
   }, [id]);
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
     navigate('/');
+  };
+
+  const handleBookNow = async () => {
+    if (!moveInDate) {
+      alert("Please select a move-in date.");
+      return;
+    }
+    setBookingStatus("Submitting...");
+    try {
+      await createBooking({
+        listing_id: listing.id,
+        move_in_date: moveInDate,
+        duration_months: parseInt(activeDuration),
+        message: "I am interested in this listing!"
+      });
+      alert("Booking request submitted successfully!");
+      navigate("/my-bookings");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to submit booking");
+      setBookingStatus("");
+    }
   };
 
   if (!listing) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">Loading...</div>;
@@ -170,22 +143,22 @@ const PropertyDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* ===== LEFT COLUMN: DETAILS ===== */}
           <div className="lg:col-span-2 flex flex-col gap-8">
-            
+
             {/* Images */}
             <div className="flex flex-col gap-3">
               <div className="w-full h-[400px] rounded-[24px] overflow-hidden bg-slate-200">
-                <img src={listing.image} alt={listing.name} className="w-full h-full object-cover" />
+                <img src={listing.images[activeImageIndex] || listing.image} alt={listing.name} className="w-full h-full object-cover" />
               </div>
-              <div className="flex gap-3">
-                <div className="w-24 h-20 rounded-xl overflow-hidden bg-slate-200 border-2 border-[#1952c4]">
-                  <img src={listing.image} alt="thumb" className="w-full h-full object-cover" />
-                </div>
-                <div className="w-24 h-20 rounded-xl overflow-hidden bg-slate-200 opacity-70 hover:opacity-100 cursor-pointer transition-opacity">
-                  <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=300" alt="thumb" className="w-full h-full object-cover" />
-                </div>
-                <div className="w-24 h-20 rounded-xl overflow-hidden bg-slate-200 opacity-70 hover:opacity-100 cursor-pointer transition-opacity">
-                  <img src="https://images.unsplash.com/photo-1502672260266-1c1e5240980c?auto=format&fit=crop&q=80&w=300" alt="thumb" className="w-full h-full object-cover" />
-                </div>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {listing.images.map((imgUrl, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden bg-slate-200 cursor-pointer transition-opacity ${activeImageIndex === idx ? 'border-2 border-[#1952c4] opacity-100' : 'opacity-70 hover:opacity-100'}`}
+                  >
+                    <img src={imgUrl} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -311,7 +284,7 @@ const PropertyDetails = () => {
                         </div>
                       </div>
                       <div className="flex text-amber-400 text-sm">
-                        {Array.from({length: 5}).map((_, i) => (
+                        {Array.from({ length: 5 }).map((_, i) => (
                           <span key={i} className={i < review.rating ? "" : "text-slate-200"}>★</span>
                         ))}
                       </div>
@@ -378,19 +351,24 @@ const PropertyDetails = () => {
                   <div className="space-y-5 mb-8">
                     <div>
                       <label className="block text-[11px] font-bold text-[#64748b] tracking-wider mb-2 uppercase">Move-In Date</label>
-                      <input type="date" className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4]" />
+                      <input
+                        type="date"
+                        value={moveInDate}
+                        onChange={(e) => setMoveInDate(e.target.value)}
+                        className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4]"
+                      />
                     </div>
-                    
+
                     <div>
                       <label className="block text-[11px] font-bold text-[#64748b] tracking-wider mb-2 uppercase">Duration</label>
                       <div className="grid grid-cols-4 gap-2">
-                        {['3 mo', '6 mo', '9 mo', '12 mo'].map(dur => (
+                        {['3', '6', '9', '12'].map(dur => (
                           <button
                             key={dur}
                             onClick={() => setActiveDuration(dur)}
                             className={`py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${activeDuration === dur ? 'bg-[#ebf3ff] border-[#1952c4] text-[#1952c4]' : 'bg-white border-[#e2e8f0] text-slate-500 hover:bg-slate-50'}`}
                           >
-                            {dur}
+                            {dur} mo
                           </button>
                         ))}
                       </div>
@@ -399,11 +377,12 @@ const PropertyDetails = () => {
 
                   {/* Actions */}
                   <div className="space-y-3">
-                    <button 
-                      onClick={() => navigate(`/book/${listing.id}`)}
-                      className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none"
+                    <button
+                      onClick={handleBookNow}
+                      disabled={bookingStatus === "Submitting..."}
+                      className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none disabled:opacity-50"
                     >
-                      Book Now
+                      {bookingStatus || "Book Now"}
                     </button>
                     <button
                       onClick={() => setIsModalOpen(true)}
@@ -414,7 +393,7 @@ const PropertyDetails = () => {
                   </div>
                 </>
               )}
-              
+
               <p className="text-center text-xs text-slate-400 mt-5 font-medium">
                 No payment charged until approved by owner
               </p>
@@ -433,17 +412,17 @@ const PropertyDetails = () => {
             </button>
             <h3 className="text-[17px] font-bold text-[#0f172a] mb-0.5">Send Inquiry</h3>
             <p className="text-[13px] text-[#1952c4] mb-6">{listing.name}</p>
-            
+
             <textarea
               rows="4"
               placeholder="Type your message to the owner..."
               className="w-full px-4 py-4 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1952c4] focus:border-[#1952c4] text-[14px] resize-none mb-4 font-medium"
             ></textarea>
-            
+
             <button onClick={() => { alert('Inquiry sent!'); setIsModalOpen(false); }} className="w-full py-3.5 bg-[#96baf7] hover:bg-[#1952c4] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none mb-4">
               Send
             </button>
-            
+
             <p className="text-center text-[10px] text-slate-400 font-medium">
               No payment charged until approved by owner
             </p>
