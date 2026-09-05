@@ -5,7 +5,7 @@ import { deleteListing, getConversations, getMessages, sendMessage, markMessages
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ const OwnerDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [userId, setUserId] = useState(null);
+  // userId is derived directly from AuthContext — no localStorage needed
   const messagesEndRef = useRef(null);
 
   const [ownerBookings, setOwnerBookings] = useState([]);
@@ -142,12 +142,7 @@ const OwnerDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) setUserId(JSON.parse(userStr).id);
-    } catch (e) { }
-  }, []);
+
 
   const fetchConversations = async () => {
     try {
@@ -176,14 +171,8 @@ const OwnerDashboard = () => {
     try {
       const res = await getMessages(chatId);
       if (res.messages) {
-        // Read userId fresh from localStorage each time to avoid stale state after login/logout
-        let currentUserId = userId;
-        if (!currentUserId) {
-          try {
-            const userStr = localStorage.getItem('user');
-            if (userStr) currentUserId = JSON.parse(userStr).id;
-          } catch (e) { }
-        }
+        // Use user.id from AuthContext — always accurate after login
+        const currentUserId = user?.id;
         setMessages(res.messages.map(m => ({
           id: m.message_id,
           sender: m.sender_id == currentUserId ? "me" : "them",
@@ -203,7 +192,7 @@ const OwnerDashboard = () => {
       const interval = setInterval(fetchConversations, 5000);
       return () => clearInterval(interval);
     }
-  }, [activeTab, userId]);
+  }, [activeTab, user]);
 
   useEffect(() => {
     if (activeTab === 'messages' && activeChatId) {
@@ -211,7 +200,7 @@ const OwnerDashboard = () => {
       const interval = setInterval(() => fetchMessages(activeChatId), 5000);
       return () => clearInterval(interval);
     }
-  }, [activeChatId, activeTab, userId]);
+  }, [activeChatId, activeTab, user]);
 
   useEffect(() => {
     if (activeTab === 'messages') {

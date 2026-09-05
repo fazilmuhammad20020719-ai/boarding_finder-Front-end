@@ -1,25 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 import { getConversations, getMessages, sendMessage, markMessagesAsRead } from '../services/api';
 
 const Messages = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileViewList, setIsMobileViewList] = useState(true);
-  const [userId, setUserId] = useState(null);
+  // userId derived from AuthContext — no localStorage needed
   const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) setUserId(JSON.parse(userStr).id);
-    } catch (e) { }
-  }, []);
 
   const fetchConversations = async () => {
     try {
@@ -48,9 +43,11 @@ const Messages = () => {
     try {
       const res = await getMessages(chatId);
       if (res.messages) {
+        // Use user.id from AuthContext — always accurate after login
+        const currentUserId = user?.id;
         setMessages(res.messages.map(m => ({
           id: m.message_id,
-          sender: m.sender_id === userId ? "me" : "them",
+          sender: m.sender_id == currentUserId ? "me" : "them",
           text: m.message_text,
           time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date(m.created_at).toLocaleDateString()
@@ -65,7 +62,7 @@ const Messages = () => {
     fetchConversations();
     const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);
-  }, [userId]);
+  }, [user]);
 
   useEffect(() => {
     if (activeChatId) {
@@ -73,7 +70,7 @@ const Messages = () => {
       const interval = setInterval(() => fetchMessages(activeChatId), 5000);
       return () => clearInterval(interval);
     }
-  }, [activeChatId, userId]);
+  }, [activeChatId, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

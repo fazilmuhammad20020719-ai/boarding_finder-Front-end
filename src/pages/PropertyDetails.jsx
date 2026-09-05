@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getListingById, createBooking } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { getListingById, checkBookingForListing } from '../services/api';
 
 const REVIEWS = [
   { id: 1, name: "Anna Lim", date: "March 2025", initial: "A", rating: 5, text: "Very clean and the owner is super accommodating. WiFi is fast enough for video calls. Highly recommended!" },
@@ -13,6 +14,7 @@ const REVIEWS = [
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [listing, setListing] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeDuration, setActiveDuration] = useState('6');
@@ -20,6 +22,7 @@ const PropertyDetails = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingStatus, setBookingStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [existingBooking, setExistingBooking] = useState(null); // { booking_id, status } if user already booked
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -106,8 +109,8 @@ const PropertyDetails = () => {
             university: data.university || "Nearby University",
             location: data.location,
             price: Number(data.price) || 0,
-            rating: data.rating || 4.5, // fallback if backend doesn't provide
-            reviews: data.reviews || 12, // fallback
+            rating: data.rating || 4.5,
+            reviews: data.reviews || 12,
             type: data.type || "boarding_house",
             gender: data.gender || "mixed",
             amenities: parsedAmenities,
@@ -117,8 +120,24 @@ const PropertyDetails = () => {
             image: allImages[0],
             description: data.description,
             isFullyBooked: data.status === 'booked',
-            liked: false
+            liked: false,
+            // Real owner info from backend JOIN
+            ownerName: data.owner_name || "Property Owner",
+            ownerEmail: data.owner_email || "",
+            ownerPhone: data.owner_phone || "",
           });
+
+          // Check if logged-in student already has a booking for this listing
+          if (user && user.role !== 'owner') {
+            try {
+              const bookingCheck = await checkBookingForListing(data.listing_id);
+              if (bookingCheck.booking) {
+                setExistingBooking(bookingCheck.booking);
+              }
+            } catch (e) {
+              // Not logged in or network error — silently ignore
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to load listing details", err);
@@ -258,26 +277,52 @@ const PropertyDetails = () => {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-[#0f172a]">Location</h3>
-                <button className="text-[#1952c4] text-sm font-bold flex items-center gap-1 hover:underline">
+                <a
+                  href={`https://maps.google.com/maps?q=${encodeURIComponent(listing.location)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1952c4] text-sm font-bold flex items-center gap-1 hover:underline"
+                >
                   Open map <span className="text-lg leading-none">›</span>
-                </button>
+                </a>
               </div>
-              <div className="w-full h-48 bg-slate-200 rounded-2xl overflow-hidden relative border border-[#e2e8f0]">
-                {/* Simulated Map Background */}
-                <svg className="absolute inset-0 w-full h-full opacity-60" preserveAspectRatio="none" viewBox="0 0 400 200">
-                  <path d="M0,50 Q100,80 200,40 T400,60" fill="none" stroke="#94a3b8" strokeWidth="4" />
-                  <path d="M0,150 Q150,180 250,120 T400,160" fill="none" stroke="#cbd5e1" strokeWidth="6" />
-                  <path d="M100,0 L120,200" fill="none" stroke="#e2e8f0" strokeWidth="8" />
-                  <path d="M300,0 L280,200" fill="none" stroke="#e2e8f0" strokeWidth="8" />
-                  <circle cx="200" cy="100" r="6" fill="#1952c4" />
+
+              {/* Address label */}
+              <div className="flex items-center gap-2 text-sm text-slate-500 font-medium mb-3">
+                <svg className="w-4 h-4 text-[#1952c4] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button className="bg-[#1952c4] text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-lg hover:bg-[#1546a8] transition-colors flex items-center gap-2 cursor-pointer border-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    View on Full Map
-                  </button>
-                </div>
+                {listing.location}
               </div>
+
+              {/* Google Maps embed — pins the exact geocoded location */}
+              <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-sm">
+                <iframe
+                  title="Property Location"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(listing.location)}&z=15&output=embed`}
+                />
+              </div>
+
+              {/* View on full map button */}
+              <a
+                href={`https://maps.google.com/maps?q=${encodeURIComponent(listing.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 w-full py-2.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm no-underline"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                View on Google Maps
+              </a>
             </div>
 
             {/* Reviews */}
@@ -335,20 +380,32 @@ const PropertyDetails = () => {
               <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#e2e8f0]">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-full bg-[#ebf3ff] text-[#1952c4] font-bold flex items-center justify-center text-lg">
-                    M
+                    {listing.ownerName.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div className="font-bold text-[#0f172a] text-sm">Maria Santos</div>
+                    <div className="font-bold text-[#0f172a] text-sm">{listing.ownerName}</div>
                     <div className="text-xs text-slate-400">Property Owner</div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="w-9 h-9 rounded-full bg-[#f0f4f9] text-[#1952c4] flex items-center justify-center hover:bg-[#e1e9f5] transition-colors border-none cursor-pointer">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                  </button>
-                  <button className="w-9 h-9 rounded-full bg-[#f0f4f9] text-[#1952c4] flex items-center justify-center hover:bg-[#e1e9f5] transition-colors border-none cursor-pointer">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                  </button>
+                  {listing.ownerPhone && (
+                    <a
+                      href={`tel:${listing.ownerPhone}`}
+                      className="w-9 h-9 rounded-full bg-[#f0f4f9] text-[#1952c4] flex items-center justify-center hover:bg-[#e1e9f5] transition-colors"
+                      title={listing.ownerPhone}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    </a>
+                  )}
+                  {listing.ownerEmail && (
+                    <a
+                      href={`mailto:${listing.ownerEmail}`}
+                      className="w-9 h-9 rounded-full bg-[#f0f4f9] text-[#1952c4] flex items-center justify-center hover:bg-[#e1e9f5] transition-colors"
+                      title={listing.ownerEmail}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -361,6 +418,80 @@ const PropertyDetails = () => {
                   <p className="text-sm text-slate-500 font-medium mb-6">Check back later or save to get notified</p>
                   <button className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm cursor-pointer">
                     Save for Later
+                  </button>
+                </div>
+              ) : existingBooking ? (
+                /* ── User already booked this listing ── */
+                <div className="flex flex-col gap-4">
+                  {/* Status Banner */}
+                  <div className={`rounded-2xl p-4 flex items-center gap-3 ${existingBooking.status === 'approved'
+                      ? 'bg-[#e8f7ec] border border-[#10b981]/30'
+                      : existingBooking.status === 'rejected' || existingBooking.status === 'cancelled'
+                        ? 'bg-red-50 border border-red-200'
+                        : 'bg-[#fff8e6] border border-[#f59e0b]/30'
+                    }`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${existingBooking.status === 'approved'
+                        ? 'bg-[#10b981] text-white'
+                        : existingBooking.status === 'rejected' || existingBooking.status === 'cancelled'
+                          ? 'bg-red-400 text-white'
+                          : 'bg-[#f59e0b] text-white'
+                      }`}>
+                      {existingBooking.status === 'approved' ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      ) : existingBooking.status === 'rejected' || existingBooking.status === 'cancelled' ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      )}
+                    </div>
+                    <div>
+                      <div className={`text-sm font-extrabold capitalize ${existingBooking.status === 'approved' ? 'text-[#10b981]'
+                          : existingBooking.status === 'rejected' || existingBooking.status === 'cancelled' ? 'text-red-500'
+                            : 'text-[#f59e0b]'
+                        }`}>
+                        Booking {existingBooking.status === 'approved' ? 'Active' : existingBooking.status.charAt(0).toUpperCase() + existingBooking.status.slice(1)}
+                      </div>
+                      <div className="text-xs text-slate-500 font-medium mt-0.5">
+                        {existingBooking.status === 'approved'
+                          ? 'Your booking has been approved by the owner.'
+                          : existingBooking.status === 'pending'
+                            ? 'Awaiting approval from the owner.'
+                            : existingBooking.status === 'rejected'
+                              ? 'Your booking was declined by the owner.'
+                              : 'This booking has been cancelled.'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Booking Details */}
+                  <div className="bg-[#f8fafc] rounded-xl p-4 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-medium">Move-in Date</span>
+                      <span className="font-bold text-[#0f172a]">{new Date(existingBooking.move_in_date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-medium">Duration</span>
+                      <span className="font-bold text-[#0f172a]">{existingBooking.duration_months} months</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-medium">Total</span>
+                      <span className="font-bold text-[#1952c4]">LKR {Number(existingBooking.total_amount).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Disabled Book Button */}
+                  <button
+                    disabled
+                    className="w-full py-3.5 bg-slate-100 text-slate-400 font-bold rounded-xl cursor-not-allowed border-none"
+                  >
+                    Already Booked
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/my-bookings')}
+                    className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                  >
+                    View My Bookings
                   </button>
                 </div>
               ) : (

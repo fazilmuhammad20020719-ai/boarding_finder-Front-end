@@ -144,6 +144,11 @@ export async function getMyBookings() {
   return request("/bookings/my-bookings", { method: "GET" });
 }
 
+export async function checkBookingForListing(listingId) {
+  return request(`/bookings/check/${listingId}`, { method: "GET" });
+}
+
+
 export async function getOwnerBookings() {
   return request("/bookings/owner-bookings", { method: "GET" });
 }
