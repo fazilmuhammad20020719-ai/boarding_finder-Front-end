@@ -24,22 +24,39 @@ const PropertyDetails = () => {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const data = await getListingById(id);
-        if (data) {
+        const response = await getListingById(id);
+        if (response && response.listing) {
+          const data = response.listing;
           // Normalize amenities string/array
           let parsedAmenities = [];
           if (Array.isArray(data.amenities)) {
             parsedAmenities = data.amenities;
           } else if (typeof data.amenities === 'string') {
-            if (data.amenities.startsWith('[') && data.amenities.endsWith(']')) {
-              try {
-                parsedAmenities = JSON.parse(data.amenities);
-              } catch (e) {
-                parsedAmenities = [];
+            try {
+              const parsed = JSON.parse(data.amenities);
+              if (Array.isArray(parsed)) {
+                parsedAmenities = parsed;
+              } else if (typeof parsed === 'object' && parsed !== null) {
+                parsedAmenities = Object.keys(parsed).filter(key => parsed[key]);
+              } else {
+                parsedAmenities = [String(parsed)];
               }
-            } else {
-              parsedAmenities = data.amenities.split(',').map(a => a.trim()).filter(Boolean);
+            } catch (e) {
+              if (data.amenities.startsWith('{') && data.amenities.endsWith('}')) {
+                parsedAmenities = data.amenities.slice(1, -1).split(',').map(a => {
+                  const key = a.split(':')[0];
+                  return key ? key.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '') : '';
+                }).filter(Boolean);
+              } else if (data.amenities.startsWith('[') && data.amenities.endsWith(']')) {
+                parsedAmenities = data.amenities.slice(1, -1).split(',').map(a => a.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              } else {
+                parsedAmenities = data.amenities.split(',').map(a => a.trim()).filter(Boolean);
+              }
             }
+          }
+
+          if (!Array.isArray(parsedAmenities)) {
+            parsedAmenities = [];
           }
 
           let rawImages = data.image_urls || data.images;
@@ -48,10 +65,23 @@ const PropertyDetails = () => {
             parsedImages = rawImages;
           } else if (typeof rawImages === 'string') {
             try {
-              parsedImages = JSON.parse(rawImages);
+              const parsed = JSON.parse(rawImages);
+              if (Array.isArray(parsed)) {
+                parsedImages = parsed;
+              } else {
+                parsedImages = [String(parsed)];
+              }
             } catch (e) {
-              parsedImages = [];
+              if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+                parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              } else {
+                parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              }
             }
+          }
+
+          if (!Array.isArray(parsedImages)) {
+            parsedImages = [];
           }
 
           let allImages = ["https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600"];
@@ -62,8 +92,10 @@ const PropertyDetails = () => {
               } else if (url.startsWith('http')) {
                 return url;
               } else {
-                const API_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
-                return `${API_URL}/${url.startsWith('/') ? url.substring(1) : url}`;
+                const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+                const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+                const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+                return `${BASE_URL}/${pathPrefix}${cleanUrl}`;
               }
             });
           }
@@ -102,26 +134,12 @@ const PropertyDetails = () => {
     navigate('/');
   };
 
-  const handleBookNow = async () => {
+  const handleBookNow = () => {
     if (!moveInDate) {
       alert("Please select a move-in date.");
       return;
     }
-    setBookingStatus("Submitting...");
-    try {
-      await createBooking({
-        listing_id: listing.id,
-        move_in_date: moveInDate,
-        duration_months: parseInt(activeDuration),
-        message: "I am interested in this listing!"
-      });
-      alert("Booking request submitted successfully!");
-      navigate("/my-bookings");
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Failed to submit booking");
-      setBookingStatus("");
-    }
+    navigate(`/book/${listing.listing_id}?date=${moveInDate}&duration=${activeDuration}`);
   };
 
   if (!listing) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">Loading...</div>;

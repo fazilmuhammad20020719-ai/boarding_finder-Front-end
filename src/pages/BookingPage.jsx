@@ -1,143 +1,82 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-
-// Reuse mock data for this page so it doesn't break when refreshed
-const MOCK_LISTINGS = [
-  {
-    id: 1,
-    name: "Metro Haven",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 18500,
-    rating: 4.9,
-    reviews: 203,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "Pool"],
-    distance: "0.2 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-    description: "A secure studio unit located right next to the University of Moratuwa. Features top-tier student amenities including a swimming pool and modern fitness center.",
-    isFullyBooked: true,
-    liked: false
-  },
-  {
-    id: 2,
-    name: "BlueSky Residences",
-    university: "University of Colombo",
-    location: "Colombo 03",
-    price: 13500,
-    rating: 4.8,
-    reviews: 142,
-    type: "dormitory",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Laundry", "CCTV", "Meals"],
-    distance: "0.3 km",
-    beds: 4,
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-    description: "Modern dormitory just 3 minutes walk from UP Diliman Gate 1. All rooms are air-conditioned with individual study areas. Common lounge, rooftop garden, and 24/7 security guard on duty. Perfect for students who value safety and convenience.",
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 3,
-    name: "Sunrise Apartments",
-    university: "University of Kelaniya",
-    location: "Kelaniya, Gampaha",
-    price: 22500,
-    rating: 4.7,
-    reviews: 178,
-    type: "studio_unit",
-    gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "CCTV"],
-    distance: "0.1 km",
-    beds: 1,
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-    description: "A private studio room perfect for individuals wanting silent study spaces. Offers high-speed Wi-Fi and 24/7 CCTV surveillance near the campus.",
-    isFullyBooked: false,
-    liked: false
-  },
-  {
-    id: 4,
-    name: "Lakeside Suites",
-    university: "University of Ruhuna",
-    location: "Galle",
-    price: 8500,
-    rating: 4.6,
-    reviews: 51,
-    type: "dormitory",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "Parking"],
-    distance: "1.2 km",
-    beds: 3,
-    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600",
-    description: "Cozy female-only shared dormitory suites in Galle. Overlooks scenic areas and includes daily home-cooked Sri Lankan meals in the rent.",
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 5,
-    name: "Tranquil Lodge",
-    university: "University of Sri Jayewardenepura",
-    location: "Nugegoda",
-    price: 11500,
-    rating: 4.5,
-    reviews: 89,
-    type: "boarding_house",
-    gender: "female",
-    amenities: ["Wifi", "Meals", "CCTV", "Curfew"],
-    distance: "0.5 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-    description: "A quiet, secure boarding house for girls in Nugegoda. High-speed Wi-Fi, healthy meals, safety CCTV, and standard student curfew policies are maintained.",
-    isFullyBooked: false,
-    liked: true
-  },
-  {
-    id: 6,
-    name: "Scholars' Den",
-    university: "University of Moratuwa",
-    location: "Katubedda, Moratuwa",
-    price: 9500,
-    rating: 4.3,
-    reviews: 67,
-    type: "boarding_house",
-    gender: "male",
-    amenities: ["Wifi", "CCTV", "Laundry"],
-    distance: "0.8 km",
-    beds: 2,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-    description: "Affordable male-only boarding house near the University of Moratuwa. Ideal for students wanting a budget-friendly bedspace with laundry access.",
-    isFullyBooked: false,
-    liked: false
-  }
-];
+import { getListingById, createBooking } from '../services/api';
 
 const BookingPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [listing, setListing] = useState(null);
-  const [activeDuration, setActiveDuration] = useState('6mo');
+  const [activeDuration, setActiveDuration] = useState(searchParams.get('duration') || '6');
+  const [moveInDate, setMoveInDate] = useState(searchParams.get('date') || '');
+  
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [university, setUniversity] = useState('');
+  const [specialRequests, setSpecialRequests] = useState('');
+
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const local = localStorage.getItem('listings');
-    let allListings = MOCK_LISTINGS;
-    if (local) {
+    const fetchListing = async () => {
       try {
-        allListings = JSON.parse(local);
-      } catch (e) {
-        console.error('Failed to parse listings', e);
+        const response = await getListingById(id);
+        const data = response.listing;
+
+        let rawImages = data.image_urls || data.images;
+        let parsedImages = [];
+        if (Array.isArray(rawImages)) {
+          parsedImages = rawImages;
+        } else if (typeof rawImages === 'string') {
+          try {
+            const parsed = JSON.parse(rawImages);
+            if (Array.isArray(parsed)) {
+              parsedImages = parsed;
+            } else {
+              parsedImages = [String(parsed)];
+            }
+          } catch (e) {
+            if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+              parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+            } else {
+              parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+            }
+          }
+        }
+        if (!Array.isArray(parsedImages)) parsedImages = [];
+
+        let primaryImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+        if (parsedImages.length > 0 && parsedImages[0]) {
+          const firstImg = parsedImages[0];
+          if (firstImg.includes('drive.google.com/uc?id=')) {
+            primaryImage = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+          } else if (firstImg.startsWith('http')) {
+            if (firstImg.includes('drive.google.com/open?id=')) {
+              const fileId = firstImg.split('id=')[1];
+              primaryImage = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+            } else {
+              primaryImage = firstImg;
+            }
+          } else if (firstImg.startsWith('/')) {
+            primaryImage = `http://localhost:5000${firstImg}`;
+          } else {
+            primaryImage = `http://localhost:5000/uploads/${firstImg}`;
+          }
+        }
+
+        setListing({
+          ...data,
+          parsed_image_url: primaryImage
+        });
+      } catch (error) {
+        console.error("Failed to fetch listing:", error);
       }
-    }
-    const found = allListings.find(l => l.id.toString() === id);
-    if (found) {
-      setListing(found);
-    } else {
-      setListing(MOCK_LISTINGS[1]); // Fallback
-    }
+    };
+    fetchListing();
   }, [id]);
 
   const handleLogout = () => {
@@ -146,14 +85,15 @@ const BookingPage = () => {
   };
 
   const getDurationMonths = () => {
-    return parseInt(activeDuration.replace('mo', ''));
+    return parseInt(activeDuration);
   };
 
   if (!listing) return <div className="min-h-screen bg-[#f4f7f9] flex items-center justify-center">Loading...</div>;
 
   const durationMonths = getDurationMonths();
-  const securityDeposit = listing.price; // typically 1 month rent
-  const total = (listing.price * durationMonths) + securityDeposit;
+  const rentPrice = parseFloat(listing.price) || 0;
+  const securityDeposit = listing.security_deposit ? parseFloat(listing.security_deposit) : rentPrice;
+  const total = (rentPrice * durationMonths) + securityDeposit;
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] flex flex-col font-sans antialiased text-[#0f172a]">
@@ -175,7 +115,7 @@ const BookingPage = () => {
             <div className="space-y-4">
               <div className="flex justify-between text-[14px]">
                 <span className="text-[#64748b] font-medium">Property</span>
-                <span className="font-extrabold text-[#0f172a]">{listing.name}</span>
+                <span className="font-extrabold text-[#0f172a]">{listing.title}</span>
               </div>
               <div className="flex justify-between text-[14px]">
                 <span className="text-[#64748b] font-medium">Move-in</span>
@@ -187,7 +127,7 @@ const BookingPage = () => {
               </div>
               <div className="flex justify-between text-[14px]">
                 <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                <span className="font-extrabold text-[#0f172a]">LKR {listing.price.toLocaleString()}</span>
+                <span className="font-extrabold text-[#0f172a]">LKR {rentPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-[15px] mt-4 pt-4 border-t border-[#e2e8f0]/80">
                 <span className="text-[#64748b] font-bold">Total</span>
@@ -246,6 +186,8 @@ const BookingPage = () => {
                         <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Move-In Date</label>
                         <input 
                           type="date" 
+                          value={moveInDate}
+                          onChange={(e) => setMoveInDate(e.target.value)}
                           className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4]" 
                           required
                         />
@@ -257,9 +199,9 @@ const BookingPage = () => {
                             <button
                               key={dur}
                               type="button"
-                              onClick={() => setActiveDuration(dur)}
+                              onClick={() => setActiveDuration(dur.replace('mo', ''))}
                               className={`py-3 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
-                                activeDuration === dur 
+                                activeDuration === dur.replace('mo', '') 
                                   ? 'bg-[#ebf3ff] border-[#1952c4] text-[#1952c4]' 
                                   : 'bg-white border-[#e2e8f0] text-slate-400 hover:bg-slate-50'
                               }`}
@@ -276,6 +218,8 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Full Name</label>
                       <input 
                         type="text" 
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
                         placeholder="Juan Dela Cruz"
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400" 
                         required
@@ -287,6 +231,8 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Email Address</label>
                       <input 
                         type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="juan@up.edu.ph"
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400" 
                         required
@@ -298,6 +244,8 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Phone Number</label>
                       <input 
                         type="tel" 
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="+63 9XX XXX XXXX"
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400" 
                         required
@@ -309,6 +257,8 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">University & Course</label>
                       <input 
                         type="text" 
+                        value={university}
+                        onChange={(e) => setUniversity(e.target.value)}
                         placeholder="UP Diliman — BS Computer Science"
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400" 
                         required
@@ -320,6 +270,8 @@ const BookingPage = () => {
                       <label className="block text-[11px] font-bold text-[#1952c4] tracking-wider mb-2 uppercase">Special Requests</label>
                       <textarea 
                         rows="3"
+                        value={specialRequests}
+                        onChange={(e) => setSpecialRequests(e.target.value)}
                         placeholder="Any special requirements..."
                         className="w-full bg-[#f4f7f9] border border-[#e2e8f0]/80 rounded-xl px-4 py-3.5 text-[15px] text-[#0f172a] font-medium focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4] placeholder-slate-400 resize-none" 
                       ></textarea>
@@ -358,20 +310,38 @@ const BookingPage = () => {
                   </div>
 
                   <p className="text-sm text-center text-slate-500 font-medium mb-6">
-                    I agree to the <span className="text-[#1952c4] font-bold cursor-pointer hover:underline">Terms of Service</span> and house rules of {listing.name}.
+                    I agree to the <span className="text-[#1952c4] font-bold cursor-pointer hover:underline">Terms of Service</span> and house rules of {listing.title}.
                   </p>
 
                   <button 
-                    onClick={() => {
+                    disabled={isSubmitting}
+                    onClick={async () => {
                       if (!paymentMethod) {
                         alert('Please select a payment method');
                         return;
                       }
-                      navigate(`/booking-confirmation?propertyId=${listing.id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}&name=${encodeURIComponent('Juan Fernando')}&email=${encodeURIComponent('juan.fernando@mrt.ac.lk')}`);
+                      
+                      setIsSubmitting(true);
+                      try {
+                        const messagePayload = `Name: ${fullName} | Email: ${email} | Phone: ${phone} | Uni: ${university} | Requests: ${specialRequests}`;
+                        
+                        await createBooking({
+                          listing_id: listing.listing_id,
+                          move_in_date: moveInDate,
+                          duration_months: durationMonths,
+                          message: messagePayload
+                        });
+                        
+                        navigate(`/booking-confirmation?propertyId=${listing.listing_id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}&name=${encodeURIComponent(fullName)}&email=${encodeURIComponent(email)}`);
+                      } catch (err) {
+                        console.error(err);
+                        alert(err.message || 'Failed to create booking');
+                        setIsSubmitting(false);
+                      }
                     }}
-                    className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none text-[15px]"
+                    className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none text-[15px] disabled:opacity-50"
                   >
-                    Confirm Booking
+                    {isSubmitting ? 'Processing...' : 'Confirm Booking'}
                   </button>
                 </>
               )}
@@ -384,12 +354,17 @@ const BookingPage = () => {
               
               {/* Property Image */}
               <div className="w-full h-44 rounded-2xl overflow-hidden bg-slate-100 mb-5">
-                <img src={listing.image} alt={listing.name} className="w-full h-full object-cover" />
+                <img 
+                  src={listing.parsed_image_url} 
+                  alt={listing.title} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600"; }}
+                />
               </div>
               
               {/* Property Name and Location */}
               <div className="mb-6">
-                <h3 className="text-[19px] font-extrabold text-[#0f172a] mb-1">{listing.name}</h3>
+                <h3 className="text-[19px] font-extrabold text-[#0f172a] mb-1">{listing.title}</h3>
                 <div className="flex items-center gap-1.5 text-sm text-[#64748b] font-medium">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   {listing.location}
@@ -403,7 +378,7 @@ const BookingPage = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center text-[15px]">
                   <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                  <span className="font-extrabold text-[#0f172a]">LKR {listing.price.toLocaleString()}</span>
+                  <span className="font-extrabold text-[#0f172a]">LKR {rentPrice.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center text-[15px]">
                   <span className="text-[#64748b] font-medium">Duration</span>

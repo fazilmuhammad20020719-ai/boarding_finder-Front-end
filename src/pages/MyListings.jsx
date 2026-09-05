@@ -30,7 +30,55 @@ const MyListings = () => {
         }
 
         const data = await response.json();
-        setListings(data.listings || []);
+
+        const parsedListings = (data.listings || []).map(listing => {
+          let rawImages = listing.image_urls || listing.images;
+          let parsedImages = [];
+          if (Array.isArray(rawImages)) {
+            parsedImages = rawImages;
+          } else if (typeof rawImages === 'string') {
+            try {
+              const parsed = JSON.parse(rawImages);
+              if (Array.isArray(parsed)) {
+                parsedImages = parsed;
+              } else {
+                parsedImages = [String(parsed)];
+              }
+            } catch (e) {
+              if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+                parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              } else {
+                parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              }
+            }
+          }
+
+          if (!Array.isArray(parsedImages)) {
+            parsedImages = [];
+          }
+
+          let imageUrl = "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800";
+          if (parsedImages.length > 0) {
+            const firstImg = parsedImages[0];
+            if (firstImg.includes('drive.google.com/uc?id=')) {
+              imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+            } else if (firstImg.startsWith('http')) {
+              imageUrl = firstImg;
+            } else {
+              const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+              const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
+              const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+              imageUrl = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+            }
+          }
+
+          return {
+            ...listing,
+            parsed_image_url: imageUrl
+          };
+        });
+
+        setListings(parsedListings);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -114,12 +162,7 @@ const MyListings = () => {
                 <div key={listing.listing_id} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
                   <div className="h-48 bg-slate-200 relative">
                     <img
-                      src={(listing.image_urls && listing.image_urls.length > 0)
-                        ? (listing.image_urls[0].includes('drive.google.com/uc?id=')
-                          ? listing.image_urls[0].replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000'
-                          : (listing.image_urls[0].startsWith('http') ? listing.image_urls[0] : `http://localhost:5000/${listing.image_urls[0].startsWith('/') ? listing.image_urls[0].substring(1) : listing.image_urls[0]}`)
-                        )
-                        : "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800"}
+                      src={listing.parsed_image_url}
                       alt={listing.title}
                       className="w-full h-full object-cover"
                     />

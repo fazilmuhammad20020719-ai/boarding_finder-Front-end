@@ -34,16 +34,43 @@ const mapListing = (dbListing) => {
     parsedAmenities = [];
   }
 
+  let rawImages = dbListing.image_urls || dbListing.images;
+  let parsedImages = [];
+  if (Array.isArray(rawImages)) {
+    parsedImages = rawImages;
+  } else if (typeof rawImages === 'string') {
+    try {
+      const parsed = JSON.parse(rawImages);
+      if (Array.isArray(parsed)) {
+        parsedImages = parsed;
+      } else {
+        parsedImages = [String(parsed)];
+      }
+    } catch (e) {
+      if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+        parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+      } else {
+        parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+      }
+    }
+  }
+
+  if (!Array.isArray(parsedImages)) {
+    parsedImages = [];
+  }
+
   let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
-  if (dbListing.image_urls && dbListing.image_urls.length > 0) {
-    const firstImg = dbListing.image_urls[0];
+  if (parsedImages.length > 0) {
+    const firstImg = parsedImages[0];
     if (firstImg.includes('drive.google.com/uc?id=')) {
       imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
     } else if (firstImg.startsWith('http')) {
       imageUrl = firstImg;
     } else {
-      const API_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
-      imageUrl = `${API_URL}/${firstImg.startsWith('/') ? firstImg.substring(1) : firstImg}`;
+      const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+      const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
+      const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+      imageUrl = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
     }
   }
 

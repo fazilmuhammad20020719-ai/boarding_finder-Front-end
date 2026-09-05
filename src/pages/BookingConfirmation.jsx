@@ -2,44 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
-const MOCK_LISTINGS = [
-  {
-    id: 1, name: "Metro Haven", university: "University of Moratuwa", location: "Katubedda, Moratuwa",
-    price: 18500, rating: 4.9, reviews: 203, type: "studio_unit", gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "Pool"], distance: "0.2 km", beds: 2,
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 2, name: "BlueSky Residences", university: "University of Colombo", location: "Colombo 03",
-    price: 13500, rating: 4.8, reviews: 142, type: "dormitory", gender: "mixed",
-    amenities: ["Wifi", "Parking", "Laundry", "CCTV", "Meals"], distance: "0.3 km", beds: 4,
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 3, name: "Sunrise Apartments", university: "University of Kelaniya", location: "Kelaniya, Gampaha",
-    price: 22500, rating: 4.7, reviews: 178, type: "studio_unit", gender: "mixed",
-    amenities: ["Wifi", "Parking", "Gym", "CCTV"], distance: "0.1 km", beds: 1,
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 4, name: "Lakeside Suites", university: "University of Ruhuna", location: "Galle",
-    price: 8500, rating: 4.6, reviews: 51, type: "dormitory", gender: "female",
-    amenities: ["Wifi", "Meals", "Parking"], distance: "1.2 km", beds: 3,
-    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 5, name: "Tranquil Lodge", university: "University of Sri Jayewardenepura", location: "Nugegoda",
-    price: 11500, rating: 4.5, reviews: 89, type: "boarding_house", gender: "female",
-    amenities: ["Wifi", "Meals", "CCTV", "Curfew"], distance: "0.5 km", beds: 2,
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 6, name: "Scholars' Den", university: "University of Moratuwa", location: "Katubedda, Moratuwa",
-    price: 9500, rating: 4.3, reviews: 67, type: "boarding_house", gender: "male",
-    amenities: ["Wifi", "CCTV", "Laundry"], distance: "0.8 km", beds: 2,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600",
-  }
-];
+import { getListingById } from '../services/api';
 
 const BookingConfirmation = () => {
   const navigate = useNavigate();
@@ -48,29 +11,96 @@ const BookingConfirmation = () => {
   const [checkAnimDone, setCheckAnimDone] = useState(false);
   const confettiRef = useRef(null);
 
+  const [listing, setListing] = useState(null);
+
   // Read booking details from URL search params
-  const propertyId = parseInt(searchParams.get('propertyId') || '2');
+  const propertyId = searchParams.get('propertyId');
   const duration = parseInt(searchParams.get('duration') || '6');
   const paymentMethod = searchParams.get('payment') || 'Cash on Move-in';
   const bookingName = searchParams.get('name') || 'Juan Fernando';
   const bookingEmail = searchParams.get('email') || 'juan.fernando@mrt.ac.lk';
 
-  // Find the listing
-  const localListings = localStorage.getItem('listings');
-  let allListings = MOCK_LISTINGS;
-  if (localListings) {
-    try { allListings = JSON.parse(localListings); } catch (e) { /* fallback */ }
-  }
-  const listing = allListings.find(l => l.id === propertyId) || MOCK_LISTINGS[1];
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const response = await getListingById(propertyId);
+        const data = response.listing;
 
-  const securityDeposit = listing.price;
-  const totalRent = listing.price * duration;
-  const total = totalRent + securityDeposit;
+        // Same bulletproof image parsing
+        let rawImages = data.image_urls || data.images;
+        let parsedImages = [];
+        if (Array.isArray(rawImages)) {
+          parsedImages = rawImages;
+        } else if (typeof rawImages === 'string') {
+          try {
+            const parsed = JSON.parse(rawImages);
+            if (Array.isArray(parsed)) {
+              parsedImages = parsed;
+            } else {
+              parsedImages = [String(parsed)];
+            }
+          } catch (e) {
+            if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+              parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+            } else {
+              parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+            }
+          }
+        }
+        if (!Array.isArray(parsedImages)) parsedImages = [];
 
-  // Generate a booking reference
-  const bookingRef = `BF-${new Date().getFullYear()}-${String(propertyId).padStart(3, '0')}${String(Math.floor(Math.random() * 9000) + 1000)}`;
-  const bookingDate = new Date().toLocaleDateString('en-LK', { year: 'numeric', month: 'long', day: 'numeric' });
-  const bookingTime = new Date().toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' });
+        let primaryImage = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600";
+        if (parsedImages.length > 0 && parsedImages[0]) {
+          const firstImg = parsedImages[0];
+          if (firstImg.includes('drive.google.com/uc?id=')) {
+            primaryImage = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+          } else if (firstImg.startsWith('http')) {
+            if (firstImg.includes('drive.google.com/open?id=')) {
+              const fileId = firstImg.split('id=')[1];
+              primaryImage = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+            } else {
+              primaryImage = firstImg;
+            }
+          } else {
+            const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+            const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
+            const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+            primaryImage = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+          }
+        }
+
+        // Amenities parsing
+        let parsedAmenities = [];
+        if (data.amenities) {
+          try {
+            if (Array.isArray(data.amenities)) {
+              parsedAmenities = data.amenities;
+            } else if (typeof data.amenities === 'string') {
+              if (data.amenities.startsWith('{') && data.amenities.endsWith('}')) {
+                const cleaned = data.amenities.slice(1, -1);
+                parsedAmenities = cleaned ? cleaned.split(',').map(a => a.trim().replace(/^"|"$/g, '')) : [];
+              } else {
+                parsedAmenities = JSON.parse(data.amenities);
+              }
+            }
+          } catch (e) {
+            parsedAmenities = typeof data.amenities === 'string' ? data.amenities.split(',').map(a => a.trim()) : [];
+          }
+        }
+
+        setListing({
+          ...data,
+          parsed_image_url: primaryImage,
+          parsed_amenities: parsedAmenities
+        });
+      } catch (error) {
+        console.error("Failed to fetch listing:", error);
+      }
+    };
+    if (propertyId) {
+      fetchListing();
+    }
+  }, [propertyId]);
 
   // Animate entrance
   useEffect(() => {
@@ -139,6 +169,18 @@ const BookingConfirmation = () => {
     return () => cancelAnimationFrame(animFrame);
   }, []);
 
+  if (!listing) return <div className="min-h-screen bg-[#f4f7f9] flex items-center justify-center">Loading...</div>;
+
+  const rentPrice = parseFloat(listing.price) || 0;
+  const securityDeposit = listing.security_deposit ? parseFloat(listing.security_deposit) : rentPrice;
+  const totalRent = rentPrice * duration;
+  const total = totalRent + securityDeposit;
+
+  // Generate a booking reference
+  const bookingRef = `BF-${new Date().getFullYear()}-${String(propertyId).padStart(3, '0')}${String(Math.floor(Math.random() * 9000) + 1000)}`;
+  const bookingDate = new Date().toLocaleDateString('en-LK', { year: 'numeric', month: 'long', day: 'numeric' });
+  const bookingTime = new Date().toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' });
+
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
     navigate('/');
@@ -152,7 +194,7 @@ const BookingConfirmation = () => {
     try {
       const l = localStorage.getItem('listings');
       if (l) return JSON.parse(l).filter(x => x.liked).length;
-    } catch (e) {}
+    } catch (e) { }
     return 2;
   })();
 
@@ -269,7 +311,7 @@ const BookingConfirmation = () => {
               transition: 'all 0.5s ease 0.1s',
             }}
           >
-            Your booking request for <span className="font-bold text-[#1952c4]">{listing.name}</span> has been successfully submitted. Here's your receipt.
+            Your booking request for <span className="font-bold text-[#1952c4]">{listing.title}</span> has been successfully submitted. Here's your receipt.
           </p>
         </div>
 
@@ -313,12 +355,17 @@ const BookingConfirmation = () => {
               <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 overflow-hidden">
                 <div className="flex flex-col sm:flex-row">
                   <div className="sm:w-48 h-44 sm:h-auto flex-shrink-0 bg-slate-100">
-                    <img src={listing.image} alt={listing.name} className="w-full h-full object-cover" />
+                    <img
+                      src={listing.parsed_image_url}
+                      alt={listing.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600"; }}
+                    />
                   </div>
                   <div className="p-6 flex-grow">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
-                        <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">{listing.name}</h3>
+                        <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">{listing.title}</h3>
                         <div className="flex items-center gap-1.5 text-sm text-[#64748b] font-medium">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                           {listing.location}
@@ -331,7 +378,7 @@ const BookingConfirmation = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {listing.amenities?.slice(0, 4).map(a => (
+                      {listing.parsed_amenities?.slice(0, 4).map(a => (
                         <span key={a} className="bg-[#f4f7f9] text-[#475569] text-xs font-semibold px-3 py-1 rounded-full">{a}</span>
                       ))}
                     </div>
@@ -384,7 +431,7 @@ const BookingConfirmation = () => {
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between items-center text-[14px]">
                     <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                    <span className="font-bold text-[#0f172a]">LKR {listing.price.toLocaleString()}</span>
+                    <span className="font-bold text-[#0f172a]">LKR {rentPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
                     <span className="text-[#64748b] font-medium">Duration</span>

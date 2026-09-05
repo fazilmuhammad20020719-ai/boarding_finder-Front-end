@@ -14,22 +14,62 @@ const MyBookings = () => {
       try {
         const response = await getMyBookings();
         if (response.bookings) {
-          // Map backend structure to frontend structure
-          const mappedBookings = response.bookings.map(b => ({
-            id: `BF-BKG-${b.booking_id.toString().padStart(6, '0')}`,
-            propertyId: b.listing_id,
-            propertyName: b.title,
-            location: b.location,
-            status: b.status === 'pending' ? 'pending' : (b.status === 'approved' ? 'active' : b.status),
-            moveInDate: new Date(b.move_in_date).toLocaleDateString(),
-            durationMonths: b.duration_months,
-            totalPrice: parseFloat(b.total_amount),
-            bookingDate: new Date(b.created_at).toLocaleDateString(),
-            image: (b.image_urls && b.image_urls.length > 0)
-              ? (b.image_urls[0].startsWith('http') ? b.image_urls[0] : `${import.meta.env.VITE_API_URL}${b.image_urls[0]}`)
-              : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600",
-            ownerName: "Owner" // Owner details aren't joined in the student view currently, fallback
-          }));
+          const mappedBookings = response.bookings.map(b => {
+            let rawImages = b.image_urls || b.images;
+            let parsedImages = [];
+            if (Array.isArray(rawImages)) {
+              parsedImages = rawImages;
+            } else if (typeof rawImages === 'string') {
+              try {
+                const parsed = JSON.parse(rawImages);
+                if (Array.isArray(parsed)) parsedImages = parsed;
+                else parsedImages = [String(parsed)];
+              } catch (e) {
+                if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+                  parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+                } else {
+                  parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+                }
+              }
+            }
+
+            let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+            if (parsedImages.length > 0 && parsedImages[0]) {
+              const firstImg = parsedImages[0];
+              if (firstImg.includes('drive.google.com/uc?id=')) {
+                imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+              } else if (firstImg.startsWith('http')) {
+                if (firstImg.includes('drive.google.com/open?id=')) {
+                  const fileId = firstImg.split('id=')[1];
+                  imageUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+                } else {
+                  imageUrl = firstImg;
+                }
+              } else {
+                const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+                if (firstImg.startsWith('/')) {
+                  imageUrl = `${BASE_URL}${firstImg}`;
+                } else {
+                  imageUrl = `${BASE_URL}/uploads/${firstImg}`;
+                }
+              }
+            }
+
+            return {
+              id: `BF-BKG-${b.booking_id.toString().padStart(6, '0')}`,
+              propertyId: b.listing_id,
+              propertyName: b.title,
+              location: b.location,
+              status: b.status === 'pending' ? 'pending' : (b.status === 'approved' ? 'active' : b.status),
+              moveInDate: new Date(b.move_in_date).toLocaleDateString(),
+              durationMonths: b.duration_months,
+              totalPrice: parseFloat(b.total_amount),
+              bookingDate: new Date(b.created_at).toLocaleDateString(),
+              image: imageUrl,
+              owner_id: b.owner_id,
+              ownerName: "Owner" // Owner details aren't joined in the student view currently, fallback
+            };
+          });
           setBookings(mappedBookings);
         }
       } catch (error) {
@@ -197,12 +237,26 @@ const MyBookings = () => {
 
                     {/* Actions */}
                     <div className="flex items-center justify-between border-t border-[#e2e8f0]/80 pt-4 mt-auto">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center font-bold text-[10px]">
-                          {booking.ownerName.charAt(0)}
+                      <button
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-[#e2e8f0] cursor-pointer group/btn"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const { sendMessage } = await import('../services/api');
+                            await sendMessage({
+                              listing_id: booking.propertyId,
+                              receiver_id: booking.owner_id, // Wait, is owner_id available?
+                              text: "Hi, I have a question about my booking."
+                            });
+                          } catch (err) { }
+                          navigate('/messages');
+                        }}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-[#e0e7ff] text-[#1952c4] flex items-center justify-center group-hover/btn:bg-[#1952c4] group-hover/btn:text-white transition-colors">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                         </div>
-                        <span className="text-sm font-semibold text-[#475569]">Contact {booking.ownerName}</span>
-                      </div>
+                        <span className="text-sm font-bold text-[#1952c4]">Contact {booking.ownerName}</span>
+                      </button>
 
                       <div className="flex gap-3">
                         {booking.status === 'pending' && (

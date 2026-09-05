@@ -154,3 +154,26 @@ export async function updateBookingStatus(id, status) {
     body: JSON.stringify({ status }),
   });
 }
+
+// ─────────────────────────────────────────────────────────────────
+// Messages API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getConversations() {
+  return request("/messages/conversations", { method: "GET" });
+}
+
+export async function getMessages(conversationId) {
+  return request(`/messages/${conversationId}`, { method: "GET" });
+}
+
+export async function sendMessage(data) {
+  return request("/messages", {
+    method: "POST",
+    body: JSON.stringify(data), // { listing_id, receiver_id, text, conversation_id }
+  });
+}
+
+export async function markMessagesAsRead(conversationId) {
+  return request(`/messages/${conversationId}/read`, { method: "PUT" });
+}

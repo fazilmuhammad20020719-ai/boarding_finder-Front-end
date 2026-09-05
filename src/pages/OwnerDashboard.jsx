@@ -1,37 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing } from '../services/api';
-
-const OWNER_MOCK_CONVERSATIONS = [
-  {
-    id: 1,
-    name: "Juan Fernando",
-    property: "Tranquil Lodge - Room 2B",
-    avatar: "https://ui-avatars.com/api/?name=Juan+Fernando&background=e8f7ec&color=10b981",
-    lastMessage: "Hi Sarah, just confirming if the WiFi is already set up?",
-    time: "09:15 AM",
-    unread: 1,
-    online: true,
-    messages: [
-      { id: 101, sender: "them", text: "Hi Sarah, just confirming if the WiFi is already set up?", time: "09:15 AM", date: "Today" }
-    ]
-  },
-  {
-    id: 2,
-    name: "Emily Chen",
-    property: "BlueSky Residences - Studio",
-    avatar: "https://ui-avatars.com/api/?name=Emily+Chen&background=ebf3ff&color=1952c4",
-    lastMessage: "Thank you for the quick response!",
-    time: "Yesterday",
-    unread: 0,
-    online: false,
-    messages: [
-      { id: 201, sender: "me", text: "Hi Emily, the maintenance guy will be there at 2 PM.", time: "02:00 PM", date: "Yesterday" },
-      { id: 202, sender: "them", text: "Thank you for the quick response!", time: "02:15 PM", date: "Yesterday" }
-    ]
-  }
-];
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead } from '../services/api';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -40,10 +10,15 @@ const OwnerDashboard = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [conversations, setConversations] = useState(OWNER_MOCK_CONVERSATIONS);
-  const [activeChatId, setActiveChatId] = useState(OWNER_MOCK_CONVERSATIONS[0].id);
+
+  // Messaging state
+  const [conversations, setConversations] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [userId, setUserId] = useState(null);
+  const messagesEndRef = useRef(null);
 
   const [ownerBookings, setOwnerBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
@@ -63,7 +38,44 @@ const OwnerDashboard = () => {
         });
         if (!response.ok) throw new Error('Failed to fetch listings');
         const data = await response.json();
-        setListings(data.listings || []);
+        const parsedListings = (data.listings || []).map(listing => {
+          let rawImages = listing.image_urls || listing.images;
+          let parsedImages = [];
+          if (Array.isArray(rawImages)) {
+            parsedImages = rawImages;
+          } else if (typeof rawImages === 'string') {
+            try {
+              parsedImages = JSON.parse(rawImages);
+            } catch (e) {
+              if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+                parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              } else {
+                parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              }
+            }
+          }
+
+          let imageUrl = "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800";
+          if (parsedImages.length > 0) {
+            const firstImg = parsedImages[0];
+            if (firstImg.includes('drive.google.com/uc?id=')) {
+              imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+            } else if (firstImg.startsWith('http')) {
+              imageUrl = firstImg;
+            } else {
+              const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+              const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
+              const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+              imageUrl = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+            }
+          }
+
+          return {
+            ...listing,
+            parsed_image_url: imageUrl
+          };
+        });
+        setListings(parsedListings);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -130,40 +142,118 @@ const OwnerDashboard = () => {
     }
   };
 
-  const activeChat = conversations.find(c => c.id === activeChatId);
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) setUserId(JSON.parse(userStr).id);
+    } catch (e) { }
+  }, []);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-
-    const newMsgObj = {
-      id: Date.now(),
-      sender: "me",
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      date: "Today"
-    };
-
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === activeChatId) {
-        return {
-          ...conv,
-          lastMessage: newMessage,
-          time: "Just now",
-          messages: [...conv.messages, newMsgObj]
-        };
+  const fetchConversations = async () => {
+    try {
+      const res = await getConversations();
+      if (res.conversations) {
+        setConversations(res.conversations.map(c => ({
+          id: c.conversation_id,
+          name: c.other_name,
+          property: c.property_title,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.other_name)}&background=e8f7ec&color=10b981`,
+          lastMessage: c.last_message || "Start a conversation",
+          time: c.last_message_time ? new Date(c.last_message_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+          unread: parseInt(c.unread_count) || 0,
+          online: true,
+          other_id: c.other_id,
+          listing_id: c.listing_id
+        })));
       }
-      return conv;
-    }));
-
-    setNewMessage('');
+    } catch (err) {
+      console.error("Failed to load conversations", err);
+    }
   };
 
-  const handleSelectChat = (id) => {
+  const fetchMessages = async (chatId) => {
+    if (!chatId) return;
+    try {
+      const res = await getMessages(chatId);
+      if (res.messages) {
+        // Read userId fresh from localStorage each time to avoid stale state after login/logout
+        let currentUserId = userId;
+        if (!currentUserId) {
+          try {
+            const userStr = localStorage.getItem('user');
+            if (userStr) currentUserId = JSON.parse(userStr).id;
+          } catch (e) { }
+        }
+        setMessages(res.messages.map(m => ({
+          id: m.message_id,
+          sender: m.sender_id == currentUserId ? "me" : "them",
+          text: m.message_text,
+          time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date(m.created_at).toLocaleDateString()
+        })));
+      }
+    } catch (err) {
+      console.error("Failed to load messages", err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'messages') {
+      fetchConversations();
+      const interval = setInterval(fetchConversations, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, userId]);
+
+  useEffect(() => {
+    if (activeTab === 'messages' && activeChatId) {
+      fetchMessages(activeChatId);
+      const interval = setInterval(() => fetchMessages(activeChatId), 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeChatId, activeTab, userId]);
+
+  useEffect(() => {
+    if (activeTab === 'messages') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, activeTab]);
+
+  const activeChat = conversations.find(c => c.id === activeChatId);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !activeChatId) return;
+
+    const msgText = newMessage.trim();
+    setNewMessage('');
+
+    // Optimistic UI update
+    setMessages(prev => [...prev, {
+      id: Date.now(),
+      sender: "me",
+      text: msgText,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: new Date().toLocaleDateString()
+    }]);
+
+    try {
+      await sendMessage({
+        conversation_id: activeChatId,
+        text: msgText
+      });
+      fetchConversations();
+    } catch (err) {
+      console.error("Failed to send", err);
+    }
+  };
+
+  const handleSelectChat = async (id) => {
     setActiveChatId(id);
-    setConversations(prev => prev.map(conv =>
-      conv.id === id ? { ...conv, unread: 0 } : conv
-    ));
+    try {
+      await markMessagesAsRead(id);
+      fetchConversations();
+    } catch (err) { }
   };
 
   const filteredConversations = conversations.filter(c =>
@@ -328,12 +418,7 @@ const OwnerDashboard = () => {
                     <div key={listing.listing_id} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-[#e2e8f0]/60 flex flex-col">
                       <div className="h-48 bg-slate-200 relative">
                         <img
-                          src={(listing.image_urls && listing.image_urls.length > 0)
-                            ? (listing.image_urls[0].includes('drive.google.com/uc?id=')
-                              ? listing.image_urls[0].replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000'
-                              : (listing.image_urls[0].startsWith('http') ? listing.image_urls[0] : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}/${listing.image_urls[0].startsWith('/') ? listing.image_urls[0].substring(1) : listing.image_urls[0]}`)
-                            )
-                            : "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800"}
+                          src={listing.parsed_image_url}
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />
@@ -664,13 +749,13 @@ const OwnerDashboard = () => {
                     {/* Date Divider */}
                     <div className="flex justify-center my-2">
                       <span className="bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                        {activeChat.messages[0]?.date || "Today"}
+                        {messages && messages.length > 0 ? messages[0].date : "Today"}
                       </span>
                     </div>
 
-                    {activeChat.messages.map((msg, index) => {
+                    {messages && messages.map((msg, index) => {
                       const isMe = msg.sender === 'me';
-                      const showDate = index > 0 && activeChat.messages[index - 1].date !== msg.date;
+                      const showDate = index > 0 && messages[index - 1] && messages[index - 1].date !== msg.date;
 
                       return (
                         <React.Fragment key={msg.id}>

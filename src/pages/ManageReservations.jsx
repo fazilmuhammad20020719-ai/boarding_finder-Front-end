@@ -1,66 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
-
-const MOCK_RESERVATIONS = [
-  {
-    id: "RES-1029",
-    tenant: "Michael Chang",
-    avatar: "https://ui-avatars.com/api/?name=Michael+Chang&background=ebf3ff&color=1952c4",
-    property: "Downtown Studio Apartment",
-    checkIn: "Aug 15, 2026",
-    checkOut: "Aug 22, 2026",
-    guests: 2,
-    totalPrice: 850,
-    status: "Pending"
-  },
-  {
-    id: "RES-1030",
-    tenant: "Sarah Connor",
-    avatar: "https://ui-avatars.com/api/?name=Sarah+Connor&background=e8f7ec&color=10b981",
-    property: "Sunset Apartment - Unit A",
-    checkIn: "Jul 20, 2026",
-    checkOut: "Dec 20, 2026",
-    guests: 1,
-    totalPrice: 6000,
-    status: "Upcoming"
-  },
-  {
-    id: "RES-1031",
-    tenant: "David Miller",
-    avatar: "https://ui-avatars.com/api/?name=David+Miller&background=fef3c7&color=d97706",
-    property: "Cozy Room - 101",
-    checkIn: "Jul 10, 2026",
-    checkOut: "Jul 15, 2026",
-    guests: 1,
-    totalPrice: 350,
-    status: "Upcoming"
-  },
-  {
-    id: "RES-1032",
-    tenant: "Jessica Alba",
-    avatar: "https://ui-avatars.com/api/?name=Jessica+Alba&background=fee2e2&color=ef4444",
-    property: "Downtown Studio Apartment",
-    checkIn: "Jun 01, 2026",
-    checkOut: "Jun 30, 2026",
-    guests: 2,
-    totalPrice: 3200,
-    status: "Past"
-  }
-];
+import { getOwnerBookings, updateBookingStatus } from '../services/api';
 
 const ManageReservations = () => {
   const [activeTab, setActiveTab] = useState('Pending');
-  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const tabs = ['Pending', 'Upcoming', 'Past'];
 
+  useEffect(() => {
+    const fetchReservations = async () => {
+      try {
+        const response = await getOwnerBookings();
+        if (response.bookings) {
+          const mapped = response.bookings.map(b => {
+            const moveIn = new Date(b.move_in_date);
+            const moveOut = new Date(moveIn);
+            moveOut.setMonth(moveIn.getMonth() + b.duration_months);
+
+            let status = 'Past';
+            if (b.status === 'pending') status = 'Pending';
+            if (b.status === 'approved') status = 'Upcoming';
+
+            return {
+              id: b.booking_id,
+              displayId: `BF-BKG-${b.booking_id.toString().padStart(6, '0')}`,
+              tenant: b.seeker_name || 'Guest',
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(b.seeker_name || 'Guest')}&background=ebf3ff&color=1952c4`,
+              property: b.title,
+              checkIn: moveIn.toLocaleDateString(),
+              checkOut: moveOut.toLocaleDateString(),
+              guests: 1,
+              totalPrice: parseFloat(b.total_amount) || 0,
+              status: status
+            };
+          });
+          setReservations(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch reservations", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReservations();
+  }, []);
+
   const filteredReservations = reservations.filter(res => res.status === activeTab);
 
-  const handleAction = (id, newStatus) => {
-    setReservations(prev => 
-      prev.map(res => res.id === id ? { ...res, status: newStatus } : res)
-    );
+  const handleAction = async (id, newStatus) => {
+    try {
+      // Map UI status back to backend status
+      let backendStatus = '';
+      if (newStatus === 'Upcoming') backendStatus = 'approved';
+      if (newStatus === 'Declined') backendStatus = 'rejected';
+      if (newStatus === 'Cancelled') backendStatus = 'cancelled';
+
+      await updateBookingStatus(id, backendStatus);
+
+      setReservations(prev =>
+        prev.map(res => res.id === id ? { ...res, status: newStatus === 'Declined' || newStatus === 'Cancelled' ? 'Past' : newStatus } : res)
+      );
+    } catch (err) {
+      console.error("Failed to update status", err);
+      alert("Failed to update status.");
+    }
   };
 
   return (
@@ -68,7 +74,7 @@ const ManageReservations = () => {
       <Navbar />
 
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
+
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
@@ -88,11 +94,10 @@ const ManageReservations = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 px-6 text-sm font-bold whitespace-nowrap transition-colors relative ${
-                activeTab === tab
+              className={`pb-4 px-6 text-sm font-bold whitespace-nowrap transition-colors relative ${activeTab === tab
                   ? 'text-[#1952c4]'
                   : 'text-[#64748b] hover:text-[#0f172a]'
-              }`}
+                }`}
             >
               {tab}
               {activeTab === tab && (
@@ -115,14 +120,14 @@ const ManageReservations = () => {
           ) : (
             filteredReservations.map((res) => (
               <div key={res.id} className="bg-white p-6 rounded-[24px] shadow-sm border border-[#e2e8f0]/60 flex flex-col lg:flex-row gap-6 justify-between lg:items-center">
-                
+
                 {/* Tenant & Property Info */}
                 <div className="flex items-start gap-4">
                   <img src={res.avatar} alt={res.tenant} className="w-12 h-12 rounded-full border border-[#e2e8f0]" />
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-bold text-lg text-[#0f172a]">{res.tenant}</h3>
-                      <span className="text-xs font-semibold text-[#64748b] bg-[#f0f4f9] px-2 py-0.5 rounded-full">{res.id}</span>
+                      <span className="text-xs font-semibold text-[#64748b] bg-[#f0f4f9] px-2 py-0.5 rounded-full">{res.displayId}</span>
                     </div>
                     <p className="text-[#475569] font-medium text-sm mb-1">{res.property}</p>
                     <p className="text-[#64748b] text-sm">
@@ -147,13 +152,13 @@ const ManageReservations = () => {
                 <div className="flex items-center gap-3 mt-4 lg:mt-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#e2e8f0]/60">
                   {activeTab === 'Pending' && (
                     <>
-                      <button 
+                      <button
                         onClick={() => handleAction(res.id, 'Upcoming')}
                         className="flex-1 lg:flex-none px-6 py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
                       >
                         Accept
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleAction(res.id, 'Declined')}
                         className="flex-1 lg:flex-none px-6 py-2.5 bg-white border border-[#e2e8f0] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-[#475569] font-semibold rounded-xl shadow-sm transition-colors text-sm"
                       >
@@ -168,7 +173,7 @@ const ManageReservations = () => {
                           Message
                         </button>
                       </Link>
-                      <button 
+                      <button
                         onClick={() => handleAction(res.id, 'Cancelled')}
                         className="flex-1 lg:flex-none px-6 py-2.5 bg-white border border-[#e2e8f0] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-[#475569] font-semibold rounded-xl shadow-sm transition-colors text-sm"
                       >
