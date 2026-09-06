@@ -125,6 +125,7 @@ const PropertyDetails = () => {
             ownerName: data.owner_name || "Property Owner",
             ownerEmail: data.owner_email || "",
             ownerPhone: data.owner_phone || "",
+            ownerId: data.owner_id,
           });
 
           // Check if logged-in student already has a booking for this listing
@@ -158,7 +159,7 @@ const PropertyDetails = () => {
       alert("Please select a move-in date.");
       return;
     }
-    navigate(`/book/${listing.listing_id}?date=${moveInDate}&duration=${activeDuration}`);
+    navigate(`/book/${listing.id}?date=${moveInDate}&duration=${activeDuration}`);
   };
 
   if (!listing) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">Loading...</div>;
@@ -409,7 +410,32 @@ const PropertyDetails = () => {
                 </div>
               </div>
 
-              {listing.isFullyBooked ? (
+              {user && user.id === listing.ownerId ? (
+                <div className="flex flex-col gap-4">
+                  <div className="bg-[#ebf3ff] rounded-2xl p-4 flex items-start gap-3 border border-[#1952c4]/20 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-[#1952c4] text-white flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#1952c4] mb-1">Your Listing</h4>
+                      <p className="text-xs text-slate-600 font-medium">You are the owner of this property. Manage it from your dashboard.</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => navigate(`/edit-listing/${listing.id}`)}
+                    className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none"
+                  >
+                    Edit Listing Details
+                  </button>
+                  <button
+                    onClick={() => navigate('/manage-reservations')}
+                    className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#0f172a] font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                  >
+                    Manage Reservations
+                  </button>
+                </div>
+              ) : listing.isFullyBooked ? (
                 <div className="flex flex-col items-center justify-center py-4 text-center">
                   <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-red-400 mb-4 border border-red-100">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
