@@ -57,10 +57,10 @@ const ManageReservations = () => {
       if (newStatus === 'Upcoming') backendStatus = 'approved';
       if (newStatus === 'Declined') backendStatus = 'rejected';
       if (newStatus === 'Cancelled') backendStatus = 'cancelled';
-
+      
       await updateBookingStatus(id, backendStatus);
-
-      setReservations(prev =>
+      
+      setReservations(prev => 
         prev.map(res => res.id === id ? { ...res, status: newStatus === 'Declined' || newStatus === 'Cancelled' ? 'Past' : newStatus } : res)
       );
     } catch (err) {
@@ -74,7 +74,7 @@ const ManageReservations = () => {
       <Navbar />
 
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
+        
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
@@ -94,10 +94,11 @@ const ManageReservations = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 px-6 text-sm font-bold whitespace-nowrap transition-colors relative ${activeTab === tab
+              className={`pb-4 px-6 text-sm font-bold whitespace-nowrap transition-colors relative ${
+                activeTab === tab
                   ? 'text-[#1952c4]'
                   : 'text-[#64748b] hover:text-[#0f172a]'
-                }`}
+              }`}
             >
               {tab}
               {activeTab === tab && (
@@ -120,7 +121,7 @@ const ManageReservations = () => {
           ) : (
             filteredReservations.map((res) => (
               <div key={res.id} className="bg-white p-6 rounded-[24px] shadow-sm border border-[#e2e8f0]/60 flex flex-col lg:flex-row gap-6 justify-between lg:items-center">
-
+                
                 {/* Tenant & Property Info */}
                 <div className="flex items-start gap-4">
                   <img src={res.avatar} alt={res.tenant} className="w-12 h-12 rounded-full border border-[#e2e8f0]" />
@@ -152,13 +153,13 @@ const ManageReservations = () => {
                 <div className="flex items-center gap-3 mt-4 lg:mt-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#e2e8f0]/60">
                   {activeTab === 'Pending' && (
                     <>
-                      <button
+                      <button 
                         onClick={() => handleAction(res.id, 'Upcoming')}
                         className="flex-1 lg:flex-none px-6 py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
                       >
                         Accept
                       </button>
-                      <button
+                      <button 
                         onClick={() => handleAction(res.id, 'Declined')}
                         className="flex-1 lg:flex-none px-6 py-2.5 bg-white border border-[#e2e8f0] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-[#475569] font-semibold rounded-xl shadow-sm transition-colors text-sm"
                       >
@@ -173,7 +174,7 @@ const ManageReservations = () => {
                           Message
                         </button>
                       </Link>
-                      <button
+                      <button 
                         onClick={() => handleAction(res.id, 'Cancelled')}
                         className="flex-1 lg:flex-none px-6 py-2.5 bg-white border border-[#e2e8f0] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-[#475569] font-semibold rounded-xl shadow-sm transition-colors text-sm"
                       >

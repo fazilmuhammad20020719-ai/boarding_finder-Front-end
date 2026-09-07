@@ -71,12 +71,8 @@ const RegisterPage = () => {
 
         await register(payload);
 
-        // Redirect based on role
-        if (role === 'owner') {
-          navigate('/owner-dashboard');
-        } else {
-          navigate('/home');
-        }
+        // Redirect to email verification page (all users must verify first)
+        navigate('/verify-account');
       } catch (err) {
         setError(err.message || 'Registration failed. Please try again.');
       } finally {

@@ -28,7 +28,7 @@ const Messages = () => {
           lastMessage: c.last_message || "Start a conversation",
           time: c.last_message_time ? new Date(c.last_message_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
           unread: parseInt(c.unread_count) || 0,
-          online: true,
+          online: true, 
           other_id: c.other_id,
           listing_id: c.listing_id
         })));
@@ -84,7 +84,7 @@ const Messages = () => {
 
     const msgText = newMessage.trim();
     setNewMessage('');
-
+    
     // Optimistic UI update
     setMessages(prev => [...prev, {
       id: Date.now(),
@@ -111,7 +111,7 @@ const Messages = () => {
     try {
       await markMessagesAsRead(id);
       fetchConversations();
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const handleLogout = () => {
@@ -119,8 +119,8 @@ const Messages = () => {
     navigate('/');
   };
 
-  const filteredConversations = conversations.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredConversations = conversations.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     c.property.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -128,7 +128,7 @@ const Messages = () => {
     try {
       const l = localStorage.getItem('listings');
       if (l) return JSON.parse(l).filter(x => x.liked).length;
-    } catch (e) { }
+    } catch (e) {}
     return 2;
   })();
 
@@ -137,26 +137,26 @@ const Messages = () => {
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="" />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-0 sm:px-6 md:px-8 py-0 sm:py-6 h-[calc(100vh-80px)] flex flex-col">
-
+        
         <div className="bg-white sm:rounded-3xl shadow-sm border-x sm:border border-[#e2e8f0]/60 flex-grow flex overflow-hidden h-full">
-
+          
           {/* ===== LEFT SIDEBAR (CONVERSATION LIST) ===== */}
           <div className={`w-full md:w-80 lg:w-[350px] border-r border-[#e2e8f0]/60 flex flex-col bg-white ${!isMobileViewList ? 'hidden md:flex' : 'flex'}`}>
-
+            
             {/* Header */}
             <div className="p-5 border-b border-[#e2e8f0]/60">
               <h1 className="text-2xl font-extrabold text-[#0f172a] mb-4 tracking-tight">Messages</h1>
-
+              
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   placeholder="Search messages..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20"
+                  className="w-full bg-[#f4f7f9] border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20" 
                 />
               </div>
             </div>
@@ -167,7 +167,7 @@ const Messages = () => {
                 <div className="p-8 text-center text-slate-500 text-sm">No conversations found.</div>
               ) : (
                 filteredConversations.map(conv => (
-                  <div
+                  <div 
                     key={conv.id}
                     onClick={() => handleSelectChat(conv.id)}
                     className={`p-4 border-b border-[#e2e8f0]/40 cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-3 ${activeChatId === conv.id ? 'bg-[#ebf3ff]/50' : ''}`}
@@ -178,7 +178,7 @@ const Messages = () => {
                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10b981] border-2 border-white rounded-full"></div>
                       )}
                     </div>
-
+                    
                     <div className="flex-grow min-w-0">
                       <div className="flex justify-between items-baseline mb-0.5">
                         <h3 className={`text-[15px] font-bold truncate ${conv.unread > 0 ? 'text-[#0f172a]' : 'text-[#334155]'}`}>
@@ -188,11 +188,11 @@ const Messages = () => {
                           {conv.time}
                         </span>
                       </div>
-
+                      
                       <div className="text-[11px] font-bold text-[#1952c4] mb-1 truncate">
                         {conv.property}
                       </div>
-
+                      
                       <div className="flex justify-between items-center gap-2">
                         <p className={`text-[13px] truncate ${conv.unread > 0 ? 'font-semibold text-[#0f172a]' : 'text-slate-500'}`}>
                           {conv.lastMessage}
@@ -213,13 +213,13 @@ const Messages = () => {
 
           {/* ===== RIGHT MAIN AREA (ACTIVE CHAT) ===== */}
           <div className={`flex-grow flex flex-col bg-[#f4f7f9]/30 h-full ${isMobileViewList ? 'hidden md:flex' : 'flex w-full md:w-auto'}`}>
-
+            
             {activeChat ? (
               <>
                 {/* Chat Header */}
                 <div className="h-[76px] px-6 border-b border-[#e2e8f0]/60 bg-white flex items-center justify-between flex-shrink-0">
                   <div className="flex items-center gap-4">
-                    <button
+                    <button 
                       onClick={() => setIsMobileViewList(true)}
                       className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-500"
                     >
@@ -227,7 +227,7 @@ const Messages = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-
+                    
                     <div className="relative">
                       <img src={activeChat.avatar} alt={activeChat.name} className="w-10 h-10 rounded-full object-cover" />
                       {activeChat.online && (
@@ -241,7 +241,7 @@ const Messages = () => {
                       </div>
                     </div>
                   </div>
-
+                  
                   <div className="flex items-center gap-2">
                     <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -264,8 +264,8 @@ const Messages = () => {
                   {messages.map((msg, index) => {
                     const isMe = msg.sender === 'me';
                     // Check if date changed
-                    const showDate = index > 0 && messages[index - 1].date !== msg.date;
-
+                    const showDate = index > 0 && messages[index-1].date !== msg.date;
+                    
                     return (
                       <React.Fragment key={msg.id}>
                         {showDate && (
@@ -277,11 +277,12 @@ const Messages = () => {
                         )}
                         <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[75%] sm:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                            <div
-                              className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe
-                                  ? 'bg-[#1952c4] text-white rounded-br-none'
+                            <div 
+                              className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
+                                isMe 
+                                  ? 'bg-[#1952c4] text-white rounded-br-none' 
                                   : 'bg-white border border-[#e2e8f0]/60 text-[#0f172a] rounded-bl-none'
-                                }`}
+                              }`}
                             >
                               {msg.text}
                             </div>
@@ -303,9 +304,9 @@ const Messages = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                       </svg>
                     </button>
-
+                    
                     <div className="flex-grow bg-[#f4f7f9] rounded-2xl border border-transparent focus-within:border-[#1952c4]/30 focus-within:bg-white transition-all">
-                      <textarea
+                      <textarea 
                         rows="1"
                         placeholder="Type a message..."
                         value={newMessage}
@@ -321,13 +322,14 @@ const Messages = () => {
                       />
                     </div>
 
-                    <button
-                      type="submit"
+                    <button 
+                      type="submit" 
                       disabled={!newMessage.trim()}
-                      className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 ${newMessage.trim()
-                          ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer'
+                      className={`p-3 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 ${
+                        newMessage.trim() 
+                          ? 'bg-[#1952c4] text-white shadow-md hover:bg-[#1546a8] cursor-pointer' 
                           : 'bg-[#e2e8f0] text-slate-400 cursor-not-allowed'
-                        }`}
+                      }`}
                     >
                       <svg className="w-5 h-5 translate-x-0.5 -translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />

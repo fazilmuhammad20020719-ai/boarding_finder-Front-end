@@ -29,7 +29,7 @@ const mapListing = (dbListing) => {
       }
     }
   }
-
+  
   if (!Array.isArray(parsedAmenities)) {
     parsedAmenities = [];
   }
@@ -67,10 +67,9 @@ const mapListing = (dbListing) => {
     } else if (firstImg.startsWith('http')) {
       imageUrl = firstImg;
     } else {
-      const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
       const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
       const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
-      imageUrl = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+      imageUrl = `/${pathPrefix}${cleanUrl}`;
     }
   }
 
@@ -305,12 +304,13 @@ const HomePage = () => {
                     <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                       LKR {listing.price.toLocaleString()}/mo
                     </span>
-                    <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
+                    <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${
+                      listing.gender === 'female'
                         ? 'bg-[#ea4335] text-white'
                         : listing.gender === 'male'
-                          ? 'bg-[#4285f4] text-white'
-                          : 'bg-[#845ef7] text-white'
-                      }`}>
+                        ? 'bg-[#4285f4] text-white'
+                        : 'bg-[#845ef7] text-white'
+                    }`}>
                       {listing.gender}
                     </span>
                   </div>
@@ -330,7 +330,7 @@ const HomePage = () => {
                       strokeWidth="2.2"
                       viewBox="0 0 24 24"
                     >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                     </svg>
                   </button>
                 </div>
@@ -382,7 +382,7 @@ const HomePage = () => {
                       <span className="text-slate-400 font-normal text-xs">({listing.reviews})</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <button
+                      <button 
                         onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
                         className="text-xs font-bold text-slate-500 hover:text-[#1952c4] transition-colors border border-slate-200 rounded-md px-2 py-1 bg-white cursor-pointer"
                       >
@@ -461,13 +461,13 @@ const HomePage = () => {
           <div className="bg-[#1952c4] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-md relative overflow-hidden">
             <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
               <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-                <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6" />
-                <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6" />
-                <circle cx="50" cy="50" r="10" fill="white" />
-                <circle cx="50" cy="90" r="10" fill="white" />
-                <circle cx="50" cy="130" r="10" fill="white" />
-                <circle cx="150" cy="70" r="10" fill="white" />
-                <circle cx="150" cy="110" r="10" fill="white" />
+                <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6"/>
+                <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6"/>
+                <circle cx="50" cy="50" r="10" fill="white"/>
+                <circle cx="50" cy="90" r="10" fill="white"/>
+                <circle cx="50" cy="130" r="10" fill="white"/>
+                <circle cx="150" cy="70" r="10" fill="white"/>
+                <circle cx="150" cy="110" r="10" fill="white"/>
               </svg>
             </div>
 
@@ -506,12 +506,12 @@ const HomePage = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white shadow-sm border border-white/10">
                   <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2" />
-                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2" />
+                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
                   </svg>
                 </div>
                 <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>

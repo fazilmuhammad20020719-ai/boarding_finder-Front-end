@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -8,9 +8,16 @@ import { useAuth } from '../context/AuthContext';
  * Props:
  *   - children: the page component to render
  *   - role (optional): restrict to a specific role ('student', 'owner', 'admin')
+ *   - skipVerification (optional): if true, allows access even if not verified
+ *     (used for verification flow pages like /verify-account, /identity-verification)
  */
-const ProtectedRoute = ({ children, role }) => {
-  const { isAuthenticated, loading, user } = useAuth();
+const ProtectedRoute = ({ children, role, skipVerification = false }) => {
+  const {
+    isAuthenticated, loading, user,
+    isEmailVerified, isVerified, verificationStatus,
+    accountStatus, hasUploadedDocs
+  } = useAuth();
+  const location = useLocation();
 
   // While checking auth status, show a simple loading state
   if (loading) {
@@ -32,9 +39,50 @@ const ProtectedRoute = ({ children, role }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Account status checks (owner management controls)
+  if (accountStatus === 'paused' || accountStatus === 'removed') {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   // Role check — if a specific role is required and user doesn't match
   if (role && user?.role !== role) {
     return <Navigate to="/unauthorized" replace />;
+  }
+
+  // Skip verification checks for verification flow pages and admin users
+  if (skipVerification || user?.role === 'admin') {
+    return children;
+  }
+
+  // ─── Verification Flow Gating ──────────────────
+  // These checks redirect unverified users to the appropriate step
+
+  // Step 1: Email not verified → go to OTP page
+  if (!isEmailVerified) {
+    if (location.pathname !== '/verify-account') {
+      return <Navigate to="/verify-account" replace />;
+    }
+  }
+
+  // Step 2: Email verified but no docs uploaded → go to document upload
+  if (isEmailVerified && !hasUploadedDocs && verificationStatus !== 'verified') {
+    if (location.pathname !== '/identity-verification') {
+      return <Navigate to="/identity-verification" replace />;
+    }
+  }
+
+  // Step 3: Docs uploaded but pending admin review → go to pending page
+  if (isEmailVerified && hasUploadedDocs && verificationStatus === 'pending') {
+    if (location.pathname !== '/pending-approval') {
+      return <Navigate to="/pending-approval" replace />;
+    }
+  }
+
+  // Step 4: Rejected → re-upload documents
+  if (verificationStatus === 'rejected') {
+    if (location.pathname !== '/identity-verification') {
+      return <Navigate to="/identity-verification" replace />;
+    }
   }
 
   return children;

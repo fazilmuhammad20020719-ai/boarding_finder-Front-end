@@ -30,7 +30,7 @@ const MyListings = () => {
         }
 
         const data = await response.json();
-
+        
         const parsedListings = (data.listings || []).map(listing => {
           let rawImages = listing.image_urls || listing.images;
           let parsedImages = [];
@@ -52,12 +52,12 @@ const MyListings = () => {
               }
             }
           }
-
+          
           if (!Array.isArray(parsedImages)) {
             parsedImages = [];
           }
 
-          let imageUrl = "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800";
+          let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
           if (parsedImages.length > 0) {
             const firstImg = parsedImages[0];
             if (firstImg.includes('drive.google.com/uc?id=')) {
@@ -65,10 +65,9 @@ const MyListings = () => {
             } else if (firstImg.startsWith('http')) {
               imageUrl = firstImg;
             } else {
-              const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
               const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
               const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
-              imageUrl = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+              imageUrl = `/${pathPrefix}${cleanUrl}`;
             }
           }
 

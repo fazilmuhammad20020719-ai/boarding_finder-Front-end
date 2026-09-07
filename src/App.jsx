@@ -11,6 +11,7 @@ import VerifyAccount from './pages/VerifyAccount';
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
 import IdentityVerification from './pages/IdentityVerification';
+import PendingApproval from './pages/PendingApproval';
 import VirtualTour from './pages/VirtualTour';
 import NeighborhoodDetails from './pages/NeighborhoodDetails';
 import RoommateMatcher from './pages/RoommateMatcher';
@@ -57,14 +58,18 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/verify-account" element={<VerifyAccount />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/terms" element={<TermsPrivacy />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
 
-      {/* ─── Protected Routes (any authenticated user) ── */}
+      {/* ─── Verification Flow Routes (Authenticated but unverified) ── */}
+      <Route path="/verify-account" element={<ProtectedRoute skipVerification={true}><VerifyAccount /></ProtectedRoute>} />
+      <Route path="/identity-verification" element={<ProtectedRoute skipVerification={true}><IdentityVerification /></ProtectedRoute>} />
+      <Route path="/pending-approval" element={<ProtectedRoute skipVerification={true}><PendingApproval /></ProtectedRoute>} />
+
+      {/* ─── Protected Routes (any authenticated AND verified user) ── */}
       <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
@@ -80,7 +85,6 @@ function App() {
       <Route path="/write-review" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
       <Route path="/compare" element={<ProtectedRoute><CompareListings /></ProtectedRoute>} />
       <Route path="/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
-      <Route path="/identity-verification" element={<ProtectedRoute><IdentityVerification /></ProtectedRoute>} />
       <Route path="/virtual-tour/:id" element={<ProtectedRoute><VirtualTour /></ProtectedRoute>} />
       <Route path="/neighborhood/:id" element={<ProtectedRoute><NeighborhoodDetails /></ProtectedRoute>} />
       <Route path="/roommate-matcher" element={<ProtectedRoute><RoommateMatcher /></ProtectedRoute>} />

@@ -49,23 +49,17 @@ const BookingConfirmation = () => {
         }
         if (!Array.isArray(parsedImages)) parsedImages = [];
 
-        let primaryImage = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600";
-        if (parsedImages.length > 0 && parsedImages[0]) {
+        let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+        if (parsedImages.length > 0) {
           const firstImg = parsedImages[0];
           if (firstImg.includes('drive.google.com/uc?id=')) {
-            primaryImage = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+            imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
           } else if (firstImg.startsWith('http')) {
-            if (firstImg.includes('drive.google.com/open?id=')) {
-              const fileId = firstImg.split('id=')[1];
-              primaryImage = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-            } else {
-              primaryImage = firstImg;
-            }
+            imageUrl = firstImg;
           } else {
-            const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
             const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
             const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
-            primaryImage = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+            imageUrl = `/${pathPrefix}${cleanUrl}`;
           }
         }
 
@@ -194,7 +188,7 @@ const BookingConfirmation = () => {
     try {
       const l = localStorage.getItem('listings');
       if (l) return JSON.parse(l).filter(x => x.liked).length;
-    } catch (e) { }
+    } catch (e) {}
     return 2;
   })();
 
@@ -355,10 +349,10 @@ const BookingConfirmation = () => {
               <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 overflow-hidden">
                 <div className="flex flex-col sm:flex-row">
                   <div className="sm:w-48 h-44 sm:h-auto flex-shrink-0 bg-slate-100">
-                    <img
-                      src={listing.parsed_image_url}
-                      alt={listing.title}
-                      className="w-full h-full object-cover"
+                    <img 
+                      src={listing.parsed_image_url} 
+                      alt={listing.title} 
+                      className="w-full h-full object-cover" 
                       onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600"; }}
                     />
                   </div>

@@ -1,14 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
+import { verifyOtp, resendOtp } from '../services/api';
 
 const VerifyAccount = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(30);
   const navigate = useNavigate();
+  const { user, refreshUser, isEmailVerified } = useAuth();
   const inputRefs = useRef([]);
+
+  // If already verified, redirect to next step
+  useEffect(() => {
+    if (isEmailVerified) {
+      navigate('/identity-verification');
+    }
+  }, [isEmailVerified, navigate]);
 
   // Handle countdown for resend button
   useEffect(() => {
@@ -42,7 +53,7 @@ const VerifyAccount = () => {
     }
   };
 
-  const handleVerify = (e) => {
+  const handleVerify = async (e) => {
     e.preventDefault();
     const code = otp.join('');
     if (code.length < 6) {
@@ -50,18 +61,31 @@ const VerifyAccount = () => {
       return;
     }
     
-    // Simulate verification
     setError('');
-    setSubmitted(true);
-    
-    // In a real app, you would verify the OTP via API here.
-    // setTimeout(() => navigate('/home'), 2000);
+    setIsLoading(true);
+
+    try {
+      await verifyOtp(code);
+      await refreshUser();
+      setSubmitted(true);
+
+      // Auto-redirect to document upload after 2 seconds
+      setTimeout(() => navigate('/identity-verification'), 2000);
+    } catch (err) {
+      setError(err.message || "Verification failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setResendTimer(30);
-    // Add logic to resend OTP to user's email
-    alert('Verification code resent to your email.');
+    setError('');
+    try {
+      await resendOtp();
+    } catch (err) {
+      setError(err.message || "Failed to resend code. Please try again.");
+    }
   };
 
   return (
@@ -88,11 +112,11 @@ const VerifyAccount = () => {
                   Verify your email
                 </h2>
                 <p className="text-[#64748b] text-[15px] leading-relaxed mb-6 font-normal text-center">
-                  We've sent a 6-digit verification code to your email address. Enter it below to confirm your account.
+                  We've sent a 6-digit verification code to <strong className="text-[#0f172a]">{user?.email || 'your email'}</strong>. Enter it below to confirm your account.
                 </p>
 
                 {error && (
-                  <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-4 text-center">
+                  <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-4 text-center font-medium">
                     {error}
                   </div>
                 )}
@@ -119,9 +143,10 @@ const VerifyAccount = () => {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm mb-6"
+                    disabled={isLoading}
+                    className={`w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-semibold rounded-[16px] transition-colors text-base shadow-sm mb-6 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
-                    Verify Account
+                    {isLoading ? 'Verifying...' : 'Verify Account'}
                   </button>
                 </form>
 
@@ -145,8 +170,8 @@ const VerifyAccount = () => {
             ) : (
               <>
                 {/* Success Icon */}
-                <div className="w-14 h-14 bg-[#ebf3ff] text-[#1952c4] rounded-2xl flex items-center justify-center mb-6 self-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <div className="w-14 h-14 bg-[#e8f7ec] text-[#10b981] rounded-2xl flex items-center justify-center mb-6 self-center">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" />
                     <path d="m9 12 2 2 4-4" />
                   </svg>
@@ -157,18 +182,16 @@ const VerifyAccount = () => {
                   Email Verified!
                 </h2>
                 <p className="text-[#64748b] text-[15px] leading-relaxed mb-6 font-normal text-center">
-                  Your email has been successfully verified. You can now access all features of the platform.
+                  Your email has been verified. Now let's verify your identity by uploading your documents.
                 </p>
 
                 {/* Proceed Button */}
-                <Link to="/home" className="w-full">
-                  <button
-                    type="button"
-                    className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-[16px] flex items-center justify-center gap-2 text-[15px] transition-all duration-200 shadow-sm"
-                  >
-                    Go to Home Page
-                  </button>
-                </Link>
+                <button
+                  onClick={() => navigate('/identity-verification')}
+                  className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-[16px] flex items-center justify-center gap-2 text-[15px] transition-all duration-200 shadow-sm cursor-pointer border-none"
+                >
+                  Upload Documents →
+                </button>
               </>
             )}
           </div>

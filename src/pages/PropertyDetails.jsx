@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-import { getListingById, checkBookingForListing } from '../services/api';
+import { getListingById, checkBookingForListing, addReview } from '../services/api';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-const REVIEWS = [
-  { id: 1, name: "Anna Lim", date: "March 2025", initial: "A", rating: 5, text: "Very clean and the owner is super accommodating. WiFi is fast enough for video calls. Highly recommended!" },
-  { id: 2, name: "Marco Bautista", date: "Feb 2025", initial: "M", rating: 4, text: "Great location, just a 5-minute walk to campus. Room is a bit small but very clean." },
-  { id: 3, name: "Sheila Cruz", date: "Jan 2025", initial: "S", rating: 5, text: "Best boarding house I've stayed in. Homey atmosphere and safe neighborhood." },
-  { id: 4, name: "Ryan Tan", date: "Dec 2024", initial: "R", rating: 4, text: "Good value for money. Internet could be faster during peak hours but overall satisfied." }
-];
+// Fix Leaflet marker icon issue in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -23,6 +27,59 @@ const PropertyDetails = () => {
   const [bookingStatus, setBookingStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const [existingBooking, setExistingBooking] = useState(null); // { booking_id, status } if user already booked
+  const [mapCoords, setMapCoords] = useState([7.7170, 81.6989]); // Batticaloa default
+
+  // Review Form State
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewText.trim()) return;
+    try {
+      setIsSubmittingReview(true);
+      await addReview(listing.id, { rating: reviewRating, comment: reviewText });
+      // Refresh listing to show the new review
+      const response = await getListingById(id);
+      if (response && response.listing) {
+        // Quick format parsing similar to what's in useEffect
+        let data = response.listing;
+        setListing(prev => ({
+          ...prev,
+          avg_rating: data.avg_rating,
+          review_count: data.review_count,
+          reviews_data: data.reviews_data
+        }));
+      }
+      setReviewText('');
+      setReviewRating(5);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit review.");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  // Geocode location string to coordinates for the map
+  useEffect(() => {
+    if (listing && listing.location) {
+      if (listing.latitude && listing.longitude) {
+        setMapCoords([listing.latitude, listing.longitude]);
+      } else {
+        // Fallback to geocoding if lat/lng are missing
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(listing.location)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              setMapCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+            }
+          })
+          .catch(err => console.error('Geocoding error:', err));
+      }
+    }
+  }, [listing]);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -95,10 +152,9 @@ const PropertyDetails = () => {
               } else if (url.startsWith('http')) {
                 return url;
               } else {
-                const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
                 const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
                 const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
-                return `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+                return `/${pathPrefix}${cleanUrl}`;
               }
             });
           }
@@ -121,11 +177,13 @@ const PropertyDetails = () => {
             description: data.description,
             isFullyBooked: data.status === 'booked',
             liked: false,
-            // Real owner info from backend JOIN
             ownerName: data.owner_name || "Property Owner",
             ownerEmail: data.owner_email || "",
             ownerPhone: data.owner_phone || "",
             ownerId: data.owner_id,
+            avg_rating: data.avg_rating,
+            review_count: data.review_count,
+            reviews_data: data.reviews_data,
           });
 
           // Check if logged-in student already has a booking for this listing
@@ -297,23 +355,20 @@ const PropertyDetails = () => {
                 {listing.location}
               </div>
 
-              {/* Google Maps embed — pins the exact geocoded location */}
-              <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-sm">
-                <iframe
-                  title="Property Location"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(listing.location)}&z=15&output=embed`}
-                />
+              {/* OpenStreetMap embed */}
+              <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-sm relative z-0">
+                <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={15} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={mapCoords}></Marker>
+                </MapContainer>
               </div>
 
               {/* View on full map button */}
               <a
-                href={`https://maps.google.com/maps?q=${encodeURIComponent(listing.location)}`}
+                href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(listing.location)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 w-full py-2.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm no-underline"
@@ -322,44 +377,88 @@ const PropertyDetails = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                View on Google Maps
+                View on OpenStreetMap
               </a>
             </div>
 
             {/* Reviews */}
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#0f172a]">Reviews</h3>
-                <button className="text-[#1952c4] text-sm font-bold flex items-center gap-1 hover:underline">
-                  All {listing.reviews} reviews <span className="text-lg leading-none">›</span>
-                </button>
+              <div className="flex justify-between items-center mb-6 border-b border-[#e2e8f0] pb-4">
+                <h3 className="text-xl font-black text-[#0f172a]">Reviews</h3>
+                <div className="text-sm font-bold text-[#1952c4] flex items-center gap-1 bg-[#ebf3ff] px-3 py-1 rounded-full">
+                  ⭐ {listing.avg_rating || "New"} <span className="text-slate-400 font-medium">({listing.review_count || 0})</span>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {REVIEWS.map(review => (
-                  <div key={review.id} className="bg-white p-5 rounded-2xl border border-[#e2e8f0]/80 shadow-sm">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] font-bold flex items-center justify-center">
-                          {review.initial}
-                        </div>
-                        <div>
-                          <div className="font-bold text-[#0f172a] text-sm">{review.name}</div>
-                          <div className="text-xs text-slate-400">{review.date}</div>
-                        </div>
-                      </div>
-                      <div className="flex text-amber-400 text-sm">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i} className={i < review.rating ? "" : "text-slate-200"}>★</span>
+
+              {/* Write Review Form (Only for logged-in students) */}
+              {user && user.role === 'student' && (
+                <div className="bg-[#f8fafc] border border-[#e2e8f0] p-5 rounded-2xl mb-6">
+                  <h4 className="font-bold text-[#0f172a] text-sm mb-3">Write a Review</h4>
+                  <form onSubmit={handleReviewSubmit}>
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Rating:</span>
+                      <div className="flex cursor-pointer text-xl">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            onClick={() => setReviewRating(star)}
+                            className={star <= reviewRating ? "text-amber-400" : "text-slate-300"}
+                          >
+                            ★
+                          </span>
                         ))}
                       </div>
                     </div>
-                    <p className="text-slate-600 text-sm leading-relaxed">{review.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    <textarea
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder="Share your experience..."
+                      className="w-full bg-white border border-[#e2e8f0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1952c4] min-h-[80px]"
+                      required
+                    ></textarea>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingReview || !reviewText.trim()}
+                      className="mt-3 px-5 py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
+                    >
+                      {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                    </button>
+                  </form>
+                </div>
+              )}
 
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {listing.reviews_data && listing.reviews_data.length > 0 ? (
+                  listing.reviews_data.map(review => (
+                    <div key={review.id} className="bg-white p-5 rounded-2xl border border-[#e2e8f0]/80 shadow-sm flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] font-bold flex items-center justify-center">
+                              {review.initial}
+                            </div>
+                            <div>
+                              <div className="font-bold text-[#0f172a] text-sm">{review.name}</div>
+                              <div className="text-xs text-slate-400">{review.date}</div>
+                            </div>
+                          </div>
+                          <div className="flex text-amber-400 text-sm">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <span key={i} className={i < review.rating ? "" : "text-slate-200"}>★</span>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-slate-600 text-sm leading-relaxed">{review.text}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full py-8 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-[#e2e8f0] rounded-2xl">
+                    No reviews yet. Be the first to review!
+                  </div>
+                )}
+              </div>
+            </div>      </div>
 
           {/* ===== RIGHT COLUMN: BOOKING CARD ===== */}
           <div className="lg:col-span-1">
@@ -372,9 +471,9 @@ const PropertyDetails = () => {
 
               {/* Rating Mini */}
               <div className="flex items-center gap-1.5 mb-6 text-sm">
-                <div className="flex text-amber-400">★★★★★</div>
-                <span className="font-bold text-[#0f172a]">{listing.rating}</span>
-                <span className="text-slate-400 underline">({listing.reviews})</span>
+                <div className="flex text-amber-400">★</div>
+                <span className="font-bold text-[#0f172a]">{listing.avg_rating || "New"}</span>
+                <span className="text-slate-400 underline">({listing.review_count || 0} reviews)</span>
               </div>
 
               {/* Owner Info */}

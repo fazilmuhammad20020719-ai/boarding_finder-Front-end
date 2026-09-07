@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus } from '../services/api';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const OwnerDashboard = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
+  
   // Messaging state
   const [conversations, setConversations] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
@@ -19,9 +19,13 @@ const OwnerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   // userId is derived directly from AuthContext — no localStorage needed
   const messagesEndRef = useRef(null);
-
+  
   const [ownerBookings, setOwnerBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  
+  // Student Management state
+  const [linkedStudents, setLinkedStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
 
   useEffect(() => {
     if (activeTab !== 'listings') return;
@@ -55,7 +59,7 @@ const OwnerDashboard = () => {
             }
           }
 
-          let imageUrl = "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800";
+          let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
           if (parsedImages.length > 0) {
             const firstImg = parsedImages[0];
             if (firstImg.includes('drive.google.com/uc?id=')) {
@@ -63,10 +67,9 @@ const OwnerDashboard = () => {
             } else if (firstImg.startsWith('http')) {
               imageUrl = firstImg;
             } else {
-              const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
               const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
               const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
-              imageUrl = `${BASE_URL}/${pathPrefix}${cleanUrl}`;
+              imageUrl = `/${pathPrefix}${cleanUrl}`;
             }
           }
 
@@ -108,6 +111,22 @@ const OwnerDashboard = () => {
     fetchBookings();
   }, [navigate, activeTab]);
 
+  useEffect(() => {
+    if (activeTab !== 'students') return;
+    const fetchStudents = async () => {
+      setStudentsLoading(true);
+      try {
+        const data = await getLinkedStudents();
+        setLinkedStudents(data.students || []);
+      } catch (err) {
+        console.error("Failed to fetch students", err);
+      } finally {
+        setStudentsLoading(false);
+      }
+    };
+    fetchStudents();
+  }, [activeTab]);
+
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this listing?')) {
       try {
@@ -133,12 +152,30 @@ const OwnerDashboard = () => {
         body: JSON.stringify({ status })
       });
       if (!res.ok) throw new Error("Failed to update status");
-
-      setOwnerBookings(prev => prev.map(b =>
+      
+      setOwnerBookings(prev => prev.map(b => 
         b.booking_id === bookingId ? { ...b, status } : b
       ));
     } catch (err) {
       alert("Error: " + err.message);
+    }
+  };
+
+  const handleUpdateStudentStatus = async (studentId, action) => {
+    if (!window.confirm(`Are you sure you want to ${action} this student's access?`)) return;
+    
+    try {
+      await updateStudentStatus(studentId, action);
+      // Optimistically update UI
+      setLinkedStudents(prev => prev.map(s => {
+        if (s.id !== studentId) return s;
+        if (action === 'pause') return { ...s, account_status: 'paused' };
+        if (action === 'reactivate') return { ...s, account_status: 'active' };
+        if (action === 'remove') return { ...s, account_status: 'removed' };
+        return s;
+      }));
+    } catch (err) {
+      alert("Error updating student: " + err.message);
     }
   };
 
@@ -156,7 +193,7 @@ const OwnerDashboard = () => {
           lastMessage: c.last_message || "Start a conversation",
           time: c.last_message_time ? new Date(c.last_message_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
           unread: parseInt(c.unread_count) || 0,
-          online: true,
+          online: true, 
           other_id: c.other_id,
           listing_id: c.listing_id
         })));
@@ -216,7 +253,7 @@ const OwnerDashboard = () => {
 
     const msgText = newMessage.trim();
     setNewMessage('');
-
+    
     // Optimistic UI update
     setMessages(prev => [...prev, {
       id: Date.now(),
@@ -242,7 +279,7 @@ const OwnerDashboard = () => {
     try {
       await markMessagesAsRead(id);
       fetchConversations();
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const filteredConversations = conversations.filter(c =>
@@ -298,6 +335,13 @@ const OwnerDashboard = () => {
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
             Messages
+          </button>
+          <button
+            onClick={() => setActiveTab('students')}
+            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'students' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            Students
           </button>
         </div>
 
@@ -618,6 +662,97 @@ const OwnerDashboard = () => {
                           ) : (
                             <span className="text-[#94a3b8]">—</span>
                           )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Manage Students Area */}
+        {activeTab === 'students' && (
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+            <div className="p-6 border-b border-[#e2e8f0]/60 bg-slate-50 flex items-center justify-between">
+              <div>
+                <h3 className="text-[17px] font-extrabold text-[#0f172a]">Manage Student Access</h3>
+                <p className="text-sm text-[#64748b]">View and manage students currently linked to your active properties.</p>
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                    <th className="px-6 py-5 rounded-tl-3xl">STUDENT</th>
+                    <th className="px-6 py-5">UNIVERSITY / ID</th>
+                    <th className="px-6 py-5">CURRENT LISTING</th>
+                    <th className="px-6 py-5">ACCOUNT STATUS</th>
+                    <th className="px-6 py-5 rounded-tr-3xl text-right">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[14px] font-medium text-[#0f172a]">
+                  {studentsLoading ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-10 text-center text-slate-500">Loading linked students...</td>
+                    </tr>
+                  ) : linkedStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-10 text-center text-slate-500">No active students linked to your properties.</td>
+                    </tr>
+                  ) : (
+                    linkedStudents.map(student => (
+                      <tr key={student.id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">
+                              {student.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-bold">{student.name}</div>
+                              <div className="text-xs text-[#64748b] font-normal">{student.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-slate-800">{student.university || 'N/A'}</div>
+                          <div className="text-xs text-slate-500 font-normal">ID: {student.student_id || 'N/A'}</div>
+                        </td>
+                        <td className="px-6 py-5 text-[#64748b]">{student.listing_title}</td>
+                        <td className="px-6 py-5">
+                          {student.account_status === 'active' && <span className="bg-[#e8f7ec] text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">Active Access</span>}
+                          {student.account_status === 'paused' && <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold">Paused</span>}
+                          {student.account_status === 'removed' && <span className="bg-red-50 text-red-500 px-3 py-1.5 rounded-full text-xs font-bold">Removed</span>}
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex gap-2 justify-end">
+                            {student.account_status === 'active' && (
+                              <button 
+                                onClick={() => handleUpdateStudentStatus(student.id, 'pause')} 
+                                className="bg-[#fff8e6] text-[#f59e0b] hover:bg-[#fef3c7] px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
+                              >
+                                Pause
+                              </button>
+                            )}
+                            {student.account_status === 'paused' && (
+                              <button 
+                                onClick={() => handleUpdateStudentStatus(student.id, 'reactivate')} 
+                                className="bg-[#e8f7ec] text-[#10b981] hover:bg-[#d1f0db] px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
+                              >
+                                Reactivate
+                              </button>
+                            )}
+                            {student.account_status !== 'removed' && (
+                              <button 
+                                onClick={() => handleUpdateStudentStatus(student.id, 'remove')} 
+                                className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))

@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 import { getListingById, createBooking } from '../services/api';
 
 const BookingPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [listing, setListing] = useState(null);
   const [activeDuration, setActiveDuration] = useState(searchParams.get('duration') || '6');
   const [moveInDate, setMoveInDate] = useState(searchParams.get('date') || '');
   
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [university, setUniversity] = useState('');
+  // Pre-fill with logged-in user's profile data
+  const [fullName, setFullName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [university, setUniversity] = useState(
+    user?.university ? `${user.university}${user.course ? ` — ${user.course}` : ''}` : ''
+  );
   const [specialRequests, setSpecialRequests] = useState('');
 
   const [step, setStep] = useState(1);

@@ -88,6 +88,13 @@ export async function deleteListing(id) {
   });
 }
 
+export async function addReview(listingId, reviewData) {
+  return request(`/listings/${listingId}/reviews`, {
+    method: "POST",
+    body: JSON.stringify(reviewData),
+  });
+}
+
 /**
  * Upload listing photos to Google Drive via the backend.
  * @param {File[]} files - Array of File objects from an <input type="file">
@@ -182,3 +189,81 @@ export async function sendMessage(data) {
 export async function markMessagesAsRead(conversationId) {
   return request(`/messages/${conversationId}/read`, { method: "PUT" });
 }
+
+// ─────────────────────────────────────────────────────────────────
+// Verification API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function verifyOtp(otp) {
+  return request("/auth/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ otp }),
+  });
+}
+
+export async function resendOtp() {
+  return request("/auth/resend-otp", {
+    method: "POST",
+  });
+}
+
+export async function uploadVerificationDocs(files) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("documents", file);
+  });
+
+  const url = `${API_URL}/auth/upload-verification-docs`;
+  const token = localStorage.getItem("token");
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Document upload failed");
+  }
+  return data;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Admin API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getPendingUsers() {
+  return request("/admin/pending-users", { method: "GET" });
+}
+
+export async function verifyUserAdmin(userId, action, note = "") {
+  return request(`/admin/users/${userId}/verify`, {
+    method: "PUT",
+    body: JSON.stringify({ action, note }),
+  });
+}
+
+export async function getVerificationStats() {
+  return request("/admin/verification-stats", { method: "GET" });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Owner Management API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getLinkedStudents() {
+  return request("/owner/students", { method: "GET" });
+}
+
+export async function updateStudentStatus(studentId, action) {
+  return request(`/owner/students/${studentId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ action }),
+  });
+}
+

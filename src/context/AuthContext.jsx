@@ -18,6 +18,13 @@ export const AuthProvider = ({ children }) => {
 
   const isAuthenticated = !!user;
 
+  // Derived verification helpers
+  const isEmailVerified = user?.is_email_verified === true;
+  const isVerified = user?.verification_status === 'verified';
+  const verificationStatus = user?.verification_status || 'pending';
+  const accountStatus = user?.account_status || 'active';
+  const hasUploadedDocs = user?.verification_docs && user.verification_docs.length > 0;
+
   // On mount, check if we have a saved token and fetch user data
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,15 +79,37 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  /**
+   * Refresh user data from the server (e.g., after OTP verification or admin approval).
+   */
+  const refreshUser = async () => {
+    try {
+      const data = await getMe();
+      setUser(data.user);
+      return data.user;
+    } catch (err) {
+      console.error("Failed to refresh user:", err);
+      return null;
+    }
+  };
+
   const value = {
     user,
     token,
     isAuthenticated,
     loading,
+    // Verification helpers
+    isEmailVerified,
+    isVerified,
+    verificationStatus,
+    accountStatus,
+    hasUploadedDocs,
+    // Actions
     register,
     login,
     logout,
     updateUser,
+    refreshUser,
   };
 
   return (
