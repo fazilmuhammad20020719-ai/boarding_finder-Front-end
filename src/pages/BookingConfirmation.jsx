@@ -84,7 +84,7 @@ const BookingConfirmation = () => {
 
         setListing({
           ...data,
-          parsed_image_url: primaryImage,
+          parsed_image_url: imageUrl,
           parsed_amenities: parsedAmenities
         });
       } catch (error) {
@@ -188,7 +188,7 @@ const BookingConfirmation = () => {
     try {
       const l = localStorage.getItem('listings');
       if (l) return JSON.parse(l).filter(x => x.liked).length;
-    } catch (e) {}
+    } catch (e) { }
     return 2;
   })();
 
@@ -349,10 +349,10 @@ const BookingConfirmation = () => {
               <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 overflow-hidden">
                 <div className="flex flex-col sm:flex-row">
                   <div className="sm:w-48 h-44 sm:h-auto flex-shrink-0 bg-slate-100">
-                    <img 
-                      src={listing.parsed_image_url} 
-                      alt={listing.title} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={listing.parsed_image_url}
+                      alt={listing.title}
+                      className="w-full h-full object-cover"
                       onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600"; }}
                     />
                   </div>
