@@ -6,7 +6,7 @@ import bgImage from '../assets/Image/Image.png';
 const RegisterPage = () => {
   const [step, setStep] = useState(1);
   const [role, setRole] = useState('student'); // 'student' or 'owner'
-  
+
   // Step 1 Fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -84,7 +84,7 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen w-full flex font-sans antialiased bg-[#f0f4f9]">
       {/* ===== LEFT HERO SECTION ===== */}
-      <div 
+      <div
         className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-16 text-white bg-cover bg-center"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
@@ -95,12 +95,12 @@ const RegisterPage = () => {
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
             <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
-              <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-              <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
-              <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
-              <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
-              <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2" />
+              <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2" />
+              <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2" />
+              <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2" />
+              <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2" />
+              <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2" />
             </svg>
           </div>
           <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>
@@ -166,22 +166,20 @@ const RegisterPage = () => {
                     <button
                       type="button"
                       onClick={() => setRole('student')}
-                      className={`py-3.5 px-5 rounded-[16px] border font-semibold flex items-center justify-center gap-2 text-[15px] transition-all duration-200 ${
-                        role === 'student'
+                      className={`py-3.5 px-5 rounded-[16px] border font-semibold flex items-center justify-center gap-2 text-[15px] transition-all duration-200 ${role === 'student'
                           ? 'border-2 border-[#1952c4] bg-[#ebf3ff] text-[#1952c4] shadow-sm'
                           : 'border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-slate-500'
-                      }`}
+                        }`}
                     >
                       🎓 Student
                     </button>
                     <button
                       type="button"
                       onClick={() => setRole('owner')}
-                      className={`py-3.5 px-5 rounded-[16px] border font-semibold flex items-center justify-center gap-2 text-[15px] transition-all duration-200 ${
-                        role === 'owner'
+                      className={`py-3.5 px-5 rounded-[16px] border font-semibold flex items-center justify-center gap-2 text-[15px] transition-all duration-200 ${role === 'owner'
                           ? 'border-2 border-[#1952c4] bg-[#ebf3ff] text-[#1952c4] shadow-sm'
                           : 'border border-[#e2e8f0]/80 bg-white hover:bg-slate-50 text-slate-500'
-                      }`}
+                        }`}
                     >
                       🏠 Property Owner
                     </button>
@@ -319,7 +317,7 @@ const RegisterPage = () => {
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                           </svg>
                         </div>
                       </div>

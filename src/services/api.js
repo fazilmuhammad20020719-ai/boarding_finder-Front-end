@@ -267,3 +267,11 @@ export async function updateStudentStatus(studentId, action) {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Dashboard/Overview API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getOwnerOverviewStats() {
+  return request("/owner/overview-stats", { method: "GET" });
+}
+

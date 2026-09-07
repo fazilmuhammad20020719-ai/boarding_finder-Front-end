@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats } from '../services/api';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const OwnerDashboard = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Messaging state
   const [conversations, setConversations] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
@@ -19,13 +19,35 @@ const OwnerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   // userId is derived directly from AuthContext — no localStorage needed
   const messagesEndRef = useRef(null);
-  
+
   const [ownerBookings, setOwnerBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
-  
+
   // Student Management state
   const [linkedStudents, setLinkedStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
+
+  // Overview Stats state
+  const [overviewStats, setOverviewStats] = useState(null);
+  const [overviewLoading, setOverviewLoading] = useState(true);
+
+  useEffect(() => {
+    if (activeTab !== 'overview') return;
+    const fetchOverview = async () => {
+      setOverviewLoading(true);
+      try {
+        const data = await getOwnerOverviewStats();
+        if (data.stats) {
+          setOverviewStats(data.stats);
+        }
+      } catch (err) {
+        console.error("Failed to fetch overview stats", err);
+      } finally {
+        setOverviewLoading(false);
+      }
+    };
+    fetchOverview();
+  }, [activeTab]);
 
   useEffect(() => {
     if (activeTab !== 'listings') return;
@@ -152,8 +174,8 @@ const OwnerDashboard = () => {
         body: JSON.stringify({ status })
       });
       if (!res.ok) throw new Error("Failed to update status");
-      
-      setOwnerBookings(prev => prev.map(b => 
+
+      setOwnerBookings(prev => prev.map(b =>
         b.booking_id === bookingId ? { ...b, status } : b
       ));
     } catch (err) {
@@ -163,7 +185,7 @@ const OwnerDashboard = () => {
 
   const handleUpdateStudentStatus = async (studentId, action) => {
     if (!window.confirm(`Are you sure you want to ${action} this student's access?`)) return;
-    
+
     try {
       await updateStudentStatus(studentId, action);
       // Optimistically update UI
@@ -193,7 +215,7 @@ const OwnerDashboard = () => {
           lastMessage: c.last_message || "Start a conversation",
           time: c.last_message_time ? new Date(c.last_message_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
           unread: parseInt(c.unread_count) || 0,
-          online: true, 
+          online: true,
           other_id: c.other_id,
           listing_id: c.listing_id
         })));
@@ -253,7 +275,7 @@ const OwnerDashboard = () => {
 
     const msgText = newMessage.trim();
     setNewMessage('');
-    
+
     // Optimistic UI update
     setMessages(prev => [...prev, {
       id: Date.now(),
@@ -279,7 +301,7 @@ const OwnerDashboard = () => {
     try {
       await markMessagesAsRead(id);
       fetchConversations();
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const filteredConversations = conversations.filter(c =>
@@ -357,53 +379,59 @@ const OwnerDashboard = () => {
 
         {/* Stats Cards */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
-                LKR
-              </div>
-              <div>
-                <div className="text-[22px] font-black text-[#0f172a]">LKR 38,500</div>
-                <div className="text-xs font-semibold text-[#64748b]">Monthly Revenue</div>
-                <div className="text-xs font-bold text-[#10b981] mt-1">+12% this month</div>
-              </div>
+          overviewLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
             </div>
+          ) : overviewStats ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center text-2xl font-bold">
+                  LKR
+                </div>
+                <div>
+                  <div className="text-[22px] font-black text-[#0f172a]">LKR {Number(overviewStats.monthlyRevenue).toLocaleString()}</div>
+                  <div className="text-xs font-semibold text-[#64748b]">Monthly Revenue</div>
+                  <div className="text-xs font-bold text-[#10b981] mt-1">This month</div>
+                </div>
               </div>
-              <div>
-                <div className="text-[22px] font-black text-[#0f172a]">12/15</div>
-                <div className="text-xs font-semibold text-[#64748b]">Rooms Occupied</div>
-                <div className="text-xs font-bold text-[#10b981] mt-1">80% occupancy</div>
+
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </div>
+                <div>
+                  <div className="text-[22px] font-black text-[#0f172a]">{overviewStats.occupancy.occupied}/{overviewStats.occupancy.total}</div>
+                  <div className="text-xs font-semibold text-[#64748b]">Rooms Occupied</div>
+                  <div className="text-xs font-bold text-[#10b981] mt-1">{overviewStats.occupancy.rate}% occupancy</div>
+                </div>
               </div>
+
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-[#fff8e6] text-[#f59e0b] flex items-center justify-center">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                </div>
+                <div>
+                  <div className="text-[22px] font-black text-[#0f172a]">{overviewStats.reviews.average}★</div>
+                  <div className="text-xs font-semibold text-[#64748b]">Average Rating</div>
+                  <div className="text-xs font-bold text-[#10b981] mt-1">{overviewStats.reviews.count} reviews</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-[#f5f3ff] text-[#8b5cf6] flex items-center justify-center">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                </div>
+                <div>
+                  <div className="text-[22px] font-black text-[#0f172a]">{overviewStats.inquiries.total}</div>
+                  <div className="text-xs font-semibold text-[#64748b]">Inquiries</div>
+                  <div className="text-xs font-bold text-[#10b981] mt-1">{overviewStats.inquiries.unanswered} unanswered</div>
+                </div>
+              </div>
+
             </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-[#fff8e6] text-[#f59e0b] flex items-center justify-center">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
-              </div>
-              <div>
-                <div className="text-[22px] font-black text-[#0f172a]">4.7★</div>
-                <div className="text-xs font-semibold text-[#64748b]">Average Rating</div>
-                <div className="text-xs font-bold text-[#10b981] mt-1">142 reviews</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-[#f5f3ff] text-[#8b5cf6] flex items-center justify-center">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-              </div>
-              <div>
-                <div className="text-[22px] font-black text-[#0f172a]">23</div>
-                <div className="text-xs font-semibold text-[#64748b]">Inquiries</div>
-                <div className="text-xs font-bold text-[#10b981] mt-1">8 unanswered</div>
-              </div>
-            </div>
-
-          </div>
+          ) : null
         )}
 
 
@@ -497,42 +525,32 @@ const OwnerDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'overview' && (
+        {activeTab === 'overview' && !overviewLoading && overviewStats && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* Revenue Chart */}
             <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col min-h-[400px]">
               <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Revenue — Last 6 Months</h3>
-              {/* Mock Chart Area */}
+
               <div className="flex-grow flex items-end justify-between px-4 pb-8 relative">
                 <div className="absolute bottom-16 left-4 right-4 border-b border-dashed border-[#e2e8f0]/80"></div>
                 <div className="absolute bottom-32 left-4 right-4 border-b border-dashed border-[#e2e8f0]/80"></div>
                 <div className="absolute bottom-48 left-4 right-4 border-b border-dashed border-[#e2e8f0]/80"></div>
 
-                <div className="flex flex-col items-center gap-2 z-10 w-1/6">
-                  <div className="w-8 md:w-12 bg-slate-100 rounded-t-md h-24"></div>
-                  <div className="text-xs font-semibold text-slate-400">Jan</div>
-                </div>
-                <div className="flex flex-col items-center gap-2 z-10 w-1/6">
-                  <div className="w-8 md:w-12 bg-slate-100 rounded-t-md h-32"></div>
-                  <div className="text-xs font-semibold text-slate-400">Feb</div>
-                </div>
-                <div className="flex flex-col items-center gap-2 z-10 w-1/6">
-                  <div className="w-8 md:w-12 bg-slate-100 rounded-t-md h-48"></div>
-                  <div className="text-xs font-semibold text-slate-400">Mar</div>
-                </div>
-                <div className="flex flex-col items-center gap-2 z-10 w-1/6">
-                  <div className="w-8 md:w-12 bg-[#1952c4]/20 rounded-t-md h-40"></div>
-                  <div className="text-xs font-semibold text-slate-400">Apr</div>
-                </div>
-                <div className="flex flex-col items-center gap-2 z-10 w-1/6">
-                  <div className="w-8 md:w-12 bg-slate-100 rounded-t-md h-56"></div>
-                  <div className="text-xs font-semibold text-slate-400">May</div>
-                </div>
-                <div className="flex flex-col items-center gap-2 z-10 w-1/6">
-                  <div className="w-8 md:w-12 bg-[#1952c4] rounded-t-md h-64"></div>
-                  <div className="text-xs font-semibold text-slate-400">Jun</div>
-                </div>
+                {overviewStats.chartData.map((data, index) => {
+                  const maxRevenue = Math.max(...overviewStats.chartData.map(d => d.revenue), 1000);
+                  const heightPercent = (data.revenue / maxRevenue) * 100;
+                  const isCurrentMonth = index === overviewStats.chartData.length - 1;
+                  return (
+                    <div key={index} className="flex flex-col items-center gap-2 z-10 w-1/6" title={`LKR ${data.revenue.toLocaleString()}`}>
+                      <div
+                        className={`w-8 md:w-12 rounded-t-md ${isCurrentMonth ? 'bg-[#1952c4]' : (data.revenue > 0 ? 'bg-[#1952c4]/20' : 'bg-slate-100')}`}
+                        style={{ height: `${Math.max(heightPercent, 5)}%`, minHeight: '1rem' }}
+                      ></div>
+                      <div className="text-xs font-semibold text-slate-400">{data.month}</div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -541,70 +559,44 @@ const OwnerDashboard = () => {
               <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Pending Requests</h3>
 
               <div className="space-y-4">
-
-                {/* Request 1 */}
-                <div className="flex items-center justify-between pb-4 border-b border-[#e2e8f0]/60">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm">
-                      M
+                {overviewStats.pendingRequests.length === 0 ? (
+                  <div className="text-sm text-[#64748b]">No pending requests right now.</div>
+                ) : (
+                  overviewStats.pendingRequests.map(req => (
+                    <div key={req.booking_id} className="flex items-center justify-between pb-4 border-b border-[#e2e8f0]/60">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 shrink-0 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm">
+                          {req.seeker_name ? req.seeker_name.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div>
+                          <div className="text-sm font-extrabold text-[#0f172a] truncate">{req.seeker_name}</div>
+                          <div className="text-xs text-[#64748b] truncate">{req.listing_title} • {new Date(req.move_in_date).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={() => {
+                          handleUpdateBookingStatus(req.booking_id, 'approved');
+                          // Remove from pending locally to update UI
+                          setOverviewStats(prev => ({
+                            ...prev,
+                            pendingRequests: prev.pendingRequests.filter(p => p.booking_id !== req.booking_id)
+                          }));
+                        }} className="w-8 h-8 rounded-full bg-[#e8f7ec] text-[#10b981] flex items-center justify-center hover:bg-[#d1f0db] transition-colors border-none cursor-pointer" title="Approve">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </button>
+                        <button onClick={() => {
+                          handleUpdateBookingStatus(req.booking_id, 'rejected');
+                          setOverviewStats(prev => ({
+                            ...prev,
+                            pendingRequests: prev.pendingRequests.filter(p => p.booking_id !== req.booking_id)
+                          }));
+                        }} className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors border-none cursor-pointer" title="Decline">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-extrabold text-[#0f172a]">Maria Reyes</div>
-                      <div className="text-xs text-[#64748b]">Room 3A • Jul 1, 2025</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="w-8 h-8 rounded-full bg-[#e8f7ec] text-[#10b981] flex items-center justify-center hover:bg-[#d1f0db] transition-colors border-none cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </button>
-                    <button className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors border-none cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Request 2 */}
-                <div className="flex items-center justify-between pb-4 border-b border-[#e2e8f0]/60">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm">
-                      A
-                    </div>
-                    <div>
-                      <div className="text-sm font-extrabold text-[#0f172a]">Ana Cruz</div>
-                      <div className="text-xs text-[#64748b]">Room 1C • Jul 8, 2025</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="w-8 h-8 rounded-full bg-[#e8f7ec] text-[#10b981] flex items-center justify-center hover:bg-[#d1f0db] transition-colors border-none cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </button>
-                    <button className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors border-none cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Request 3 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm">
-                      C
-                    </div>
-                    <div>
-                      <div className="text-sm font-extrabold text-[#0f172a]">Carlo Lim</div>
-                      <div className="text-xs text-[#64748b]">Room 2B • Jul 12, 2025</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="w-8 h-8 rounded-full bg-[#e8f7ec] text-[#10b981] flex items-center justify-center hover:bg-[#d1f0db] transition-colors border-none cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </button>
-                    <button className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors border-none cursor-pointer">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </div>
-                </div>
-
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -681,7 +673,7 @@ const OwnerDashboard = () => {
                 <p className="text-sm text-[#64748b]">View and manage students currently linked to your active properties.</p>
               </div>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
@@ -729,24 +721,24 @@ const OwnerDashboard = () => {
                         <td className="px-6 py-5 text-right">
                           <div className="flex gap-2 justify-end">
                             {student.account_status === 'active' && (
-                              <button 
-                                onClick={() => handleUpdateStudentStatus(student.id, 'pause')} 
+                              <button
+                                onClick={() => handleUpdateStudentStatus(student.id, 'pause')}
                                 className="bg-[#fff8e6] text-[#f59e0b] hover:bg-[#fef3c7] px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
                               >
                                 Pause
                               </button>
                             )}
                             {student.account_status === 'paused' && (
-                              <button 
-                                onClick={() => handleUpdateStudentStatus(student.id, 'reactivate')} 
+                              <button
+                                onClick={() => handleUpdateStudentStatus(student.id, 'reactivate')}
                                 className="bg-[#e8f7ec] text-[#10b981] hover:bg-[#d1f0db] px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
                               >
                                 Reactivate
                               </button>
                             )}
                             {student.account_status !== 'removed' && (
-                              <button 
-                                onClick={() => handleUpdateStudentStatus(student.id, 'remove')} 
+                              <button
+                                onClick={() => handleUpdateStudentStatus(student.id, 'remove')}
                                 className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
                               >
                                 Remove
