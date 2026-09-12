@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { uploadVerificationDocs } from '../services/api';
 
@@ -95,8 +94,6 @@ const IdentityVerification = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
-      <Navbar />
-
       <div className="flex-grow flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-[560px]">
           <div className="bg-white rounded-[32px] p-8 sm:p-10 shadow-sm border border-[#e2e8f0]/60 flex flex-col">

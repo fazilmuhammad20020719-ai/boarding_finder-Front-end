@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getPendingUsers, verifyUserAdmin, getVerificationStats } from '../services/api';
+import { getPendingUsers, verifyUserAdmin, getVerificationStats, getAllUsers, updateUserStatusAdmin, updateUserRoleAdmin, getAllAdminListings, updateListingStatusAdmin } from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 // We need to resolve image urls for verification docs.
@@ -11,12 +11,17 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('verifications');
-  
+
   const [stats, setStats] = useState(null);
   const [pendingUsers, setPendingUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [allListings, setAllListings] = useState([]);
+
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(true);
-  
+  const [loadingAllUsers, setLoadingAllUsers] = useState(true);
+  const [loadingListings, setLoadingListings] = useState(true);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionNote, setActionNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,7 +29,33 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchStats();
     fetchPendingUsers();
+    fetchAllUsersList();
+    fetchAllListingsList();
   }, []);
+
+  const fetchAllListingsList = async () => {
+    try {
+      setLoadingListings(true);
+      const data = await getAllAdminListings();
+      setAllListings(data.listings || []);
+    } catch (err) {
+      console.error('Failed to fetch all listings:', err);
+    } finally {
+      setLoadingListings(false);
+    }
+  };
+
+  const fetchAllUsersList = async () => {
+    try {
+      setLoadingAllUsers(true);
+      const data = await getAllUsers();
+      setAllUsers(data.users || []);
+    } catch (err) {
+      console.error('Failed to fetch all users:', err);
+    } finally {
+      setLoadingAllUsers(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -55,7 +86,7 @@ const AdminDashboard = () => {
 
   const handleVerifyAction = async (action) => {
     if (!selectedUser) return;
-    
+
     if (action === 'reject' && !actionNote) {
       alert("Please provide a note when rejecting.");
       return;
@@ -76,6 +107,45 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateStatus = async (userId, status) => {
+    if (!window.confirm(`Are you sure you want to change this user's status to ${status}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateUserStatusAdmin(userId, status);
+      await fetchAllUsersList();
+    } catch (err) {
+      alert(err.message || 'Failed to update status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateRole = async (userId, role) => {
+    if (!window.confirm(`Are you sure you want to change this user's role to ${role}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateUserRoleAdmin(userId, role);
+      await fetchAllUsersList();
+    } catch (err) {
+      alert(err.message || 'Failed to update role');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateListingStatus = async (listingId, status) => {
+    if (!window.confirm(`Are you sure you want to change this listing's status to ${status}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateListingStatusAdmin(listingId, status);
+      await fetchAllListingsList();
+    } catch (err) {
+      alert(err.message || 'Failed to update listing status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const renderVerificationModal = () => {
     if (!selectedUser) return null;
     return (
@@ -87,7 +157,7 @@ const AdminDashboard = () => {
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          
+
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-100">
             {/* User Details */}
             <div className="bg-white p-5 rounded-2xl shadow-sm">
@@ -126,7 +196,7 @@ const AdminDashboard = () => {
                 <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Admin Actions</h4>
                 <div className="mb-4">
                   <label className="block text-sm font-semibold text-slate-600 mb-2">Rejection Note (required for rejection):</label>
-                  <textarea 
+                  <textarea
                     value={actionNote}
                     onChange={(e) => setActionNote(e.target.value)}
                     placeholder="e.g. Blurry ID, Expired document..."
@@ -135,14 +205,14 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="flex gap-3 mt-4">
-                <button 
+                <button
                   onClick={() => handleVerifyAction('reject')}
                   disabled={isProcessing || !actionNote}
                   className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 border-none cursor-pointer"
                 >
                   Reject
                 </button>
-                <button 
+                <button
                   onClick={() => handleVerifyAction('approve')}
                   disabled={isProcessing}
                   className="flex-1 bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50 border-none cursor-pointer"
@@ -154,35 +224,52 @@ const AdminDashboard = () => {
 
             {/* Documents */}
             <div className="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm">
-               <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submitted Documents</h4>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 {selectedUser.verification_docs?.map((doc, idx) => {
-                   const fileUrl = doc.startsWith('http') ? doc : `${BASE_URL}${doc}`;
-                   const isPdf = doc.toLowerCase().endsWith('.pdf');
-                   return (
-                     <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex flex-col">
-                       <div className="bg-slate-200 py-2 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                         Document {idx + 1}
-                       </div>
-                       <div className="p-4 flex-grow flex items-center justify-center min-h-[300px]">
-                         {isPdf ? (
-                           <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 text-[#1952c4] hover:underline">
-                             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                             <span className="font-semibold">View PDF Document</span>
-                           </a>
-                         ) : (
-                           <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                             <img src={fileUrl} alt={`Doc ${idx+1}`} className="max-w-full max-h-[400px] object-contain rounded shadow-sm hover:opacity-90 transition-opacity" />
-                           </a>
-                         )}
-                       </div>
-                     </div>
-                   );
-                 })}
-                 {(!selectedUser.verification_docs || selectedUser.verification_docs.length === 0) && (
-                   <div className="col-span-2 text-center text-slate-500 py-8 italic">No documents uploaded.</div>
-                 )}
-               </div>
+              <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submitted Documents</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {selectedUser.verification_docs?.map((doc, idx) => {
+                  let normalizedDoc = doc.replace(/\\/g, '/');
+                  let fileUrl = '';
+                  let isPdf = normalizedDoc.toLowerCase().endsWith('.pdf');
+
+                  if (normalizedDoc.includes('drive.google.com/uc?id=')) {
+                    fileUrl = normalizedDoc.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+                  } else if (normalizedDoc.includes('drive.google.com/open?id=')) {
+                    const fileId = normalizedDoc.split('id=')[1];
+                    fileUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+                  } else if (normalizedDoc.startsWith('http')) {
+                    fileUrl = normalizedDoc;
+                    if (normalizedDoc.includes('drive.google.com/file/d/')) {
+                      isPdf = true; // Display generic Drive links as clickable documents rather than broken images
+                    }
+                  } else {
+                    const cleanUrl = normalizedDoc.startsWith('/') ? normalizedDoc.substring(1) : normalizedDoc;
+                    fileUrl = `${BASE_URL}/${cleanUrl}`;
+                  }
+
+                  return (
+                    <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex flex-col">
+                      <div className="bg-slate-200 py-2 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                        Document {idx + 1}
+                      </div>
+                      <div className="p-4 flex-grow flex items-center justify-center min-h-[300px]">
+                        {isPdf ? (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 text-[#1952c4] hover:underline">
+                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span className="font-semibold">View Document</span>
+                          </a>
+                        ) : (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={fileUrl} alt={`Doc ${idx + 1}`} className="max-w-full max-h-[400px] object-contain rounded shadow-sm hover:opacity-90 transition-opacity" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                {(!selectedUser.verification_docs || selectedUser.verification_docs.length === 0) && (
+                  <div className="col-span-2 text-center text-slate-500 py-8 italic">No documents uploaded.</div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -203,7 +290,7 @@ const AdminDashboard = () => {
             <div className="text-xl font-extrabold text-white">BoardingFinder Admin</div>
           </div>
         </div>
-        
+
         <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           Logout
@@ -211,10 +298,10 @@ const AdminDashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 md:px-8 py-10">
-        
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
-          
+
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -259,7 +346,7 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <div className="flex border-b border-[#e2e8f0] mb-8 overflow-x-auto">
-          <button 
+          <button
             onClick={() => setActiveTab('verifications')}
             className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'verifications' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
           >
@@ -269,8 +356,24 @@ const AdminDashboard = () => {
               <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{stats.pending_verifications}</span>
             )}
           </button>
-          
-          <button 
+
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            User Management
+          </button>
+
+          <button
+            onClick={() => setActiveTab('listings')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'listings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            Listing Management
+          </button>
+
+          <button
             onClick={() => setActiveTab('overview')}
             className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
           >
@@ -327,7 +430,7 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="px-6 py-5">
-                          <button 
+                          <button
                             onClick={() => setSelectedUser(user)}
                             className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition-colors border-none cursor-pointer shadow-sm"
                           >
@@ -343,64 +446,195 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {activeTab === 'users' && (
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+            {loadingAllUsers ? (
+              <div className="p-12 text-center text-slate-500">Loading users...</div>
+            ) : allUsers.length === 0 ? (
+              <div className="p-12 text-center text-slate-500">No users found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                      <th className="px-6 py-5 rounded-tl-3xl">USER</th>
+                      <th className="px-6 py-5">ROLE</th>
+                      <th className="px-6 py-5">STATUS</th>
+                      <th className="px-6 py-5">JOINED</th>
+                      <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[14px] font-medium text-[#0f172a]">
+                    {allUsers.map(user => (
+                      <tr key={user.id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-bold">{user.name}</span>
+                            <span className="text-xs text-slate-500">{user.email}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <select
+                            value={user.role}
+                            onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                            disabled={isProcessing}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer outline-none ${user.role === 'admin' ? 'bg-red-50 text-red-600 border-red-200' : user.role === 'owner' ? 'bg-[#ebf3ff] text-[#1952c4] border-[#1952c4]/20' : 'bg-[#f3e8ff] text-[#9333ea] border-[#9333ea]/20'}`}
+                          >
+                            <option value="student">Student</option>
+                            <option value="owner">Owner</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.account_status === 'active' ? 'bg-emerald-50 text-emerald-600' : user.account_status === 'paused' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>
+                            {user.account_status || 'active'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-slate-500 text-sm">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-5 flex gap-2">
+                          {(!user.account_status || user.account_status === 'active') ? (
+                            <>
+                              <button onClick={() => handleUpdateStatus(user.id, 'paused')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors border-none cursor-pointer">Suspend</button>
+                              <button onClick={() => handleUpdateStatus(user.id, 'removed')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors border-none cursor-pointer">Ban</button>
+                            </>
+                          ) : (
+                            <button onClick={() => handleUpdateStatus(user.id, 'active')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors border-none cursor-pointer">Activate</button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'listings' && (
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+            {loadingListings ? (
+              <div className="p-12 text-center text-slate-500">Loading listings...</div>
+            ) : allListings.length === 0 ? (
+              <div className="p-12 text-center text-slate-500">No listings found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                      <th className="px-6 py-5 rounded-tl-3xl">TITLE & LOCATION</th>
+                      <th className="px-6 py-5">OWNER</th>
+                      <th className="px-6 py-5">PRICE</th>
+                      <th className="px-6 py-5">STATUS</th>
+                      <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[14px] font-medium text-[#0f172a]">
+                    {allListings.map(listing => (
+                      <tr key={listing.listing_id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-bold cursor-pointer hover:text-[#1952c4] transition-colors" onClick={() => navigate(`/property/${listing.listing_id}`)}>{listing.title}</span>
+                            <span className="text-xs text-slate-500 max-w-xs truncate">{listing.location}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-semibold">{listing.owner_name}</span>
+                            <span className="text-xs text-slate-500">{listing.owner_email}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 font-bold text-slate-700">
+                          ${listing.price}/mo
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${listing.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600' : listing.approval_status === 'pending' ? 'bg-amber-50 text-amber-600' : listing.approval_status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+                            {listing.approval_status || 'approved'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 flex gap-2">
+                          <select
+                            value={listing.approval_status || 'approved'}
+                            onChange={(e) => handleUpdateListingStatus(listing.listing_id, e.target.value)}
+                            disabled={isProcessing}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer outline-none ${listing.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : listing.approval_status === 'rejected' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="rejected">Rejected</option>
+                          </select>
+
+                          <button onClick={() => navigate(`/property/${listing.listing_id}`)} className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors border-none cursor-pointer">View</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'overview' && (
-           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-             <div className="lg:col-span-2 space-y-8">
-               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col h-[380px]">
-                 <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Verification Pipeline</h3>
-                 <div className="flex-grow flex items-end justify-between px-4 pb-2 relative">
-                   <div className="absolute bottom-6 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
-                   <div className="absolute bottom-20 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
-                   <div className="absolute bottom-36 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
-                   <div className="absolute bottom-52 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
-                   
-                   {[
-                     { label: 'Registered', val: stats?.total_users || 0, h: 'h-48', color: 'from-slate-400 to-slate-500' },
-                     { label: 'Verified', val: stats?.verified_users || 0, h: 'h-36', color: 'from-[#10b981] to-[#059669]' },
-                     { label: 'Pending', val: stats?.pending_verifications || 0, h: 'h-16', color: 'from-[#f59e0b] to-[#d97706]' },
-                     { label: 'Rejected', val: stats?.rejected_verifications || 0, h: 'h-8', color: 'from-red-500 to-red-600' }
-                   ].map((bar, index) => (
-                     <div key={index} className="flex flex-col items-center gap-3 z-10 flex-1 px-1">
-                       <div className={`w-full max-w-[60px] bg-gradient-to-t ${bar.color} rounded-t-lg ${bar.h} relative group cursor-pointer`}>
-                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                           {bar.val}
-                         </div>
-                       </div>
-                       <div className="text-[11px] font-semibold text-slate-500 uppercase">{bar.label}</div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </div>
-             
-             <div className="lg:col-span-1 space-y-8">
-               <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
-                 <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">System Status</h3>
-                 <div className="space-y-4">
-                   <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
-                     <span className="text-[#64748b] font-semibold text-[15px]">API</span>
-                     <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
-                   </div>
-                   <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
-                     <span className="text-[#64748b] font-semibold text-[15px]">Database</span>
-                     <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
-                   </div>
-                   <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
-                     <span className="text-[#64748b] font-semibold text-[15px]">Email Service</span>
-                     <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
-                   </div>
-                   <div className="flex justify-between items-center">
-                     <span className="text-[#64748b] font-semibold text-[15px]">Document Storage</span>
-                     <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col h-[380px]">
+                <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">Verification Pipeline</h3>
+                <div className="flex-grow flex items-end justify-between px-4 pb-2 relative">
+                  <div className="absolute bottom-6 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
+                  <div className="absolute bottom-20 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
+                  <div className="absolute bottom-36 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
+                  <div className="absolute bottom-52 left-4 right-4 border-b border-dashed border-[#e2e8f0]"></div>
+
+                  {[
+                    { label: 'Registered', val: stats?.total_users || 0, h: 'h-48', color: 'from-slate-400 to-slate-500' },
+                    { label: 'Verified', val: stats?.verified_users || 0, h: 'h-36', color: 'from-[#10b981] to-[#059669]' },
+                    { label: 'Pending', val: stats?.pending_verifications || 0, h: 'h-16', color: 'from-[#f59e0b] to-[#d97706]' },
+                    { label: 'Rejected', val: stats?.rejected_verifications || 0, h: 'h-8', color: 'from-red-500 to-red-600' }
+                  ].map((bar, index) => (
+                    <div key={index} className="flex flex-col items-center gap-3 z-10 flex-1 px-1">
+                      <div className={`w-full max-w-[60px] bg-gradient-to-t ${bar.color} rounded-t-lg ${bar.h} relative group cursor-pointer`}>
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                          {bar.val}
+                        </div>
+                      </div>
+                      <div className="text-[11px] font-semibold text-slate-500 uppercase">{bar.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-1 space-y-8">
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
+                <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">System Status</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
+                    <span className="text-[#64748b] font-semibold text-[15px]">API</span>
+                    <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
+                    <span className="text-[#64748b] font-semibold text-[15px]">Database</span>
+                    <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-[#e2e8f0]/60">
+                    <span className="text-[#64748b] font-semibold text-[15px]">Email Service</span>
+                    <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#64748b] font-semibold text-[15px]">Document Storage</span>
+                    <span className="text-[#10b981] font-bold text-[15px]">Operational</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
       </main>
-      
+
       {/* Verification Modal */}
       {renderVerificationModal()}
     </div>

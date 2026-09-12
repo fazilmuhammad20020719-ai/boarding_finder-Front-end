@@ -29,7 +29,7 @@ const ContactUs = () => {
       <Navbar activeTab="contact" />
 
       <main className="flex-grow pt-16 pb-24 max-w-7xl mx-auto px-6 md:px-12 w-full">
-        
+
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#0f172a] tracking-tight mb-4">
             Get in Touch
@@ -40,12 +40,12 @@ const ContactUs = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
-          
+
           {/* Contact Information (Left) */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
               <h3 className="text-xl font-extrabold mb-6">Contact Information</h3>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center shrink-0">
@@ -63,7 +63,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[#64748b] mb-1">Phone</div>
-                    <div className="text-[#0f172a] font-semibold">+94 11 234 5678</div>
+                    <div className="text-[#0f172a] font-semibold">+94 25 226 6512</div>
                   </div>
                 </div>
 
@@ -73,7 +73,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[#64748b] mb-1">Address</div>
-                    <div className="text-[#0f172a] font-semibold">123 University Drive,<br/>Colombo 03, Sri Lanka</div>
+                    <div className="text-[#0f172a] font-semibold">Rajarata University of Sri Lanka,<br />Mihintale, Anuradhapura</div>
                   </div>
                 </div>
               </div>
@@ -93,7 +93,7 @@ const ContactUs = () => {
           <div className="lg:col-span-3">
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60">
               <h3 className="text-2xl font-extrabold mb-6">Send a Message</h3>
-              
+
               {submitted && (
                 <div className="bg-[#e8f7ec] border border-[#10b981]/20 text-[#10b981] p-4 rounded-2xl mb-6 flex items-center gap-3 font-medium">
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -105,25 +105,25 @@ const ContactUs = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-[#0f172a]">Full Name</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="name"
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="John Doe" 
+                      placeholder="John Doe"
                       className="w-full px-4 py-3 rounded-xl border border-[#e2e8f0] focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] outline-none transition-all font-medium text-sm placeholder-slate-400"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="block text-sm font-bold text-[#0f172a]">Email Address</label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       name="email"
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john@example.com" 
+                      placeholder="john@example.com"
                       className="w-full px-4 py-3 rounded-xl border border-[#e2e8f0] focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] outline-none transition-all font-medium text-sm placeholder-slate-400"
                     />
                   </div>
@@ -131,32 +131,32 @@ const ContactUs = () => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-[#0f172a]">Subject</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="subject"
                     required
                     value={formData.subject}
                     onChange={handleChange}
-                    placeholder="How can we help?" 
+                    placeholder="How can we help?"
                     className="w-full px-4 py-3 rounded-xl border border-[#e2e8f0] focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] outline-none transition-all font-medium text-sm placeholder-slate-400"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-[#0f172a]">Message</label>
-                  <textarea 
+                  <textarea
                     rows="5"
                     name="message"
                     required
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Tell us more about your inquiry..." 
+                    placeholder="Tell us more about your inquiry..."
                     className="w-full px-4 py-3 rounded-xl border border-[#e2e8f0] focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] outline-none transition-all font-medium text-sm placeholder-slate-400 resize-none"
                   ></textarea>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="w-full bg-[#1952c4] text-white py-4 rounded-xl font-bold text-[15px] hover:bg-[#1546a8] transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer border-none flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>

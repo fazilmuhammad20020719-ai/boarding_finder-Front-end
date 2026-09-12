@@ -53,6 +53,30 @@ const VerifyAccount = () => {
     }
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').trim().slice(0, 6).split('');
+    if (pastedData.length === 0) return;
+
+    const newOtp = [...otp];
+    let currentIndex = 0;
+
+    pastedData.forEach((char) => {
+      if (!isNaN(char) && char !== ' ' && currentIndex < 6) {
+        newOtp[currentIndex] = char;
+        currentIndex++;
+      }
+    });
+
+    setOtp(newOtp);
+
+    const nextEmptyIndex = newOtp.findIndex(val => val === '');
+    const focusIndex = nextEmptyIndex !== -1 ? nextEmptyIndex : 5;
+    if (inputRefs.current[focusIndex]) {
+      inputRefs.current[focusIndex].focus();
+    }
+  };
+
   const handleVerify = async (e) => {
     e.preventDefault();
     const code = otp.join('');
@@ -60,7 +84,7 @@ const VerifyAccount = () => {
       setError("Please enter the complete 6-digit code");
       return;
     }
-    
+
     setError('');
     setIsLoading(true);
 
@@ -134,6 +158,7 @@ const VerifyAccount = () => {
                         value={data}
                         onChange={(e) => handleChange(e.target, index)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
+                        onPaste={handlePaste}
                         ref={(el) => (inputRefs.current[index] = el)}
                         onFocus={(e) => e.target.select()}
                       />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-import { getListingById, checkBookingForListing, addReview } from '../services/api';
+import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin } from '../services/api';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -28,6 +28,7 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [existingBooking, setExistingBooking] = useState(null); // { booking_id, status } if user already booked
   const [mapCoords, setMapCoords] = useState([7.7170, 81.6989]); // Batticaloa default
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Review Form State
   const [reviewRating, setReviewRating] = useState(5);
@@ -59,6 +60,21 @@ const PropertyDetails = () => {
       alert("Failed to submit review.");
     } finally {
       setIsSubmittingReview(false);
+    }
+  };
+
+  const handleAdminUpdateStatus = async (status) => {
+    if (!window.confirm(`Are you sure you want to change this listing's status to ${status}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateListingStatusAdmin(listing.id, status);
+      // Update local state to reflect change without full reload
+      setListing(prev => ({ ...prev, approval_status: status }));
+      alert(`Listing status successfully updated to ${status}.`);
+    } catch (err) {
+      alert(err.message || 'Failed to update listing status');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -184,6 +200,7 @@ const PropertyDetails = () => {
             avg_rating: data.avg_rating,
             review_count: data.review_count,
             reviews_data: data.reviews_data,
+            approval_status: data.approval_status || 'approved',
           });
 
           // Check if logged-in student already has a booking for this listing
@@ -235,6 +252,23 @@ const PropertyDetails = () => {
           <span>›</span>
           <span className="text-[#0f172a] font-semibold">{listing.name}</span>
         </div>
+
+        {user && user.role === 'admin' && (
+          <div className="mb-6 bg-slate-800 text-white px-6 py-3 rounded-2xl flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              </div>
+              <div>
+                <span className="font-bold text-sm block">Admin Review Mode</span>
+                <span className="text-xs text-slate-300">You are viewing this listing as an administrator.</span>
+              </div>
+            </div>
+            <button onClick={() => navigate('/admin')} className="text-sm font-semibold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors border-none cursor-pointer text-white">
+              Back to Dashboard
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* ===== LEFT COLUMN: DETAILS ===== */}
@@ -533,6 +567,71 @@ const PropertyDetails = () => {
                   >
                     Manage Reservations
                   </button>
+                </div>
+              ) : user && user.role === 'admin' ? (
+                /* ── Admin Controls ── */
+                <div className="flex flex-col gap-4">
+                  <div className={`rounded-2xl p-4 flex items-start gap-3 border mb-2 ${listing.approval_status === 'approved' ? 'bg-emerald-50 border-emerald-200' :
+                      listing.approval_status === 'rejected' ? 'bg-red-50 border-red-200' :
+                        listing.approval_status === 'suspended' ? 'bg-amber-50 border-amber-200' :
+                          'bg-blue-50 border-blue-200'
+                    }`}>
+                    <div className="mt-1">
+                      {listing.approval_status === 'approved' && <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                      {(listing.approval_status === 'rejected' || listing.approval_status === 'suspended') && <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
+                      {listing.approval_status === 'pending' && <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold uppercase tracking-wider mb-1" style={{
+                        color: listing.approval_status === 'approved' ? '#059669' :
+                          listing.approval_status === 'rejected' ? '#dc2626' :
+                            listing.approval_status === 'suspended' ? '#d97706' : '#2563eb'
+                      }}>
+                        Status: {listing.approval_status}
+                      </h4>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                        {listing.approval_status === 'approved' && 'This listing is visible to all students.'}
+                        {listing.approval_status === 'pending' && 'This listing is awaiting your review before it goes public.'}
+                        {listing.approval_status === 'rejected' && 'This listing was rejected and is not visible to students.'}
+                        {listing.approval_status === 'suspended' && 'This listing was suspended due to violations.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[11px] font-bold text-[#64748b] tracking-wider mb-1 uppercase">Admin Actions</label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {listing.approval_status !== 'approved' && (
+                        <button
+                          onClick={() => handleAdminUpdateStatus('approved')}
+                          disabled={isProcessing}
+                          className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none disabled:opacity-50"
+                        >
+                          Approve Listing
+                        </button>
+                      )}
+
+                      {listing.approval_status !== 'suspended' && (
+                        <button
+                          onClick={() => handleAdminUpdateStatus('suspended')}
+                          disabled={isProcessing}
+                          className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none disabled:opacity-50"
+                        >
+                          Suspend Listing
+                        </button>
+                      )}
+
+                      {listing.approval_status !== 'rejected' && (
+                        <button
+                          onClick={() => handleAdminUpdateStatus('rejected')}
+                          disabled={isProcessing}
+                          className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none disabled:opacity-50"
+                        >
+                          Reject Listing
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ) : listing.isFullyBooked ? (
                 <div className="flex flex-col items-center justify-center py-4 text-center">

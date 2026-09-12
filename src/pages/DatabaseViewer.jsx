@@ -44,6 +44,25 @@ const DatabaseViewer = () => {
     }
   };
 
+  const handleDeleteRecord = async (tableName, pkName, pkValue) => {
+    if (!window.confirm(`Are you sure you want to permanently delete this record from ${tableName}? This action cannot be undone.`)) return;
+    try {
+      const response = await fetch(`${API_URL}/db/tables/${tableName}/${pkName}/${pkValue}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete record');
+      // Refresh the table data to reflect the deletion
+      fetchTableData(tableName);
+    } catch (err) {
+      alert(`Error deleting record: ${err.message}`);
+    }
+  };
+
+  const handleExport = (withData) => {
+    const url = `${API_URL}/db/export?withData=${withData}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="flex h-screen bg-[#f4f7f9] font-sans text-[#0f172a]">
       {/* Sidebar for Tables */}
@@ -63,11 +82,10 @@ const DatabaseViewer = () => {
               <button
                 key={table}
                 onClick={() => fetchTableData(table)}
-                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border-none flex items-center gap-3 ${
-                  selectedTable === table 
-                    ? 'bg-[#ebf3ff] text-[#1952c4]' 
+                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border-none flex items-center gap-3 ${selectedTable === table
+                    ? 'bg-[#ebf3ff] text-[#1952c4]'
                     : 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 {table}
@@ -89,14 +107,36 @@ const DatabaseViewer = () => {
               {tableData.data.length} row{tableData.data.length !== 1 ? 's' : ''} retrieved
             </p>
           </div>
-          <button 
-            onClick={() => fetchTableData(selectedTable)} 
-            disabled={!selectedTable || loading}
-            className="flex items-center gap-2 bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
-          >
-            <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              <button className="flex items-center gap-2 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm cursor-pointer">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Export DB
+              </button>
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-[#e2e8f0] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                <button
+                  onClick={() => handleExport(false)}
+                  className="w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 border-b border-[#e2e8f0] transition-colors border-none cursor-pointer"
+                >
+                  Schema Only
+                </button>
+                <button
+                  onClick={() => handleExport(true)}
+                  className="w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors border-none cursor-pointer"
+                >
+                  Schema + Data
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => fetchTableData(selectedTable)}
+              disabled={!selectedTable || loading}
+              className="flex items-center gap-2 bg-[#1952c4] hover:bg-[#1546a8] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
+            >
+              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              Refresh
+            </button>
+          </div>
         </header>
 
         {/* Data View */}
@@ -124,13 +164,16 @@ const DatabaseViewer = () => {
                   <thead>
                     <tr className="bg-[#f0f4f9] border-b border-[#e2e8f0]/60">
                       {tableData.columns.map((col, idx) => (
-                        <th key={col.column_name} className={`px-5 py-4 text-xs font-bold text-[#64748b] uppercase tracking-wider whitespace-nowrap ${idx === 0 ? 'rounded-tl-3xl' : ''} ${idx === tableData.columns.length - 1 ? 'rounded-tr-3xl' : ''}`}>
+                        <th key={col.column_name} className={`px-5 py-4 text-xs font-bold text-[#64748b] uppercase tracking-wider whitespace-nowrap ${idx === 0 ? 'rounded-tl-3xl' : ''}`}>
                           <div className="flex flex-col">
                             <span>{col.column_name}</span>
                             <span className="text-[10px] text-slate-400 mt-0.5 lowercase font-medium">{col.data_type}</span>
                           </div>
                         </th>
                       ))}
+                      <th className="px-5 py-4 text-xs font-bold text-[#64748b] uppercase tracking-wider whitespace-nowrap rounded-tr-3xl text-right">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="text-sm font-medium text-[#0f172a]">
@@ -156,6 +199,15 @@ const DatabaseViewer = () => {
                               )}
                             </td>
                           ))}
+                          <td className="px-5 py-4 text-right">
+                            <button
+                              onClick={() => handleDeleteRecord(selectedTable, tableData.columns[0].column_name, row[tableData.columns[0].column_name])}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer border-none bg-transparent"
+                              title="Permanently Delete"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}

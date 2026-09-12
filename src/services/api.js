@@ -69,6 +69,10 @@ export async function getListingById(id) {
   return request(`/listings/${id}`, { method: "GET" });
 }
 
+export async function getStats() {
+  return request("/listings/public/stats", { method: "GET" });
+}
+
 export async function getListing(id) {
   return request(`/listings/${id}`, {
     method: "GET",
@@ -250,6 +254,35 @@ export async function verifyUserAdmin(userId, action, note = "") {
 
 export async function getVerificationStats() {
   return request("/admin/verification-stats", { method: "GET" });
+}
+
+export async function getAllUsers() {
+  return request("/admin/users", { method: "GET" });
+}
+
+export async function updateUserStatusAdmin(userId, status) {
+  return request(`/admin/users/${userId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function updateUserRoleAdmin(userId, role) {
+  return request(`/admin/users/${userId}/role`, {
+    method: "PUT",
+    body: JSON.stringify({ role }),
+  });
+}
+
+export async function getAllAdminListings() {
+  return request("/admin/listings", { method: "GET" });
+}
+
+export async function updateListingStatusAdmin(listingId, status) {
+  return request(`/admin/listings/${listingId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────
