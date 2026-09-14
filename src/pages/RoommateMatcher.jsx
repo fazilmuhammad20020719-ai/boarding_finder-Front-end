@@ -7,6 +7,7 @@ const RoommateMatcher = () => {
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [acceptedConnections, setAcceptedConnections] = useState([]);
   const [activeTab, setActiveTab] = useState('discover');
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,7 @@ const RoommateMatcher = () => {
 
       setProfiles(matchesRes.matches || []);
       setPendingRequests(requestsRes.requests || []);
+      setSentRequests(requestsRes.sentRequests || []);
       setAcceptedConnections(connectionsRes.connections || []);
 
       if (profileRes.profile) {
@@ -122,6 +124,8 @@ const RoommateMatcher = () => {
     try {
       await disconnectRoommate(connectionId);
       setAcceptedConnections(prev => prev.filter(c => c.connection_id !== connectionId));
+      setSentRequests(prev => prev.filter(c => c.connection_id !== connectionId));
+      setPendingRequests(prev => prev.filter(c => c.connection_id !== connectionId));
     } catch (err) {
       console.error("Failed to disconnect", err);
       alert("Failed to disconnect. Please try again.");
@@ -200,7 +204,9 @@ const RoommateMatcher = () => {
           >
             My Connections
             {pendingRequests.length > 0 && (
-              <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{pendingRequests.length}</span>
+              <span className="bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">
+                {pendingRequests.length}
+              </span>
             )}
           </button>
         </div>
@@ -346,7 +352,7 @@ const RoommateMatcher = () => {
             <div>
               <h2 className="text-xl font-bold mb-4">Pending Requests ({pendingRequests.length})</h2>
               {pendingRequests.length === 0 ? (
-                <p className="text-[#64748b] bg-white p-6 rounded-xl border border-[#e2e8f0]/60">No pending connection requests.</p>
+                <p className="text-[#64748b] bg-white p-6 rounded-[24px] border border-[#e2e8f0]/60 shadow-sm">No pending connection requests.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {pendingRequests.map(req => (
@@ -369,11 +375,42 @@ const RoommateMatcher = () => {
               )}
             </div>
 
+            {/* Sent Requests */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Sent Requests ({sentRequests.length})</h2>
+              {sentRequests.length === 0 ? (
+                <p className="text-[#64748b] bg-white p-6 rounded-[24px] border border-[#e2e8f0]/60 shadow-sm">You haven't sent any connection requests yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {sentRequests.map(req => (
+                    <div key={req.connection_id} className="bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 p-6 flex flex-col">
+                      <div className="flex items-center gap-4 mb-4">
+                        <img src={req.avatar_url || "https://ui-avatars.com/api/?name=User"} alt={req.name} className="w-12 h-12 rounded-full border border-gray-200" />
+                        <div>
+                          <h3 className="font-bold text-gray-900">{req.name}, {req.age}</h3>
+                          <p className="text-xs text-gray-500">{req.occupation}</p>
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-sm italic text-gray-600 line-clamp-2">"{req.bio}"</p>
+                      </div>
+                      <div className="mt-auto flex gap-2">
+                        <button onClick={() => handleDisconnect(req.connection_id)} className="w-full bg-white border border-gray-200 hover:border-gray-300 text-gray-500 hover:text-gray-600 font-bold py-2 rounded-xl text-sm transition-colors flex justify-center items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          Cancel Request
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Accepted Connections */}
             <div>
               <h2 className="text-xl font-bold mb-4">My Roommates ({acceptedConnections.length})</h2>
               {acceptedConnections.length === 0 ? (
-                <p className="text-[#64748b] bg-white p-6 rounded-xl border border-[#e2e8f0]/60">You have no accepted connections yet.</p>
+                <p className="text-[#64748b] bg-white p-6 rounded-[24px] border border-[#e2e8f0]/60 shadow-sm">You have no accepted connections yet.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {acceptedConnections.map(conn => (
