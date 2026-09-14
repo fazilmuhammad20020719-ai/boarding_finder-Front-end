@@ -59,8 +59,32 @@ const MapViewPage = () => {
 
         const listingsArray = allListings.listings || [];
         const mappedListings = listingsArray.map(dbListing => {
-          const displayImage = dbListing.image_urls && dbListing.image_urls.length > 0
-            ? (dbListing.image_urls[0].startsWith('http') ? dbListing.image_urls[0] : `http://localhost:5000${dbListing.image_urls[0]}`)
+          let rawImages = dbListing.image_urls || dbListing.images;
+          let parsedImages = [];
+          if (Array.isArray(rawImages)) {
+            parsedImages = rawImages;
+          } else if (typeof rawImages === 'string') {
+            try {
+              const parsed = JSON.parse(rawImages);
+              if (Array.isArray(parsed)) {
+                parsedImages = parsed;
+              } else {
+                parsedImages = [String(parsed)];
+              }
+            } catch (e) {
+              if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+                parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              } else {
+                parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+              }
+            }
+          }
+          if (!Array.isArray(parsedImages)) {
+            parsedImages = [];
+          }
+
+          const displayImage = parsedImages.length > 0
+            ? (parsedImages[0].startsWith('http') ? parsedImages[0] : `http://localhost:5000${parsedImages[0]}`)
             : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
 
           return {
