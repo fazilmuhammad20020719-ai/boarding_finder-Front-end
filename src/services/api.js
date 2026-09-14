@@ -484,3 +484,54 @@ export const getOwnerLedger = async () => {
   if (data.error) throw new Error(data.error);
   return data;
 };
+
+// ─── MAINTENANCE ─────────────────────────────────────────────────────────────
+
+export const createMaintenanceRequest = async (ticketData) => {
+  const data = await request(`/maintenance`, {
+    method: 'POST',
+    body: JSON.stringify(ticketData),
+  });
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+export const getStudentMaintenanceRequests = async () => {
+  const data = await request(`/maintenance/student`);
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+export const getOwnerMaintenanceRequests = async () => {
+  const data = await request(`/maintenance/owner`);
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+export const updateMaintenanceStatus = async (id, status) => {
+  const data = await request(`/maintenance/${id}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+// ─── Notifications API Methods ─────────────────────
+
+export const getNotifications = async () => {
+  return request("/notifications", { method: "GET" });
+};
+
+export const markNotificationAsRead = async (id) => {
+  return request(`/notifications/${id}/read`, { method: "PUT" });
+};
+
+export const markAllNotificationsAsRead = async () => {
+  return request("/notifications/read-all", { method: "PUT" });
+};
+
+export const deleteNotification = async (id) => {
+  return request(`/notifications/${id}`, { method: "DELETE" });
+};
+

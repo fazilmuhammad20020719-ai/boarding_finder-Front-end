@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus } from '../services/api';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -30,6 +30,10 @@ const OwnerDashboard = () => {
   // Overview Stats state
   const [overviewStats, setOverviewStats] = useState(null);
   const [overviewLoading, setOverviewLoading] = useState(true);
+
+  // Maintenance state
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
   useEffect(() => {
     if (activeTab !== 'overview') return;
@@ -148,6 +152,33 @@ const OwnerDashboard = () => {
     };
     fetchStudents();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'maintenance') return;
+    const fetchMaintenance = async () => {
+      setMaintenanceLoading(true);
+      try {
+        const data = await getOwnerMaintenanceRequests();
+        setMaintenanceRequests(data || []);
+      } catch (err) {
+        console.error("Failed to fetch maintenance requests", err);
+      } finally {
+        setMaintenanceLoading(false);
+      }
+    };
+    fetchMaintenance();
+  }, [activeTab]);
+
+  const handleUpdateMaintenanceTicket = async (ticketId, status) => {
+    try {
+      await updateMaintenanceStatus(ticketId, status);
+      setMaintenanceRequests(prev => prev.map(t =>
+        t.id === ticketId ? { ...t, status } : t
+      ));
+    } catch (err) {
+      alert("Error updating status: " + err.message);
+    }
+  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this listing?')) {
@@ -345,42 +376,49 @@ const OwnerDashboard = () => {
         <div className="hidden lg:flex items-center gap-2 justify-center flex-1">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'overview' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'overview' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             Overview
           </button>
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'listings' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'listings' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             My Listings
           </button>
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'bookings' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'bookings' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             Bookings
           </button>
           <button
             onClick={() => setActiveTab('messages')}
-            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'messages' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'messages' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
             Messages
           </button>
           <button
             onClick={() => setActiveTab('students')}
-            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'students' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'students' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             Students
           </button>
           <button
+            onClick={() => setActiveTab('maintenance')}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none ${activeTab === 'maintenance' ? 'bg-white text-[#1e3a8a] shadow-sm' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Maintenance
+          </button>
+          <button
             onClick={() => navigate('/earnings')}
-            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none bg-transparent text-white/70 hover:text-white hover:bg-white/10`}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none bg-transparent text-white/70 hover:text-white hover:bg-white/10`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Earnings
@@ -777,6 +815,82 @@ const OwnerDashboard = () => {
                               </button>
                             )}
                           </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Maintenance Area */}
+        {activeTab === 'maintenance' && (
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+            <div className="p-6 border-b border-[#e2e8f0]/60 bg-slate-50 flex items-center justify-between">
+              <div>
+                <h3 className="text-[17px] font-extrabold text-[#0f172a]">Maintenance Requests</h3>
+                <p className="text-sm text-[#64748b]">Manage and update repair tickets submitted by your tenants.</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                    <th className="px-6 py-5 rounded-tl-3xl">TICKET INFO</th>
+                    <th className="px-6 py-5">TENANT & PROPERTY</th>
+                    <th className="px-6 py-5">ISSUE DETAILS</th>
+                    <th className="px-6 py-5">STATUS</th>
+                    <th className="px-6 py-5 rounded-tr-3xl text-right">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[14px] font-medium text-[#0f172a]">
+                  {maintenanceLoading ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-10 text-center text-slate-500">Loading maintenance requests...</td>
+                    </tr>
+                  ) : maintenanceRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-10 text-center text-slate-500">No maintenance requests from your tenants.</td>
+                    </tr>
+                  ) : (
+                    maintenanceRequests.map(ticket => (
+                      <tr key={ticket.id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="font-bold text-[#0f172a]">{ticket.ticket_id}</div>
+                          <div className="text-xs text-[#64748b] mt-1">{new Date(ticket.created_at).toLocaleDateString()}</div>
+                          <span className={`inline-block mt-2 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${ticket.urgency === 'High' ? 'bg-red-100 text-red-700' :
+                              ticket.urgency === 'Medium' ? 'bg-orange-100 text-orange-700' :
+                                'bg-blue-100 text-blue-700'
+                            }`}>
+                            {ticket.urgency} Urgency
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="font-bold text-[#0f172a]">{ticket.student_name}</div>
+                          <div className="text-xs text-slate-500 font-normal">{ticket.property_name}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="font-bold text-[#0f172a] mb-1">{ticket.title} <span className="font-normal text-xs text-[#64748b]">({ticket.category})</span></div>
+                          <div className="text-sm text-[#475569] line-clamp-2 max-w-sm">{ticket.description}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          {ticket.status === 'Pending' && <span className="bg-[#fff8e6] text-[#f59e0b] px-3 py-1.5 rounded-full text-xs font-bold border border-[#f59e0b]/20">Pending</span>}
+                          {ticket.status === 'In Progress' && <span className="bg-[#ebf3ff] text-[#1952c4] px-3 py-1.5 rounded-full text-xs font-bold border border-[#1952c4]/20">In Progress</span>}
+                          {ticket.status === 'Resolved' && <span className="bg-[#e8f7ec] text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold border border-[#10b981]/20">Resolved</span>}
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <select
+                            value={ticket.status}
+                            onChange={(e) => handleUpdateMaintenanceTicket(ticket.id, e.target.value)}
+                            className="bg-white border border-[#e2e8f0] text-sm font-bold text-[#475569] rounded-xl px-3 py-2 outline-none cursor-pointer focus:ring-2 focus:ring-[#1952c4]/20"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                          </select>
                         </td>
                       </tr>
                     ))

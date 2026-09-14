@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getConversations, getNotifications } from '../services/api';
 import logoImg from '../assets/Image/Logo.png';
 
 const Navbar = ({ likedCount = 0 }) => {
@@ -9,6 +10,38 @@ const Navbar = ({ likedCount = 0 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
+
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      const fetchCounts = async () => {
+        try {
+          const [convRes, notifRes] = await Promise.all([
+            getConversations(),
+            getNotifications()
+          ]);
+
+          if (convRes && convRes.conversations) {
+            const unreadMsgCount = convRes.conversations.reduce((sum, c) => sum + (parseInt(c.unread_count) || 0), 0);
+            setUnreadMessages(unreadMsgCount);
+          }
+
+          if (Array.isArray(notifRes)) {
+            const unreadNotifCount = notifRes.filter(n => !n.is_read).length;
+            setUnreadNotifications(unreadNotifCount);
+          }
+        } catch (error) {
+          console.error("Failed to fetch unread counts:", error);
+        }
+      };
+
+      fetchCounts();
+      const interval = setInterval(fetchCounts, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
   const handleLogoutClick = () => {
     setIsMobileMenuOpen(false);
@@ -86,7 +119,9 @@ const Navbar = ({ likedCount = 0 }) => {
                   <svg className="w-6 h-6 text-[#475569] hover:text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-white"></span>
+                  {unreadMessages > 0 && (
+                    <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-white"></span>
+                  )}
                 </Link>
 
                 {/* Notifications Badge */}
@@ -94,7 +129,9 @@ const Navbar = ({ likedCount = 0 }) => {
                   <svg className="w-6 h-6 text-[#475569] hover:text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
-                  <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-white"></span>
+                  {unreadNotifications > 0 && (
+                    <span className="absolute -top-1.5 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border border-white"></span>
+                  )}
                 </Link>
 
                 {/* Saved Hearts Badge */}
@@ -168,6 +205,13 @@ const Navbar = ({ likedCount = 0 }) => {
                           className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
                         >
                           Payment History
+                        </Link>
+                        <Link
+                          to="/maintenance-portal"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-[#475569] hover:bg-slate-50"
+                        >
+                          Maintenance Portal
                         </Link>
                         <Link
                           to="/settings"

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getAllListings, getSavedListings, addSavedListing, removeSavedListing } from '../services/api';
+import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getStats } from '../services/api';
 
 // Remove MOCK_LISTINGS and map from API instead
 const mapListing = (dbListing) => {
@@ -93,18 +93,19 @@ const mapListing = (dbListing) => {
 };
 
 const UNIVERSITIES = [
-  { name: "UP Diliman", listings: 12, icon: "🎓", color: "#1952c4" },
-  { name: "UST", listings: 9, icon: "🏛️", color: "#7c3aed" },
-  { name: "De La Salle", listings: 11, icon: "📚", color: "#059669" },
-  { name: "Ateneo", listings: 14, icon: "🦅", color: "#d97706" },
-  { name: "FEU", listings: 34, icon: "🔵", color: "#2563eb" },
-  { name: "DLSU-D", listings: 8, icon: "🏫", color: "#dc2626" },
+  { name: "UOC", listings: 12, icon: "🎓", color: "#1952c4" },
+  { name: "UOP", listings: 9, icon: "🏛️", color: "#7c3aed" },
+  { name: "UOM", listings: 11, icon: "⚙️", color: "#059669" },
+  { name: "UOK", listings: 14, icon: "📚", color: "#d97706" },
+  { name: "USJ", listings: 34, icon: "💡", color: "#2563eb" },
+  { name: "UOR", listings: 8, icon: "🏫", color: "#e11d48" }
 ];
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [listings, setListings] = useState([]);
+  const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -120,6 +121,16 @@ const HomePage = () => {
           const savedIds = new Set(savedData.map(l => l.listing_id));
           const mapped = listingsData.listings.map(mapListing);
           setListings(mapped.map(l => ({ ...l, liked: savedIds.has(l.id) })));
+        }
+
+        // 4. Fetch Stats
+        try {
+          const statsData = await getStats();
+          if (statsData?.stats) {
+            setStats(statsData.stats);
+          }
+        } catch (statsErr) {
+          console.error("Failed to load stats", statsErr);
         }
       } catch (err) {
         console.error("Failed to fetch data:", err);
@@ -162,14 +173,14 @@ const HomePage = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs font-semibold text-white/90">1,240+ verified listings available</span>
+            <span className="text-xs font-semibold text-white/90">{stats ? `${stats.activeListings}+` : "0+"} verified listings available</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-white max-w-2xl mb-4">
             Find Your Home<br />Near Campus
           </h1>
           <p className="text-white/75 text-base sm:text-lg max-w-lg mb-8 font-normal leading-relaxed">
-            Discover verified boarding houses, dormitories, and studio units close to Rajarata University of Sri Lanka.
+            Discover verified boarding houses, dormitories, and studio units close to top universities in Sri Lanka.
           </p>
 
           {/* Search Bar */}
@@ -196,7 +207,7 @@ const HomePage = () => {
           {/* Popular filters chips */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-white/60 text-xs font-semibold mr-1">Popular:</span>
-            {["Diliman QC", "UP La Salle Taft", "Katipunan Area"].map((chip) => (
+            {["Anuradhapura", "Colombo", "Nugegoda", "Peradeniya"].map((chip) => (
               <button
                 key={chip}
                 onClick={() => navigate('/search')}
@@ -212,10 +223,10 @@ const HomePage = () => {
         <div className="relative z-10 bg-white/10 backdrop-blur-sm border-t border-white/10">
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
-              { value: "1,240+", label: "Active listings" },
-              { value: "48", label: "Partner universities" },
-              { value: "8,400+", label: "Students placed" },
-              { value: "4.7★", label: "Average rating" },
+              { value: stats ? `${stats.activeListings}+` : "0+", label: "Active listings" },
+              { value: stats ? `${stats.partnerUniversities}` : "0", label: "Partner universities" },
+              { value: stats ? `${stats.studentsPlaced}+` : "0+", label: "Students placed" },
+              { value: stats ? `${stats.avgRating}★` : "0.0★", label: "Average rating" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
