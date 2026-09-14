@@ -183,6 +183,19 @@ const OwnerDashboard = () => {
     }
   };
 
+  const handleGenerateLease = async (bookingId) => {
+    try {
+      const { generateLease } = await import('../services/api');
+      await generateLease(bookingId);
+      alert("Lease generated successfully and is ready for the student to sign!");
+      setOwnerBookings(prev => prev.map(b =>
+        b.booking_id === bookingId ? { ...b, lease_status: 'pending' } : b
+      ));
+    } catch (err) {
+      alert(err.message || "Failed to generate lease. Maybe one already exists?");
+    }
+  };
+
   const handleUpdateStudentStatus = async (studentId, action) => {
     if (!window.confirm(`Are you sure you want to ${action} this student's access?`)) return;
 
@@ -364,6 +377,13 @@ const OwnerDashboard = () => {
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             Students
+          </button>
+          <button
+            onClick={() => navigate('/earnings')}
+            className={`px-5 py-2.5 font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none bg-transparent text-white/70 hover:text-white hover:bg-white/10`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Earnings
           </button>
         </div>
 
@@ -565,15 +585,15 @@ const OwnerDashboard = () => {
                   overviewStats.pendingRequests.map(req => (
                     <div key={req.booking_id} className="flex items-center justify-between pb-4 border-b border-[#e2e8f0]/60">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 shrink-0 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm">
-                          {req.seeker_name ? req.seeker_name.charAt(0).toUpperCase() : '?'}
+                        <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm">
+                          {req.initial || req.seeker_name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="text-sm font-extrabold text-[#0f172a] truncate">{req.seeker_name}</div>
-                          <div className="text-xs text-[#64748b] truncate">{req.listing_title} • {new Date(req.move_in_date).toLocaleDateString()}</div>
+                          <div className="text-sm font-extrabold text-[#0f172a]">{req.seeker_name}</div>
+                          <div className="text-xs text-[#64748b]">{req.listing_title} • {new Date(req.move_in_date).toLocaleDateString()}</div>
                         </div>
                       </div>
-                      <div className="flex gap-2 shrink-0">
+                      <div className="flex gap-2">
                         <button onClick={() => {
                           handleUpdateBookingStatus(req.booking_id, 'approved');
                           // Remove from pending locally to update UI
@@ -650,6 +670,18 @@ const OwnerDashboard = () => {
                             <div className="flex gap-2">
                               <button onClick={() => handleUpdateBookingStatus(booking.booking_id, 'approved')} className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
                               <button onClick={() => handleUpdateBookingStatus(booking.booking_id, 'rejected')} className="bg-red-50 text-red-500 hover:bg-red-100 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
+                            </div>
+                          ) : booking.status === 'approved' ? (
+                            <div className="flex gap-2">
+                              {!booking.lease_status && (
+                                <button onClick={() => handleGenerateLease(booking.booking_id)} className="bg-[#10b981] hover:bg-[#059669] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Generate Lease</button>
+                              )}
+                              {booking.lease_status === 'pending' && (
+                                <button onClick={() => navigate(`/digital-lease?booking_id=${booking.booking_id}`)} className="bg-amber-100 hover:bg-amber-200 text-amber-700 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Lease Pending</button>
+                              )}
+                              {booking.lease_status === 'signed' && (
+                                <button onClick={() => navigate(`/digital-lease?booking_id=${booking.booking_id}`)} className="bg-[#1952c4] hover:bg-[#1546a8] text-white px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">View Signed Lease</button>
+                              )}
                             </div>
                           ) : (
                             <span className="text-[#94a3b8]">—</span>

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/Image/Logo.png';
 
-const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
+const Navbar = ({ likedCount = 0 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
 
   const handleLogoutClick = () => {
@@ -21,15 +22,24 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
   const userInitial = userName.charAt(0).toUpperCase();
 
   const getLinkClass = (tabName) => {
-    const isActive = activeTab === tabName;
+    const targetPath = `/${tabName}`;
+    const isActive = location.pathname === targetPath || location.pathname.startsWith(`${targetPath}/`);
     return isActive
-      ? "text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-1.5 rounded-full shadow-sm transition-all"
-      : "text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors px-4 py-1.5";
+      ? "whitespace-nowrap text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-1.5 rounded-full shadow-sm transition-all"
+      : "whitespace-nowrap text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] transition-colors px-4 py-1.5";
+  };
+
+  const getMobileLinkClass = (tabName) => {
+    const targetPath = `/${tabName}`;
+    const isActive = location.pathname === targetPath || location.pathname.startsWith(`${targetPath}/`);
+    return isActive
+      ? "text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit"
+      : "text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100";
   };
 
   return (
     <nav className="w-full bg-white border-b border-[#e2e8f0]/80 shadow-sm z-50 sticky top-0">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="max-w-[1600px] w-full mx-auto px-4 md:px-8 lg:px-12">
         <div className="flex justify-between items-center h-20">
 
           {/* Logo */}
@@ -42,7 +52,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
 
           {/* Desktop Navigation Links */}
           {isAuthenticated && (
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden xl:flex items-center gap-2">
               <Link to="/home" className={getLinkClass('home')}>
                 Home
               </Link>
@@ -54,6 +64,9 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
               </Link>
               <Link to="/roommate-matcher" className={getLinkClass('roommate-matcher')}>
                 Find a Roommate
+              </Link>
+              <Link to="/community-forum" className={getLinkClass('community-forum')}>
+                Community Forum
               </Link>
               <Link to="/about" className={getLinkClass('about')}>
                 About us
@@ -188,7 +201,7 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
             {isAuthenticated && (
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all cursor-pointer border-none bg-transparent"
+                className="xl:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all cursor-pointer border-none bg-transparent"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
@@ -206,40 +219,47 @@ const Navbar = ({ likedCount = 0, activeTab = 'search' }) => {
 
       {/* ===== MOBILE NAVIGATION DROPDOWN ===== */}
       {isAuthenticated && isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-[#e2e8f0] shadow-lg py-4 px-6 z-40 animate-slideDown">
+        <div className="xl:hidden absolute top-20 left-0 w-full bg-white border-b border-[#e2e8f0] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-4">
             <Link
               to="/home"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className={getMobileLinkClass('home')}
             >
               Home
             </Link>
             <Link
               to="/search"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-[15px] font-semibold text-[#1952c4] bg-[#ebf3ff] px-4 py-2.5 rounded-xl shadow-sm inline-block w-fit"
+              className={getMobileLinkClass('search')}
             >
               Search
             </Link>
             <Link
               to="/map"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className={getMobileLinkClass('map')}
             >
               Map View
             </Link>
             <Link
               to="/about"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className={getMobileLinkClass('about')}
             >
               About us
             </Link>
             <Link
+              to="/community-forum"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={getMobileLinkClass('community-forum')}
+            >
+              Community Forum
+            </Link>
+            <Link
               to="/contact"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-[15px] font-semibold text-[#475569] hover:text-[#1952c4] py-2 border-b border-slate-100"
+              className={getMobileLinkClass('contact')}
             >
               Contact us
             </Link>

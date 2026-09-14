@@ -1,24 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { getLeaseByBookingId, signLease } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const DigitalLease = () => {
+  const [searchParams] = useSearchParams();
+  const bookingId = searchParams.get('booking_id');
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [step, setStep] = useState(1);
   const [signature, setSignature] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSign = (e) => {
+  const [lease, setLease] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!bookingId) {
+      setError("No booking ID provided in the URL.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchLease = async () => {
+      try {
+        const data = await getLeaseByBookingId(bookingId);
+        setLease(data);
+        if (data.status === 'signed') {
+          setStep(3); // Already signed
+          setSignature(data.student_signature);
+        }
+      } catch (err) {
+        console.error("Error fetching lease:", err);
+        setError(err.message || "Failed to fetch lease details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLease();
+  }, [bookingId]);
+
+  const handleSign = async (e) => {
     e.preventDefault();
-    if (!signature || !agreed) return;
+    if (!signature || !agreed || !lease) return;
 
     setIsSubmitting(true);
-    // Simulate API call to save digital signature
-    setTimeout(() => {
+    try {
+      await signLease(lease.id, signature);
+      setLease(prev => ({ ...prev, status: 'signed', student_signature: signature, signed_at: new Date().toISOString() }));
+      setStep(3);
+    } catch (err) {
+      alert(err.message || "Failed to sign lease");
+    } finally {
       setIsSubmitting(false);
-      setStep(3); // Move to success step
-    }, 2000);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f4f7f9] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
+      </div>
+    );
+  }
+
+  if (error || !lease) {
+    return (
+      <div className="min-h-screen bg-[#f4f7f9] flex flex-col font-sans text-[#0f172a]">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center p-6">
+          <div className="bg-white p-8 rounded-2xl shadow-sm text-center max-w-md w-full border border-red-100">
+            <div className="text-red-500 mb-4 flex justify-center">
+              <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Lease Not Found</h2>
+            <p className="text-gray-500 mb-6">{error || "The landlord has not generated a lease for this booking yet."}</p>
+            <button onClick={() => navigate('/my-bookings')} className="px-6 py-2 bg-[#1952c4] text-white rounded-xl">Go Back</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const startDate = new Date(lease.start_date).toLocaleDateString();
+  const endDate = new Date(lease.end_date).toLocaleDateString();
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col">
@@ -28,9 +100,9 @@ const DigitalLease = () => {
       <div className="bg-[#1e3a8a] text-white py-4 px-6 md:px-8 shadow-md relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold tracking-tight">Lease Agreement Signing</h1>
-          <p className="text-white/70 text-sm mt-0.5">Sunset Apartment - Unit A (12-Month Lease)</p>
+          <p className="text-white/70 text-sm mt-0.5">{lease.property_name} ({lease.property_address})</p>
         </div>
-        
+
         {/* Progress Tracker */}
         <div className="flex items-center gap-2 text-sm font-bold">
           <div className={`flex items-center gap-1 ${step >= 1 ? 'text-white' : 'text-white/40'}`}>
@@ -53,46 +125,42 @@ const DigitalLease = () => {
       </div>
 
       <main className="flex-grow flex flex-col lg:flex-row max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-8 gap-6">
-        
+
         {step < 3 ? (
           <>
-            {/* Left Side: Document Viewer (Mock) */}
+            {/* Left Side: Document Viewer */}
             <div className="w-full lg:w-2/3 bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 flex flex-col overflow-hidden">
               <div className="p-4 border-b border-[#e2e8f0]/60 bg-slate-50 flex justify-between items-center">
                 <span className="text-sm font-bold text-[#475569]">Standard_Lease_Agreement.pdf</span>
-                <div className="flex gap-2">
-                  <button className="p-1.5 text-[#64748b] hover:bg-[#e2e8f0] rounded-lg transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                  </button>
-                  <button className="p-1.5 text-[#64748b] hover:bg-[#e2e8f0] rounded-lg transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                  </button>
-                </div>
               </div>
-              
+
               <div className="flex-grow bg-[#f8fafc] p-6 overflow-y-auto relative h-[50vh] lg:h-auto">
-                 {/* Mock Document Content */}
-                 <div className="bg-white shadow-md p-8 md:p-12 mx-auto max-w-2xl min-h-full border border-gray-200">
-                    <h2 className="text-2xl font-black text-center mb-6">RESIDENTIAL LEASE AGREEMENT</h2>
-                    <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                      This Residential Lease Agreement ("Agreement") made this 1st day of August, 2026 is between <strong>Roberto Cruz</strong> ("Landlord") and <strong>Tenant Name</strong> ("Tenant").
-                    </p>
-                    <h3 className="font-bold mt-6 mb-2">1. PROPERTY</h3>
-                    <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                      The Landlord agrees to lease to the Tenant the property located at Sunset Apartment, Unit A, hereinafter referred to as the "Premises".
-                    </p>
-                    <h3 className="font-bold mt-6 mb-2">2. TERM</h3>
-                    <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                      The lease term will begin on August 15, 2026, and will terminate on August 14, 2027.
-                    </p>
-                    <h3 className="font-bold mt-6 mb-2">3. RENT</h3>
-                    <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                      Tenant agrees to pay Landlord rent in the amount of LKR 1,200.00 per month, payable in advance on the 1st day of each calendar month.
-                    </p>
-                    <div className="h-64 flex items-center justify-center border-t border-gray-300 mt-12 pt-8">
-                       <p className="text-gray-400 italic">... Continued on next page ...</p>
-                    </div>
-                 </div>
+                {/* Document Content */}
+                <div className="bg-white shadow-md p-8 md:p-12 mx-auto max-w-2xl min-h-full border border-gray-200">
+                  <h2 className="text-2xl font-black text-center mb-6">RESIDENTIAL LEASE AGREEMENT</h2>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    This Residential Lease Agreement ("Agreement") made this <strong>{new Date().toLocaleDateString()}</strong> is between <strong>{lease.owner_name}</strong> ("Landlord") and <strong>{lease.student_name}</strong> ("Tenant").
+                  </p>
+                  <h3 className="font-bold mt-6 mb-2">1. PROPERTY</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    The Landlord agrees to lease to the Tenant the property located at {lease.property_address} ({lease.property_name}), hereinafter referred to as the "Premises".
+                  </p>
+                  <h3 className="font-bold mt-6 mb-2">2. TERM</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    The lease term will begin on <strong>{startDate}</strong>, and will terminate on <strong>{endDate}</strong>.
+                  </p>
+                  <h3 className="font-bold mt-6 mb-2">3. RENT</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    Tenant agrees to pay Landlord rent in the amount of <strong>LKR {Number(lease.rent_amount).toLocaleString()}</strong> per month, payable in advance on the 1st day of each calendar month.
+                  </p>
+                  <h3 className="font-bold mt-6 mb-2">4. TERMS</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    {lease.terms}
+                  </p>
+                  <div className="h-32 flex items-center justify-center border-t border-gray-300 mt-12 pt-8">
+                    <p className="text-gray-400 italic">... End of Document ...</p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -107,9 +175,9 @@ const DigitalLease = () => {
                   <p className="text-[#475569] text-sm leading-relaxed mb-8">
                     Please carefully read through the lease agreement in the viewer. Once you have reviewed and agree to the terms, proceed to the signing phase.
                   </p>
-                  
+
                   <div className="mt-auto">
-                    <button 
+                    <button
                       onClick={() => setStep(2)}
                       className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl shadow-sm transition-all text-sm"
                     >
@@ -129,8 +197,8 @@ const DigitalLease = () => {
 
                   <div className="mb-6">
                     <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-2 uppercase">Your Electronic Signature</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       required
                       value={signature}
                       onChange={(e) => setSignature(e.target.value)}
@@ -141,26 +209,26 @@ const DigitalLease = () => {
                   </div>
 
                   <label className="flex items-start gap-3 cursor-pointer p-3 border border-[#e2e8f0] rounded-xl hover:bg-slate-50 transition-colors">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={agreed}
                       onChange={(e) => setAgreed(e.target.checked)}
-                      className="mt-1 w-5 h-5 text-[#1952c4] rounded focus:ring-[#1952c4]" 
+                      className="mt-1 w-5 h-5 text-[#1952c4] rounded focus:ring-[#1952c4]"
                     />
                     <span className="text-xs text-[#475569] font-medium leading-relaxed">
                       I agree that my typed name above acts as my electronic signature and is the legal equivalent of my manual signature.
                     </span>
                   </label>
-                  
+
                   <div className="mt-auto pt-6 flex gap-3">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setStep(1)}
                       className="w-1/3 py-4 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#475569] font-bold rounded-xl transition-colors text-sm"
                     >
                       Back
                     </button>
-                    <button 
+                    <button
                       type="submit"
                       disabled={!signature || !agreed || isSubmitting}
                       className="w-2/3 py-4 bg-[#10b981] hover:bg-[#059669] disabled:bg-[#a7f3d0] disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-sm transition-all text-sm flex items-center justify-center gap-2"
@@ -183,44 +251,37 @@ const DigitalLease = () => {
             </div>
           </>
         ) : (
-          /* Step 3: Success State */
+          /* Step 3: Success State (or already signed) */
           <div className="w-full max-w-3xl mx-auto bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 p-12 flex flex-col items-center text-center mt-8">
-             <div className="w-24 h-24 bg-[#ecfdf5] text-[#10b981] rounded-full flex items-center justify-center mb-8 shadow-sm border-[4px] border-[#a7f3d0]">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-             </div>
-             <h2 className="text-3xl font-black text-[#0f172a] tracking-tight mb-4">Lease Signed Successfully!</h2>
-             <p className="text-[#475569] text-lg max-w-lg mb-8">
-               Your digital signature has been recorded and the lease agreement is now legally binding. A copy of the signed document has been emailed to you and the landlord.
-             </p>
-             
-             <div className="bg-[#f8fafc] w-full max-w-md p-6 rounded-2xl border border-[#e2e8f0] mb-8 text-left">
-                <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Signature Details</p>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-semibold text-[#0f172a]">Signer:</span>
-                  <span className="text-lg italic font-signature text-[#1e3a8a]">{signature}</span>
-                </div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-semibold text-[#0f172a]">Timestamp:</span>
-                  <span className="text-sm text-[#475569]">{new Date().toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-[#0f172a]">IP Address:</span>
-                  <span className="text-sm text-[#475569]">192.168.1.1</span>
-                </div>
-             </div>
+            <div className="w-24 h-24 bg-[#ecfdf5] text-[#10b981] rounded-full flex items-center justify-center mb-8 shadow-sm border-[4px] border-[#a7f3d0]">
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-black text-[#0f172a] tracking-tight mb-4">Lease Signed Successfully!</h2>
+            <p className="text-[#475569] text-lg max-w-lg mb-8">
+              Your digital signature has been recorded and the lease agreement is now legally binding. A copy of the signed document has been saved.
+            </p>
 
-             <div className="flex gap-4 w-full max-w-md">
-                <button className="flex-1 py-4 bg-white border-2 border-[#1952c4] text-[#1952c4] hover:bg-[#ebf3ff] font-bold rounded-xl transition-colors text-sm">
-                  Download PDF
+            <div className="bg-[#f8fafc] w-full max-w-md p-6 rounded-2xl border border-[#e2e8f0] mb-8 text-left">
+              <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Signature Details</p>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-semibold text-[#0f172a]">Signer:</span>
+                <span className="text-lg italic font-signature text-[#1e3a8a]" style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive" }}>{lease.student_signature}</span>
+              </div>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-semibold text-[#0f172a]">Timestamp:</span>
+                <span className="text-sm text-[#475569]">{new Date(lease.signed_at || new Date()).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-4 w-full max-w-md">
+              <Link to={user?.role === 'owner' ? "/owner-dashboard" : "/my-bookings"} className="flex-1">
+                <button className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl shadow-sm transition-colors text-sm">
+                  Return to Bookings
                 </button>
-                <Link to="/profile" className="flex-1">
-                  <button className="w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl shadow-sm transition-colors text-sm">
-                    Return to Dashboard
-                  </button>
-                </Link>
-             </div>
+              </Link>
+            </div>
           </div>
         )}
       </main>

@@ -24,7 +24,7 @@ async function request(endpoint, options = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    throw new Error(data.error || data.message || "Something went wrong");
   }
 
   return data;
@@ -396,3 +396,91 @@ export async function disconnectRoommate(connectionId) {
     method: "DELETE",
   });
 }
+
+// ─────────────────────────────────────────────────────────────────
+// Forum API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getForumPosts(category, search) {
+  let url = "/forum/posts?";
+  if (category && category !== "All Topics") url += `category=${encodeURIComponent(category)}&`;
+  if (search) url += `search=${encodeURIComponent(search)}&`;
+  return request(url, { method: "GET" });
+}
+
+export async function createForumPost(postData) {
+  return request("/forum/posts", {
+    method: "POST",
+    body: JSON.stringify(postData),
+  });
+}
+
+export async function getForumPostById(id) {
+  return request(`/forum/posts/${id}`, { method: "GET" });
+}
+
+export async function addForumComment(postId, content) {
+  return request(`/forum/posts/${postId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export async function toggleForumUpvote(postId) {
+  return request(`/forum/posts/${postId}/upvote`, {
+    method: "POST",
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Leases API Methods
+// ─── LEASES ─────────────────────────────────────────────────────────────
+
+export const generateLease = async (bookingId) => {
+  const data = await request(`/leases`, {
+    method: 'POST',
+    body: JSON.stringify({ booking_id: bookingId }),
+  });
+  if (data.error || data.message) {
+    if (data.error) throw new Error(data.error);
+  }
+  return data;
+};
+
+export const getLeaseByBookingId = async (bookingId) => {
+  const data = await request(`/leases/booking/${bookingId}`);
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+export const signLease = async (leaseId, signature) => {
+  const data = await request(`/leases/${leaseId}/sign`, {
+    method: 'PUT',
+    body: JSON.stringify({ signature }),
+  });
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+// ─── PAYMENTS ─────────────────────────────────────────────────────────────
+
+export const processPayment = async (paymentDetails) => {
+  const data = await request(`/payments/pay`, {
+    method: 'POST',
+    body: JSON.stringify(paymentDetails),
+  });
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+export const getPaymentHistory = async () => {
+  const data = await request(`/payments/history`);
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+export const getOwnerLedger = async () => {
+  const data = await request(`/payments/ledger`);
+  if (data.error) throw new Error(data.error);
+  return data;
+};

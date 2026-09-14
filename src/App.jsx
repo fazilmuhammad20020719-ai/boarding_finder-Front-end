@@ -16,6 +16,7 @@ import VirtualTour from './pages/VirtualTour';
 import NeighborhoodDetails from './pages/NeighborhoodDetails';
 import RoommateMatcher from './pages/RoommateMatcher';
 import CommunityForum from './pages/CommunityForum';
+import ForumPost from './pages/ForumPost';
 import MaintenancePortal from './pages/MaintenancePortal';
 import DigitalLease from './pages/DigitalLease';
 import CalendarManagement from './pages/CalendarManagement';
@@ -89,6 +90,7 @@ function App() {
       <Route path="/neighborhood/:id" element={<ProtectedRoute><NeighborhoodDetails /></ProtectedRoute>} />
       <Route path="/roommate-matcher" element={<ProtectedRoute><RoommateMatcher /></ProtectedRoute>} />
       <Route path="/community-forum" element={<ProtectedRoute><CommunityForum /></ProtectedRoute>} />
+      <Route path="/community-forum/:id" element={<ProtectedRoute><ForumPost /></ProtectedRoute>} />
       <Route path="/maintenance-portal" element={<ProtectedRoute><MaintenancePortal /></ProtectedRoute>} />
       <Route path="/digital-lease" element={<ProtectedRoute><DigitalLease /></ProtectedRoute>} />
 
