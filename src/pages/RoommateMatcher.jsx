@@ -1,72 +1,171 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Link } from 'react-router-dom';
-
-const MOCK_ROOMMATES = [
-  {
-    id: "RM-1",
-    name: "Alex",
-    age: 22,
-    occupation: "Student",
-    budget: "LKR 400 - LKR 550/mo",
-    matchScore: 92,
-    avatar: "https://ui-avatars.com/api/?name=Alex&background=ebf3ff&color=1952c4",
-    bio: "Hi! I'm a third-year engineering student. Looking for a quiet place to study and sleep. I keep things very clean and respect personal space.",
-    tags: ["Non-smoker", "Early bird", "Very tidy", "Quiet"]
-  },
-  {
-    id: "RM-2",
-    name: "Samantha",
-    age: 25,
-    occupation: "Graphic Designer",
-    budget: "LKR 500 - LKR 700/mo",
-    matchScore: 85,
-    avatar: "https://ui-avatars.com/api/?name=Samantha&background=e8f7ec&color=10b981",
-    bio: "Working professional who occasionally works from home. I love cooking and don't mind sharing meals. Have a small, friendly cat.",
-    tags: ["Has Pets", "Night owl", "Social", "Clean"]
-  },
-  {
-    id: "RM-3",
-    name: "David",
-    age: 24,
-    occupation: "Software Dev",
-    budget: "LKR 600 - LKR 800/mo",
-    matchScore: 78,
-    avatar: "https://ui-avatars.com/api/?name=David&background=fef3c7&color=d97706",
-    bio: "Mostly at the office during the week. Weekends I'm usually out hiking or playing games. Easy going and flexible.",
-    tags: ["Non-smoker", "Gamer", "Relaxed", "Occasional drinker"]
-  },
-  {
-    id: "RM-4",
-    name: "Mia",
-    age: 21,
-    occupation: "Student",
-    budget: "LKR 350 - LKR 450/mo",
-    matchScore: 95,
-    avatar: "https://ui-avatars.com/api/?name=Mia&background=fee2e2&color=ef4444",
-    bio: "Nursing student looking for a chill roommate to split a 2-bedroom. I study a lot but love watching movies in my downtime.",
-    tags: ["Student", "Non-smoker", "Early bird", "Clean"]
-  }
-];
+import { getRoommateMatches, getMyRoommateProfile, updateRoommateProfile, passRoommateProfile, sendMessage, sendRoommateConnectionRequest, getRoommateConnectionRequests, getAcceptedRoommateConnections, respondToRoommateConnectionRequest, disconnectRoommate } from '../services/api';
 
 const RoommateMatcher = () => {
-  const [profiles, setProfiles] = useState(MOCK_ROOMMATES);
-  
-  const handleAction = (id, action) => {
-    // action could be 'message' or 'pass'
-    if (action === 'pass') {
-      setProfiles(prev => prev.filter(p => p.id !== id));
-    } else {
-      alert(`Opening chat with roommate ID: ${id}`);
+  const navigate = useNavigate();
+  const [profiles, setProfiles] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [acceptedConnections, setAcceptedConnections] = useState([]);
+  const [activeTab, setActiveTab] = useState('discover');
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    budgetMax: '',
+    ageMax: '',
+    location: '',
+    occupation: ''
+  });
+  const [myProfile, setMyProfile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [formData, setFormData] = useState({
+    age: '',
+    occupation: '',
+    budget_min: '',
+    budget_max: '',
+    location: '',
+    gender: 'Other',
+    preferred_gender: 'Any',
+    bio: '',
+    tags: ''
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [matchesRes, profileRes, requestsRes, connectionsRes] = await Promise.all([
+        getRoommateMatches(),
+        getMyRoommateProfile(),
+        getRoommateConnectionRequests(),
+        getAcceptedRoommateConnections()
+      ]);
+
+      setProfiles(matchesRes.matches || []);
+      setPendingRequests(requestsRes.requests || []);
+      setAcceptedConnections(connectionsRes.connections || []);
+
+      if (profileRes.profile) {
+        setMyProfile(profileRes.profile);
+        setFormData({
+          age: profileRes.profile.age || '',
+          occupation: profileRes.profile.occupation || '',
+          budget_min: profileRes.profile.budget_min || '',
+          budget_max: profileRes.profile.budget_max || '',
+          location: profileRes.profile.location || '',
+          gender: profileRes.profile.gender || 'Other',
+          preferred_gender: profileRes.profile.preferred_gender || 'Any',
+          bio: profileRes.profile.bio || '',
+          tags: profileRes.profile.tags ? profileRes.profile.tags.join(', ') : ''
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching roommate data:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleAction = async (profile, action) => {
+    if (action === 'pass') {
+      try {
+        // Optimistic UI update
+        setProfiles(prev => prev.filter(p => p.user_id !== profile.user_id));
+        // Permanent backend save
+        await passRoommateProfile(profile.user_id);
+      } catch (err) {
+        console.error("Failed to pass profile", err);
+        // Optional: you could revert the UI state here if it fails
+      }
+    } else if (action === 'connect') {
+      try {
+        setProfiles(prev => prev.filter(p => p.user_id !== profile.user_id));
+        await sendRoommateConnectionRequest(profile.user_id);
+        alert("Connection request sent!");
+      } catch (err) {
+        console.error("Failed to send connection request", err);
+        alert("Failed to send connection request.");
+      }
+    }
+  };
+
+  const handleRespond = async (connectionId, action) => {
+    try {
+      await respondToRoommateConnectionRequest(connectionId, action);
+      fetchData();
+    } catch (err) {
+      console.error("Failed to respond to request", err);
+      alert("Failed to update request.");
+    }
+  };
+
+  const handleMessage = async (userId) => {
+    try {
+      await sendMessage({
+        receiver_id: userId,
+        text: "Hi! I accepted your connection request on the Roommate Matcher."
+      });
+      navigate('/messages');
+    } catch (err) {
+      console.error("Failed to start conversation", err);
+      alert("Failed to start chat.");
+    }
+  };
+
+  const handleDisconnect = async (connectionId) => {
+    if (!window.confirm("Are you sure you want to remove this roommate connection?")) return;
+    try {
+      await disconnectRoommate(connectionId);
+      setAcceptedConnections(prev => prev.filter(c => c.connection_id !== connectionId));
+    } catch (err) {
+      console.error("Failed to disconnect", err);
+      alert("Failed to disconnect. Please try again.");
+    }
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setSaveError('');
+    setIsSaving(true);
+    try {
+      const dataToSubmit = {
+        ...formData,
+        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean)
+      };
+      const result = await updateRoommateProfile(dataToSubmit);
+      if (result && result.message) {
+        setIsModalOpen(false);
+        fetchData();
+      } else {
+        setSaveError('Unexpected response from server. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setSaveError(error.message || 'Failed to save profile. Check if the backend server is running.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const filteredProfiles = profiles.filter(p => {
+    if (filters.budgetMax && parseInt(p.budget_min) > parseInt(filters.budgetMax)) return false;
+    if (filters.ageMax && p.age > parseInt(filters.ageMax)) return false;
+    if (filters.location && (!p.location || !p.location.toLowerCase().includes(filters.location.toLowerCase()))) return false;
+    if (filters.occupation && (!p.occupation || !p.occupation.toLowerCase().includes(filters.occupation.toLowerCase()))) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
       <Navbar />
 
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
+
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
@@ -78,119 +177,308 @@ const RoommateMatcher = () => {
             </div>
             <p className="text-[#64748b] mt-1 text-[15px]">Find compatible roommates to share costs based on lifestyle preferences.</p>
           </div>
-          <button className="px-5 py-2.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#475569] font-bold rounded-xl shadow-sm transition-all text-sm flex items-center gap-2">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 py-2.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#475569] font-bold rounded-xl shadow-sm transition-all text-sm flex items-center gap-2"
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-            Edit My Seeker Profile
+            {myProfile ? "Edit My Seeker Profile" : "Create Seeker Profile"}
           </button>
         </div>
 
-        {/* Filters/Matches Info */}
-        <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-[20px] border border-[#e2e8f0]/60 shadow-sm mb-8 gap-4">
-          <p className="text-[#475569] font-medium">
-            Showing <span className="font-bold text-[#0f172a]">{profiles.length} potential matches</span> in your area
-          </p>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-[#64748b]">Sort by:</span>
-            <select className="bg-[#f0f4f9] border-none rounded-xl px-4 py-2 text-sm font-bold text-[#0f172a] focus:ring-0 cursor-pointer outline-none">
-              <option>Highest Match %</option>
-              <option>Lowest Budget</option>
-              <option>Newest Profiles</option>
-            </select>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6 border-b border-[#e2e8f0]/60 pb-2">
+          <button
+            onClick={() => setActiveTab('discover')}
+            className={`pb-2 font-bold transition-colors ${activeTab === 'discover' ? 'text-[#1952c4] border-b-2 border-[#1952c4]' : 'text-[#64748b] hover:text-[#0f172a]'}`}
+          >
+            Discover
+          </button>
+          <button
+            onClick={() => setActiveTab('connections')}
+            className={`pb-2 font-bold transition-colors flex items-center gap-2 ${activeTab === 'connections' ? 'text-[#1952c4] border-b-2 border-[#1952c4]' : 'text-[#64748b] hover:text-[#0f172a]'}`}
+          >
+            My Connections
+            {pendingRequests.length > 0 && (
+              <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{pendingRequests.length}</span>
+            )}
+          </button>
         </div>
 
-        {/* Roommate Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {profiles.length === 0 ? (
-            <div className="col-span-full bg-white rounded-[24px] p-12 text-center border border-[#e2e8f0]/60 shadow-sm">
-              <div className="w-16 h-16 bg-[#f0f4f9] text-[#94a3b8] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        {activeTab === 'discover' ? (
+          <>
+            {/* Filter Bar */}
+            <div className="bg-white p-5 rounded-[24px] border border-[#e2e8f0]/60 shadow-sm mb-8">
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 w-full">
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1.5">Max Budget</label>
+                  <input type="number" placeholder="e.g. 20000" value={filters.budgetMax} onChange={e => setFilters({ ...filters, budgetMax: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+                <div className="flex-1 w-full">
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1.5">Max Age</label>
+                  <input type="number" placeholder="e.g. 25" value={filters.ageMax} onChange={e => setFilters({ ...filters, ageMax: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+                <div className="flex-1 w-full">
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1.5">Location</label>
+                  <input type="text" placeholder="e.g. Colombo" value={filters.location} onChange={e => setFilters({ ...filters, location: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+                <div className="flex-1 w-full">
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1.5">Occupation</label>
+                  <select value={filters.occupation} onChange={e => setFilters({ ...filters, occupation: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none">
+                    <option value="">Any</option>
+                    <option value="student">Student</option>
+                    <option value="professional">Professional</option>
+                  </select>
+                </div>
+                <button onClick={() => setFilters({ budgetMax: '', ageMax: '', location: '', occupation: '' })} className="px-4 py-2 text-sm font-bold text-[#64748b] hover:text-[#0f172a] transition-colors rounded-xl border border-[#e2e8f0]/60 bg-[#f8fafc]">
+                  Clear
+                </button>
               </div>
-              <h3 className="text-lg font-bold text-[#0f172a] mb-1">No more profiles</h3>
-              <p className="text-[#64748b]">You've reviewed all potential roommates in your area. Try expanding your search criteria.</p>
+              <div className="mt-4 pt-4 border-t border-[#e2e8f0]/60 flex justify-between items-center">
+                <p className="text-[#475569] text-sm font-medium">
+                  Showing <span className="font-bold text-[#1952c4]">{filteredProfiles.length}</span> matches based on your filters
+                </p>
+              </div>
             </div>
-          ) : (
-            profiles.map(profile => (
-              <div key={profile.id} className="bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
-                {/* Card Header (Avatar & Match Score) */}
-                <div className="p-6 pb-0 flex justify-between items-start">
-                  <div className="flex items-center gap-4">
-                    <img src={profile.avatar} alt={profile.name} className="w-16 h-16 rounded-full border-2 border-white shadow-sm" />
-                    <div>
-                      <h2 className="text-xl font-bold text-[#0f172a]">{profile.name}, {profile.age}</h2>
-                      <p className="text-[#64748b] text-sm font-medium">{profile.occupation}</p>
+
+            {/* Roommate Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                <div className="col-span-full py-12 text-center text-gray-500 font-bold">Loading matches...</div>
+              ) : filteredProfiles.length === 0 ? (
+                <div className="col-span-full bg-white rounded-[24px] p-12 text-center border border-[#e2e8f0]/60 shadow-sm">
+                  <div className="w-16 h-16 bg-[#f0f4f9] text-[#94a3b8] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  </div>
+                  <h3 className="text-lg font-bold text-[#0f172a] mb-1">No more profiles</h3>
+                  <p className="text-[#64748b]">You've reviewed all potential roommates matching your criteria. Try expanding your search filters.</p>
+                </div>
+              ) : (
+                filteredProfiles.map(profile => (
+                  <div key={profile.profile_id} className="bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
+                    {/* Card Header (Avatar & Match Score) */}
+                    <div className="p-6 pb-0 flex justify-between items-start">
+                      <div className="flex items-center gap-4">
+                        <img src={profile.avatar_url || "https://ui-avatars.com/api/?name=User"} alt={profile.name} className="w-16 h-16 rounded-full border-2 border-white shadow-sm" />
+                        <div>
+                          <h2 className="text-xl font-bold text-[#0f172a]">{profile.name}, {profile.age} <span className="text-[#64748b] text-sm font-normal">({profile.gender || 'Other'})</span></h2>
+                          <p className="text-[#64748b] text-sm font-medium">{profile.occupation}</p>
+                          {profile.location && (
+                            <p className="text-[#64748b] text-xs mt-1 flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                              {profile.location}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Match Score Badge */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center border-4 border-green-100 relative">
+                          <svg className="absolute inset-0 w-full h-full text-green-500" viewBox="0 0 36 36">
+                            <path
+                              className="text-gray-200"
+                              strokeWidth="3"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <path
+                              className="text-green-500"
+                              strokeWidth="3"
+                              strokeDasharray={`${profile.matchScore || 50}, 100`}
+                              strokeLinecap="round"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                          </svg>
+                          <span className="text-xs font-black text-[#0f172a] z-10">{profile.matchScore || 50}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-6 flex-grow flex flex-col">
+                      <div className="mb-4">
+                        <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Budget</p>
+                        <p className="text-lg font-black text-[#10b981]">LKR {profile.budget_min} - {profile.budget_max}/mo</p>
+                      </div>
+
+                      <p className="text-[#475569] text-sm leading-relaxed mb-6 italic line-clamp-3">
+                        "{profile.bio}"
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 mt-auto">
+                        {(profile.tags || []).map(tag => (
+                          <span key={tag} className="px-2.5 py-1 bg-[#f0f4f9] text-[#475569] text-[11px] font-bold rounded-lg border border-[#e2e8f0]/80">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Card Actions */}
+                    <div className="flex border-t border-[#e2e8f0]/60">
+                      <button
+                        onClick={() => handleAction(profile, 'pass')}
+                        className="flex-1 py-4 text-center font-bold text-[#64748b] hover:bg-red-50 hover:text-red-600 transition-colors border-r border-[#e2e8f0]/60 flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        Pass
+                      </button>
+                      <button
+                        onClick={() => handleAction(profile, 'connect')}
+                        className="flex-1 py-4 text-center font-bold text-[#1952c4] hover:bg-[#ebf3ff] transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        Connect
+                      </button>
                     </div>
                   </div>
-                  
-                  {/* Match Score Badge */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center border-4 border-green-100 relative">
-                       <svg className="absolute inset-0 w-full h-full text-green-500" viewBox="0 0 36 36">
-                          <path
-                            className="text-gray-200"
-                            strokeWidth="3"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          />
-                          <path
-                            className="text-green-500"
-                            strokeWidth="3"
-                            strokeDasharray={`${profile.matchScore}, 100`}
-                            strokeLinecap="round"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          />
-                       </svg>
-                       <span className="text-xs font-black text-[#0f172a] z-10">{profile.matchScore}%</span>
+                ))
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="space-y-8">
+            {/* Pending Requests */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Pending Requests ({pendingRequests.length})</h2>
+              {pendingRequests.length === 0 ? (
+                <p className="text-[#64748b] bg-white p-6 rounded-xl border border-[#e2e8f0]/60">No pending connection requests.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {pendingRequests.map(req => (
+                    <div key={req.connection_id} className="bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 p-6 flex flex-col">
+                      <div className="flex items-center gap-4 mb-4">
+                        <img src={req.avatar_url || "https://ui-avatars.com/api/?name=User"} alt={req.name} className="w-12 h-12 rounded-full border border-gray-200" />
+                        <div>
+                          <h3 className="font-bold text-gray-900">{req.name}, {req.age}</h3>
+                          <p className="text-xs text-gray-500">{req.occupation}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm italic text-gray-600 line-clamp-2 mb-4">"{req.bio}"</p>
+                      <div className="mt-auto flex gap-2">
+                        <button onClick={() => handleRespond(req.connection_id, 'accepted')} className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-xl text-sm transition-colors">Accept</button>
+                        <button onClick={() => handleRespond(req.connection_id, 'rejected')} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-xl text-sm transition-colors">Decline</button>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Card Body */}
-                <div className="p-6 flex-grow flex flex-col">
-                  <div className="mb-4">
-                    <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Budget</p>
-                    <p className="text-lg font-black text-[#10b981]">{profile.budget}</p>
-                  </div>
-
-                  <p className="text-[#475569] text-sm leading-relaxed mb-6 italic line-clamp-3">
-                    "{profile.bio}"
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mt-auto">
-                    {profile.tags.map(tag => (
-                      <span key={tag} className="px-2.5 py-1 bg-[#f0f4f9] text-[#475569] text-[11px] font-bold rounded-lg border border-[#e2e8f0]/80">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+            {/* Accepted Connections */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">My Roommates ({acceptedConnections.length})</h2>
+              {acceptedConnections.length === 0 ? (
+                <p className="text-[#64748b] bg-white p-6 rounded-xl border border-[#e2e8f0]/60">You have no accepted connections yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {acceptedConnections.map(conn => (
+                    <div key={conn.connection_id} className="bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 p-6 flex flex-col">
+                      <div className="flex items-center gap-4 mb-4">
+                        <img src={conn.avatar_url || "https://ui-avatars.com/api/?name=User"} alt={conn.name} className="w-12 h-12 rounded-full border border-gray-200" />
+                        <div>
+                          <h3 className="font-bold text-gray-900">{conn.name}, {conn.age}</h3>
+                          <p className="text-xs text-gray-500">{conn.occupation}</p>
+                        </div>
+                      </div>
+                      <div className="mt-auto flex flex-col gap-2">
+                        <button onClick={() => handleMessage(conn.user_id)} className="w-full bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold py-3 rounded-xl text-sm transition-colors flex justify-center items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                          Message
+                        </button>
+                        <button onClick={() => handleDisconnect(conn.connection_id)} className="w-full bg-white border border-red-200 hover:border-red-300 text-red-500 hover:text-red-600 hover:bg-red-50 font-bold py-2 rounded-xl text-sm transition-colors flex justify-center items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          Disconnect
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-
-                {/* Card Actions */}
-                <div className="flex border-t border-[#e2e8f0]/60">
-                  <button 
-                    onClick={() => handleAction(profile.id, 'pass')}
-                    className="flex-1 py-4 text-center font-bold text-[#64748b] hover:bg-red-50 hover:text-red-600 transition-colors border-r border-[#e2e8f0]/60 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    Pass
-                  </button>
-                  <button 
-                    onClick={() => handleAction(profile.id, 'message')}
-                    className="flex-1 py-4 text-center font-bold text-[#1952c4] hover:bg-[#ebf3ff] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                    Message
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+              )}
+            </div>
+          </div>
+        )}
 
       </main>
+
+      {/* Profile Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#e2e8f0]/60 flex justify-between items-center bg-[#f8fafc]">
+              <h2 className="text-xl font-extrabold text-[#0f172a]">Seeker Profile</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-[#94a3b8] hover:text-[#0f172a]">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleProfileSubmit} className="p-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Age</label>
+                  <input required type="number" value={formData.age} onChange={e => setFormData({ ...formData, age: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Occupation</label>
+                  <input required type="text" value={formData.occupation} onChange={e => setFormData({ ...formData, occupation: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Min Budget (LKR)</label>
+                  <input required type="number" value={formData.budget_min} onChange={e => setFormData({ ...formData, budget_min: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Max Budget (LKR)</label>
+                  <input required type="number" value={formData.budget_max} onChange={e => setFormData({ ...formData, budget_max: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Gender</label>
+                  <select required value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Preferred Roommate Gender</label>
+                  <select required value={formData.preferred_gender} onChange={e => setFormData({ ...formData, preferred_gender: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none">
+                    <option value="Any">Any</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Preferred Location</label>
+                <input required type="text" placeholder="e.g. Colombo, Kandy" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Bio</label>
+                <textarea required rows="3" value={formData.bio} onChange={e => setFormData({ ...formData, bio: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none resize-none"></textarea>
+              </div>
+              <div className="mb-6">
+                <label className="block text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Lifestyle Tags (comma separated)</label>
+                <input required type="text" placeholder="e.g. Non-smoker, Early bird, Clean" value={formData.tags} onChange={e => setFormData({ ...formData, tags: e.target.value })} className="w-full px-4 py-2 bg-[#f0f4f9] border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#1952c4] outline-none" />
+              </div>
+              {saveError && (
+                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                  ⚠️ {saveError}
+                </div>
+              )}
+              <button type="submit" disabled={isSaving} className="w-full py-3 bg-[#1952c4] hover:bg-[#1546a8] disabled:bg-[#94a3b8] text-white font-bold rounded-xl shadow-md transition-colors">
+                {isSaving ? 'Saving...' : 'Save Profile'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

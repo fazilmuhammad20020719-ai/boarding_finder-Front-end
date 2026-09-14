@@ -342,3 +342,57 @@ export async function removeSavedListing(listingId) {
 export async function checkSavedStatus(listingId) {
   return request(`/saved-listings/check/${listingId}`, { method: "GET" });
 }
+
+// ─────────────────────────────────────────────────────────────────
+// Roommate Matcher API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getRoommateMatches() {
+  return request("/roommates/matches", { method: "GET" });
+}
+
+export async function getMyRoommateProfile() {
+  return request("/roommates/me", { method: "GET" });
+}
+
+export async function updateRoommateProfile(profileData) {
+  return request("/roommates/me", {
+    method: "POST",
+    body: JSON.stringify(profileData),
+  });
+}
+
+export async function passRoommateProfile(passedId) {
+  return request("/roommates/pass", {
+    method: "POST",
+    body: JSON.stringify({ passedId }),
+  });
+}
+
+export async function sendRoommateConnectionRequest(receiverId) {
+  return request("/roommates/connect", {
+    method: "POST",
+    body: JSON.stringify({ receiverId }),
+  });
+}
+
+export async function getRoommateConnectionRequests() {
+  return request("/roommates/connections/pending", { method: "GET" });
+}
+
+export async function respondToRoommateConnectionRequest(connectionId, action) {
+  return request(`/roommates/connections/${connectionId}/respond`, {
+    method: "PUT",
+    body: JSON.stringify({ action }),
+  });
+}
+
+export async function getAcceptedRoommateConnections() {
+  return request("/roommates/connections/accepted", { method: "GET" });
+}
+
+export async function disconnectRoommate(connectionId) {
+  return request(`/roommates/connections/${connectionId}`, {
+    method: "DELETE",
+  });
+}
