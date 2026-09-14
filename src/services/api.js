@@ -278,6 +278,10 @@ export async function getAllAdminListings() {
   return request("/admin/listings", { method: "GET" });
 }
 
+export async function getPlatformAnalytics() {
+  return request("/admin/analytics", { method: "GET" });
+}
+
 export async function updateListingStatusAdmin(listingId, status) {
   return request(`/admin/listings/${listingId}/status`, {
     method: "PUT",
@@ -308,3 +312,27 @@ export async function getOwnerOverviewStats() {
   return request("/owner/overview-stats", { method: "GET" });
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Saved Listings API Methods
+// ─────────────────────────────────────────────────────────────────
+
+export async function getSavedListings() {
+  return request("/saved-listings", { method: "GET" });
+}
+
+export async function addSavedListing(listing_id) {
+  return request("/saved-listings", {
+    method: "POST",
+    body: JSON.stringify({ listing_id }),
+  });
+}
+
+export async function removeSavedListing(listingId) {
+  return request(`/saved-listings/${listingId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function checkSavedStatus(listingId) {
+  return request(`/saved-listings/check/${listingId}`, { method: "GET" });
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin } from '../services/api';
+import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin, checkSavedStatus, addSavedListing, removeSavedListing } from '../services/api';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -175,6 +175,23 @@ const PropertyDetails = () => {
             });
           }
 
+          // Check if logged-in student already has a booking for this listing
+          let isSaved = false;
+          if (user && user.role !== 'owner') {
+            try {
+              const bookingCheck = await checkBookingForListing(data.listing_id);
+              if (bookingCheck.booking) {
+                setExistingBooking(bookingCheck.booking);
+              }
+              const saveCheck = await checkSavedStatus(data.listing_id);
+              if (saveCheck.isSaved) {
+                isSaved = true;
+              }
+            } catch (e) {
+              // Not logged in or network error — silently ignore
+            }
+          }
+
           setListing({
             id: data.listing_id,
             name: data.title,
@@ -192,7 +209,7 @@ const PropertyDetails = () => {
             image: allImages[0],
             description: data.description,
             isFullyBooked: data.status === 'booked',
-            liked: false,
+            liked: isSaved,
             ownerName: data.owner_name || "Property Owner",
             ownerEmail: data.owner_email || "",
             ownerPhone: data.owner_phone || "",
@@ -202,18 +219,6 @@ const PropertyDetails = () => {
             reviews_data: data.reviews_data,
             approval_status: data.approval_status || 'approved',
           });
-
-          // Check if logged-in student already has a booking for this listing
-          if (user && user.role !== 'owner') {
-            try {
-              const bookingCheck = await checkBookingForListing(data.listing_id);
-              if (bookingCheck.booking) {
-                setExistingBooking(bookingCheck.booking);
-              }
-            } catch (e) {
-              // Not logged in or network error — silently ignore
-            }
-          }
         }
       } catch (err) {
         console.error("Failed to load listing details", err);
@@ -296,7 +301,25 @@ const PropertyDetails = () => {
             <div>
               <div className="flex justify-between items-start mb-2">
                 <h1 className="text-4xl font-extrabold tracking-tight text-[#0f172a]">{listing.name}</h1>
-                <button className="flex items-center gap-2 px-4 py-2 border border-[#e2e8f0] rounded-full hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600 bg-white shadow-sm cursor-pointer">
+                <button
+                  onClick={async () => {
+                    if (!user || user.role === 'owner') {
+                      alert("Please login as a student to save properties.");
+                      return;
+                    }
+                    try {
+                      if (listing.liked) {
+                        await removeSavedListing(listing.id);
+                      } else {
+                        await addSavedListing(listing.id);
+                      }
+                      setListing(prev => ({ ...prev, liked: !prev.liked }));
+                    } catch (err) {
+                      console.error("Failed to toggle save status", err);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 border border-[#e2e8f0] rounded-full hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600 bg-white shadow-sm cursor-pointer"
+                >
                   <svg className={`w-4 h-4 ${listing.liked ? 'text-red-500 fill-current' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>

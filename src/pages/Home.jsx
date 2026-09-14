@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getAllListings } from '../services/api';
+import { getAllListings, getSavedListings, addSavedListing, removeSavedListing } from '../services/api';
 
 // Remove MOCK_LISTINGS and map from API instead
 const mapListing = (dbListing) => {
@@ -109,19 +109,25 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getAllListings();
-        if (data.listings) {
-          setListings(data.listings.map(mapListing));
+        const [listingsData, savedData] = await Promise.all([
+          getAllListings(),
+          localStorage.getItem("token") ? getSavedListings().catch(() => []) : Promise.resolve([])
+        ]);
+
+        if (listingsData.listings) {
+          const savedIds = new Set(savedData.map(l => l.listing_id));
+          const mapped = listingsData.listings.map(mapListing);
+          setListings(mapped.map(l => ({ ...l, liked: savedIds.has(l.id) })));
         }
       } catch (err) {
-        console.error("Failed to fetch listings:", err);
+        console.error("Failed to fetch data:", err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchListings();
+    fetchData();
   }, []);
 
   const handleLogout = () => {
@@ -163,7 +169,7 @@ const HomePage = () => {
             Find Your Home<br />Near Campus
           </h1>
           <p className="text-white/75 text-base sm:text-lg max-w-lg mb-8 font-normal leading-relaxed">
-            Discover verified boarding houses, dormitories, and studio units close to top Philippine universities.
+            Discover verified boarding houses, dormitories, and studio units close to Rajarata University of Sri Lanka.
           </p>
 
           {/* Search Bar */}
@@ -316,9 +322,22 @@ const HomePage = () => {
 
                   <button
                     type="button"
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      setListings(listings.map(l => l.id === listing.id ? { ...l, liked: !l.liked } : l));
+                      if (!localStorage.getItem("token")) {
+                        alert("Please login to save properties.");
+                        return;
+                      }
+                      try {
+                        if (listing.liked) {
+                          await removeSavedListing(listing.id);
+                        } else {
+                          await addSavedListing(listing.id);
+                        }
+                        setListings(listings.map(l => l.id === listing.id ? { ...l, liked: !l.liked } : l));
+                      } catch (err) {
+                        console.error("Failed to toggle save status", err);
+                      }
                     }}
                     className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white hover:bg-slate-50 shadow-md flex items-center justify-center transition-transform hover:scale-105 border-none cursor-pointer"
                   >
@@ -451,45 +470,6 @@ const HomePage = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ===== OWN A BOARDING HOUSE CTA ===== */}
-        <section className="max-w-7xl mx-auto px-6 md:px-12 py-14">
-          <div className="bg-[#1952c4] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-md relative overflow-hidden">
-            <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
-              <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-                <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6" />
-                <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6" />
-                <circle cx="50" cy="50" r="10" fill="white" />
-                <circle cx="50" cy="90" r="10" fill="white" />
-                <circle cx="50" cy="130" r="10" fill="white" />
-                <circle cx="150" cy="70" r="10" fill="white" />
-                <circle cx="150" cy="110" r="10" fill="white" />
-              </svg>
-            </div>
-
-            <div className="max-w-xl text-left relative z-10">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">Own a boarding house?</h2>
-              <p className="text-white/80 text-sm sm:text-base leading-relaxed font-normal">
-                List your property and connect with thousands of students looking for a place near campus.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-4 flex-shrink-0 relative z-10">
-              <button
-                onClick={() => navigate('/register')}
-                className="px-6 py-3 bg-white hover:bg-slate-100 text-[#1952c4] font-bold rounded-xl transition-all shadow-sm text-sm cursor-pointer border-none"
-              >
-                List Your Property
-              </button>
-              <button
-                onClick={() => navigate('/register')}
-                className="px-6 py-3 border border-white hover:bg-white/10 text-white font-bold rounded-xl transition-all text-sm cursor-pointer bg-transparent"
-              >
-                Learn More
-              </button>
             </div>
           </div>
         </section>
