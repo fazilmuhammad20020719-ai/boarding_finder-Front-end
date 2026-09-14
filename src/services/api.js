@@ -133,6 +133,12 @@ export async function uploadListingPhotos(files) {
   return data;
 }
 
+// ─── Neighborhood API Methods ──────────────────
+
+export async function getNeighborhoodDetails(id) {
+  return request(`/listings/${id}/neighborhood`);
+}
+
 // ─── Profile API Methods ─────────────────────
 
 export async function updateProfile(profileData) {
