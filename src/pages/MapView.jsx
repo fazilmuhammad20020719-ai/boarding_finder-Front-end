@@ -83,9 +83,19 @@ const MapViewPage = () => {
             parsedImages = [];
           }
 
-          const displayImage = parsedImages.length > 0
-            ? (parsedImages[0].startsWith('http') ? parsedImages[0] : `http://localhost:5000${parsedImages[0]}`)
-            : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+          let displayImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+          if (parsedImages.length > 0) {
+            const firstImg = parsedImages[0];
+            if (firstImg.includes('drive.google.com/uc?id=')) {
+              displayImage = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+            } else if (firstImg.startsWith('http')) {
+              displayImage = firstImg;
+            } else {
+              const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
+              const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+              displayImage = `/${pathPrefix}${cleanUrl}`;
+            }
+          }
 
           return {
             id: dbListing.listing_id,
