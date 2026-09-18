@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import bgImage from '../assets/Image/Image.png';
 import Navbar from '../components/Navbar';
@@ -106,12 +106,7 @@ const LandingPage = () => {
                   >
                     Get Started →
                   </Link>
-                  <Link
-                    to="/register"
-                    className="px-7 py-3 border border-[#FACC15] text-[#FACC15] hover:bg-[#FACC15]/10 font-bold rounded-full transition-all text-center text-sm tracking-wide"
-                  >
-                    Sign Up Free
-                  </Link>
+
                 </>
               )}
             </div>
