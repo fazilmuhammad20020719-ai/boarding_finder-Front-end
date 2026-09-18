@@ -1,0 +1,103 @@
+================================================================================
+  BOARDINGFINDER — DARK THEME UPDATE CHECKLIST
+  Theme: bg-black | Card: #1A1A1A | Accent: #FACC15 | Border: #2a2a2a / #333
+================================================================================
+
+LEGEND:
+  [✅] Already updated to new dark theme
+  [❌] Needs theme update
+  [⚙️ ] Admin/internal tool — lower priority
+  [🔒] Auth-flow page — high priority
+
+--------------------------------------------------------------------------------
+  AUTH FLOW PAGES (High Priority)
+--------------------------------------------------------------------------------
+  [✅] login.jsx                   — Dark theme done
+  [✅] Register.jsx                — Dark theme done
+  [✅] VerifyAccount.jsx           — Dark theme done
+  [✅] IdentityVerification.jsx    — Dark theme done
+  [❌] ForgotPassword.jsx          — Needs update
+  [❌] ResetPassword.jsx           — Needs update
+  [❌] PendingApproval.jsx         — Needs update
+
+--------------------------------------------------------------------------------
+  PUBLIC / LANDING PAGES (High Priority)
+--------------------------------------------------------------------------------
+  [✅] Landing.jsx                 — Dark theme done
+  [❌] Home.jsx                    — Needs update (main listing browse page)
+  [❌] Search.jsx                  — Needs update (search & filter page)
+  [❌] PropertyDetails.jsx         — Needs update (single listing view)
+  [❌] AboutUs.jsx                 — Needs update
+  [❌] ContactUs.jsx               — Needs update
+  [❌] FAQ.jsx                     — Needs update
+  [❌] TermsPrivacy.jsx            — Needs update
+  [❌] NotFound.jsx                — Needs update
+  [❌] Unauthorized.jsx            — Needs update
+
+--------------------------------------------------------------------------------
+  STUDENT PAGES (Medium Priority)
+--------------------------------------------------------------------------------
+  [❌] MyBookings.jsx              — Needs update
+  [❌] SavedHomes.jsx              — Needs update
+  [❌] Profile.jsx                 — Needs update
+  [❌] Settings.jsx                — Needs update
+  [❌] Notifications.jsx           — Needs update
+  [❌] Messages.jsx                — Needs update
+  [❌] RoommateMatcher.jsx         — Needs update
+  [❌] CompareListings.jsx         — Needs update
+  [❌] ReviewPage.jsx              — Needs update
+  [❌] BookingPage.jsx             — Needs update
+  [❌] BookingConfirmation.jsx     — Needs update
+  [❌] MapView.jsx                 — Needs update
+  [❌] NeighborhoodDetails.jsx     — Needs update
+  [❌] VirtualTour.jsx             — Needs update
+  [❌] DigitalLease.jsx            — Needs update
+  [❌] CommunityForum.jsx          — Needs update
+  [❌] ForumPost.jsx               — Needs update
+
+--------------------------------------------------------------------------------
+  OWNER PAGES (Medium Priority)
+--------------------------------------------------------------------------------
+  [❌] OwnerDashboard.jsx          — Needs update
+  [❌] OwnerListingForm.jsx        — Needs update (add/edit listing)
+  [❌] MyListings.jsx              — Needs update
+  [❌] ManageListings.jsx          — Needs update
+  [❌] ManageReservations.jsx      — Needs update
+  [❌] CalendarManagement.jsx      — Needs update
+  [❌] Earnings.jsx                — Needs update
+  [❌] PaymentHistory.jsx          — Needs update
+  [❌] MaintenancePortal.jsx       — Needs update
+  [❌] PromoteProperty.jsx         — Needs update
+
+--------------------------------------------------------------------------------
+  ADMIN PAGES (Lower Priority)
+--------------------------------------------------------------------------------
+  [⚙️ ] AdminDashboard.jsx         — Needs update
+  [⚙️ ] ManageUsers.jsx            — Needs update
+  [⚙️ ] DatabaseViewer.jsx         — Needs update
+
+--------------------------------------------------------------------------------
+  COMPONENTS (Shared)
+--------------------------------------------------------------------------------
+  [✅] Navbar.jsx                  — Dark theme done
+  [❌] Footer.jsx                  — Needs update
+  [❌] ReportModal.jsx             — Needs update
+  [--] ProtectedRoute.jsx          — No UI, skip
+
+--------------------------------------------------------------------------------
+  SUMMARY
+--------------------------------------------------------------------------------
+  Total files:       48 pages + 4 components = 52 items
+  Already done:      6  (Landing, login, Register, VerifyAccount,
+                        IdentityVerification, Navbar)
+  Remaining:         46 items
+
+  Suggested order:
+    1. ForgotPassword, ResetPassword, PendingApproval  (auth flow)
+    2. Home, Search, PropertyDetails                   (core user journey)
+    3. Profile, Settings, Notifications, Messages      (user account)
+    4. OwnerDashboard, OwnerListingForm, MyListings    (owner flow)
+    5. Remaining student & public pages
+    6. Admin pages last
+
+================================================================================
