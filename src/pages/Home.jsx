@@ -1,0 +1,530 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import bgImage from '../assets/Image/Image.png';
+import { getAllListings } from '../services/api';
+
+// Remove MOCK_LISTINGS and map from API instead
+const mapListing = (dbListing) => {
+  let parsedAmenities = [];
+  if (Array.isArray(dbListing.amenities)) {
+    parsedAmenities = dbListing.amenities;
+  } else if (typeof dbListing.amenities === 'string') {
+    try {
+      const parsed = JSON.parse(dbListing.amenities);
+      if (Array.isArray(parsed)) {
+        parsedAmenities = parsed;
+      } else if (typeof parsed === 'object' && parsed !== null) {
+        parsedAmenities = Object.keys(parsed).filter(key => parsed[key]);
+      } else {
+        parsedAmenities = [String(parsed)];
+      }
+    } catch (e) {
+      if (dbListing.amenities.startsWith('{') && dbListing.amenities.endsWith('}')) {
+        parsedAmenities = dbListing.amenities.slice(1, -1).split(',').map(a => {
+          const key = a.split(':')[0];
+          return key ? key.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '') : '';
+        }).filter(Boolean);
+      } else {
+        parsedAmenities = dbListing.amenities.split(',').map(a => a.trim()).filter(Boolean);
+      }
+    }
+  }
+  
+  if (!Array.isArray(parsedAmenities)) {
+    parsedAmenities = [];
+  }
+
+  let rawImages = dbListing.image_urls || dbListing.images;
+  let parsedImages = [];
+  if (Array.isArray(rawImages)) {
+    parsedImages = rawImages;
+  } else if (typeof rawImages === 'string') {
+    try {
+      const parsed = JSON.parse(rawImages);
+      if (Array.isArray(parsed)) {
+        parsedImages = parsed;
+      } else {
+        parsedImages = [String(parsed)];
+      }
+    } catch (e) {
+      if (rawImages.startsWith('[') && rawImages.endsWith(']')) {
+        parsedImages = rawImages.slice(1, -1).split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+      } else {
+        parsedImages = rawImages.split(',').map(url => url.trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '')).filter(Boolean);
+      }
+    }
+  }
+
+  if (!Array.isArray(parsedImages)) {
+    parsedImages = [];
+  }
+
+  let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
+  if (parsedImages.length > 0) {
+    const firstImg = parsedImages[0];
+    if (firstImg.includes('drive.google.com/uc?id=')) {
+      imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
+    } else if (firstImg.startsWith('http')) {
+      imageUrl = firstImg;
+    } else {
+      const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
+      const pathPrefix = cleanUrl.startsWith('images/') ? '' : 'images/';
+      imageUrl = `/${pathPrefix}${cleanUrl}`;
+    }
+  }
+
+  return {
+    id: dbListing.listing_id,
+    name: dbListing.title,
+    university: dbListing.university || 'Nearby University',
+    location: dbListing.location,
+    price: Number(dbListing.price) || 0,
+    rating: dbListing.rating || 0,
+    reviews: dbListing.reviews || 0,
+    type: dbListing.type || 'boarding_house',
+    gender: dbListing.gender || 'mixed',
+    amenities: parsedAmenities,
+    distance: dbListing.distance || 'N/A',
+    beds: dbListing.beds || 1,
+    image: imageUrl,
+    isFullyBooked: dbListing.status === 'booked',
+    liked: false
+  };
+};
+
+const HomePage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+  const [prevBgIndex, setPrevBgIndex] = useState(0);
+
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const bgImages = useMemo(() => [
+    '/slide1.jpg',
+    '/slide2.jpg',
+    '/slide3.jpg'
+  ], []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBgIndex((prevIndex) => {
+        setPrevBgIndex(prevIndex);
+        return (prevIndex + 1) % bgImages.length;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [bgImages.length]);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await getAllListings();
+        if (data.listings) {
+          setListings(data.listings.map(mapListing));
+        }
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userLoggedIn');
+    navigate('/');
+  };
+
+  const likedCount = useMemo(() => listings.filter(l => l.liked).length, [listings]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    } else {
+      navigate('/search');
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full flex flex-col font-sans antialiased text-main relative bg-slate-50">
+      
+      {/* Subtle Yellow + White Glowing Ambient Lights */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-overlay">
+        <div className="absolute top-0 left-1/4 w-[40vw] h-[40vw] rounded-full bg-white/40 blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[50vw] h-[50vw] rounded-full bg-yellow-300/20 blur-[150px]" />
+      </div>
+      <div className="relative z-10 flex flex-col flex-grow">
+      <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="home" transparent={true} />
+
+      {/* ===== HERO SECTION ===== */}
+      <section className="relative text-slate-800 overflow-hidden border-b border-white/40 shadow-sm min-h-[100vh] flex flex-col justify-center mt-[-80px]">
+        {/* We use mt-[-80px] so the hero background correctly goes behind the transparent Navbar which is 80px tall (h-20) */}
+        
+        {/* Background Slideshow (Hero Only) */}
+        {bgImages.map((img, index) => {
+          let opacityClass = 'opacity-0 z-0';
+          if (index === currentBgIndex) {
+            opacityClass = 'opacity-100 z-10';
+          } else if (index === prevBgIndex) {
+            opacityClass = 'opacity-100 z-0';
+          }
+          return (
+            <img
+              key={img}
+              src={img}
+              alt="Boarding background"
+              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out pointer-events-none ${opacityClass}`}
+            />
+          );
+        })}
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-20 w-full flex flex-col items-center text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-slate-900 max-w-3xl mb-6">
+            Find Your Home<br />Near Campus
+          </h1>
+          <p className="text-slate-700 text-base sm:text-lg font-medium max-w-xl mb-10 font-normal leading-relaxed">
+            Discover verified boarding houses, dormitories, and studio units close to top Philippine universities.
+          </p>
+
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgba(250,204,21,0.25)] rounded-3xl p-2.5 w-full max-w-2xl mx-auto mb-6">
+            <svg className="w-5 h-5 text-slate-500 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by university, location, or boarding name..."
+              className="flex-grow py-3 bg-transparent text-slate-800 placeholder-slate-500 font-bold focus:outline-none text-sm font-medium text-left"
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-extrabold shadow-[0_4px_14px_rgba(250,204,21,0.4)] rounded-2xl shadow-sm text-sm transition-all flex-shrink-0 cursor-pointer border-none"
+            >
+              Search Now
+            </button>
+          </form>
+        </div>
+
+
+        </section>
+
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="flex-grow">
+
+        {/* ===== FEATURED LISTINGS ===== */}
+        <section className="max-w-7xl mx-auto px-6 md:px-12 py-14">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-main tracking-tight">Featured Listings</h2>
+              <p className="text-slate-500 text-sm mt-1 font-normal">Top-rated boarding houses this month</p>
+            </div>
+            <Link to="/search" className="text-sm font-bold text-yellow-600 hover:underline flex items-center gap-1">
+              See all listings →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoading ? (
+              <div className="col-span-full py-12 flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+              </div>
+            ) : listings.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-slate-500">
+                No listings available right now.
+              </div>
+            ) : listings.slice(0, 6).map((listing) => (
+              <div
+                key={listing.id}
+                onClick={() => navigate(`/property/${listing.id}`)}
+                className="bg-white/70 backdrop-blur-md rounded-3xl overflow-hidden border border-white/60 shadow-[0_4px_24px_0_rgba(31,38,135,0.05)] hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+              >
+                {/* Photo */}
+                <div className="h-48 w-full relative overflow-hidden bg-slate-100">
+                  <img
+                    src={listing.image}
+                    alt={listing.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+
+                  {listing.isFullyBooked && (
+                    <div className="absolute inset-0 bg-main/45 backdrop-blur-[2px] flex items-center justify-center z-10">
+                      <span className="bg-white text-slate-800 text-sm font-extrabold px-5 py-2 rounded-full shadow-lg uppercase tracking-wide">
+                        Fully Booked
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="absolute bottom-4 left-4 z-20 flex gap-2">
+                    <span className="bg-yellow-400 text-black text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-md">
+                      LKR {listing.price.toLocaleString()}/mo
+                    </span>
+                    <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${
+                      listing.gender === 'female'
+                        ? 'bg-black text-slate-900'
+                        : listing.gender === 'male'
+                        ? 'bg-white text-black border border-black/10'
+                        : 'bg-yellow-400 text-black'
+                    }`}>
+                      {listing.gender}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setListings(listings.map(l => l.id === listing.id ? { ...l, liked: !l.liked } : l));
+                    }}
+                    className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white hover:bg-slate-50 shadow-md flex items-center justify-center transition-transform hover:scale-105 border-none cursor-pointer"
+                  >
+                    <svg
+                      className={`w-5 h-5 ${listing.liked ? 'text-red-500 fill-current' : 'text-slate-600'}`}
+                      fill={listing.liked ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Details */}
+                <div className="p-5 flex-grow flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-xs font-bold text-primary-500 uppercase tracking-wider truncate">
+                        {listing.university}
+                      </span>
+                      <span className="bg-slate-100 text-muted text-xs font-bold px-2.5 py-0.5 rounded-full capitalize flex-shrink-0">
+                        {listing.type.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-main group-hover:text-yellow-600 transition-colors line-clamp-1 mb-1.5">
+                      {listing.name}
+                    </h3>
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-3 font-semibold">
+                      <span className="truncate">📍 {listing.location}</span>
+                      <span className="flex-shrink-0 text-yellow-600 font-extrabold">📏 {listing.distance}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {listing.amenities.slice(0, 3).map((amenity, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-app text-muted text-xs font-semibold px-2.5 py-1 rounded-md"
+                        >
+                          {amenity}
+                        </span>
+                      ))}
+                      {listing.amenities.length > 3 && (
+                        <span className="bg-app text-muted text-xs font-semibold px-2.5 py-1 rounded-md">
+                          +{listing.amenities.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-light/60 pt-3 flex justify-between items-center">
+                    <div className="flex items-center gap-1 font-bold text-sm text-slate-700">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i} className={i < Math.floor(listing.rating) ? "text-amber-400" : "text-slate-200"}>★</span>
+                      ))}
+                      <span className="text-main ml-1">{listing.rating}</span>
+                      <span className="text-slate-600 font-normal text-xs">({listing.reviews})</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
+                        className="text-xs font-bold text-slate-500 hover:text-primary-500 transition-colors border border-slate-200 rounded-md px-2 py-1 bg-white cursor-pointer"
+                      >
+                        Compare
+                      </button>
+                      <span className="text-xs font-bold text-primary-500">View details ➔</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== HOW IT WORKS ===== */}
+        <section className="py-16 border-t border-white/40">
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl font-bold text-main tracking-tight mb-2">How BoardingFinder Works</h2>
+              <p className="text-slate-500 text-sm font-normal">Simple steps to find your ideal boarding house</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {[
+                {
+                  step: "Step 01",
+                  title: "Search & Filter",
+                  desc: "Search for boarding houses near your university. Filter by price, gender policy, facilities, and more.",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  ),
+                },
+                {
+                  step: "Step 02",
+                  title: "View & Compare",
+                  desc: "Browse photos, read reviews from real students, and compare boarding houses side by side.",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ),
+                },
+                {
+                  step: "Step 03",
+                  title: "Book Securely",
+                  desc: "Send a booking request directly to the owner and confirm your stay with secure payment options.",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="m9 11 2 2 4-4" />
+                    </svg>
+                  ),
+                },
+              ].map((item) => (
+                <div key={item.step} className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white text-yellow-500 shadow-[0_4px_14px_rgba(250,204,21,0.3)] backdrop-blur-md border border-white flex items-center justify-center flex-shrink-0">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <span className="text-yellow-600 text-xs font-extrabold uppercase tracking-wider mb-1 block">{item.step}</span>
+                    <h3 className="text-lg font-bold text-main mb-1.5">{item.title}</h3>
+                    <p className="text-slate-500 text-sm leading-relaxed font-normal">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ===== OWN A BOARDING HOUSE CTA ===== */}
+        <section className="max-w-7xl mx-auto px-6 md:px-12 py-14">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 sm:p-12 text-slate-900 border border-white shadow-[0_8px_30px_rgba(250,204,21,0.25)] flex flex-col md:flex-row items-center justify-between gap-8 shadow-md relative overflow-hidden">
+            <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
+              <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
+                <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6"/>
+                <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6"/>
+                <circle cx="50" cy="50" r="10" fill="white"/>
+                <circle cx="50" cy="90" r="10" fill="white"/>
+                <circle cx="50" cy="130" r="10" fill="white"/>
+                <circle cx="150" cy="70" r="10" fill="white"/>
+                <circle cx="150" cy="110" r="10" fill="white"/>
+              </svg>
+            </div>
+
+            <div className="max-w-xl text-left relative z-10">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">Own a boarding house?</h2>
+              <p className="text-slate-600 font-medium text-sm sm:text-base leading-relaxed font-normal">
+                List your property and connect with thousands of students looking for a place near campus.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4 flex-shrink-0 relative z-10">
+              <button
+                onClick={() => navigate('/register')}
+                className="px-6 py-3 bg-white hover:bg-slate-100 text-yellow-600 font-extrabold rounded-xl transition-all shadow-sm text-sm cursor-pointer border-none"
+              >
+                List Your Property
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="px-6 py-3 border-2 border-yellow-400 hover:bg-yellow-400/20 text-slate-800 font-extrabold rounded-xl transition-all text-sm cursor-pointer bg-transparent"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      {/* ===== FOOTER ===== */}
+      <footer className="bg-white/40 backdrop-blur-lg text-slate-900 pt-16 pb-8 border-t border-white/60 mt-auto shadow-[0_-8px_30px_rgba(250,204,21,0.15)]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+
+            <div className="lg:col-span-2 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-slate-900 shadow-sm border border-white/10">
+                  <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
+                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2"/>
+                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2"/>
+                  </svg>
+                </div>
+                <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>
+              </div>
+              <p className="text-slate-700 text-sm leading-relaxed max-w-sm font-normal">
+                Find verified boarding houses near universities across Sri Lanka.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">For Students</h4>
+              <ul className="flex flex-col gap-3 text-slate-700 text-sm font-normal">
+                <li><Link to="/search" className="hover:text-slate-900 transition-colors">Search Listings</Link></li>
+                <li><Link to="/map" className="hover:text-slate-900 transition-colors">Map View</Link></li>
+                <li><Link to="/saved-homes" className="hover:text-slate-900 transition-colors">Saved Listings</Link></li>
+                <li><Link to="/home" className="hover:text-slate-900 transition-colors">Reviews</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">For Owners</h4>
+              <ul className="flex flex-col gap-3 text-slate-700 text-sm font-normal">
+                <li><Link to="/register" className="hover:text-slate-900 transition-colors">List Property</Link></li>
+                <li><Link to="/register" className="hover:text-slate-900 transition-colors">Owner Dashboard</Link></li>
+                <li><Link to="/register" className="hover:text-slate-900 transition-colors">Pricing</Link></li>
+                <li><Link to="/register" className="hover:text-slate-900 transition-colors">Support</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Company</h4>
+              <ul className="flex flex-col gap-3 text-slate-700 text-sm font-normal">
+                <li><Link to="/" className="hover:text-slate-900 transition-colors">About Us</Link></li>
+                <li><Link to="/" className="hover:text-slate-900 transition-colors">Blog</Link></li>
+                <li><Link to="/" className="hover:text-slate-900 transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/" className="hover:text-slate-900 transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-yellow-400/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-slate-600 text-xs font-normal">
+              © 2026 BoardingFinder. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
