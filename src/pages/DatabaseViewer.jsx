@@ -64,7 +64,6 @@ const DatabaseViewer = () => {
   };
 
   return (
-  return (
     <div className="flex h-screen bg-black font-sans text-white">
       {/* Sidebar for Tables */}
       <div className="w-64 bg-[#1A1A1A] border-r border-[#333] flex flex-col h-full shadow-sm">
