@@ -207,7 +207,7 @@ const SearchPage = () => {
   }, [listings, searchQuery, maxPrice, genderFilter, typeFilter, facilitiesFilter, sortBy]);
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="search" />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-8">
@@ -215,9 +215,9 @@ const SearchPage = () => {
         {/* ===== TOP SEARCH & SORT BAR ===== */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
           {/* Search Input */}
-          <div className="flex items-center flex-grow bg-white p-2 rounded-[20px] shadow-sm border border-[#e2e8f0]/60 max-w-2xl w-full">
+          <div className="flex items-center flex-grow bg-[#1A1A1A] p-2 rounded-[20px] shadow-sm border border-[#333] max-w-2xl w-full">
             <div className="flex items-center flex-grow px-3 gap-2">
-              <svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-white/50 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -226,12 +226,12 @@ const SearchPage = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name, university, or location..."
-                className="w-full py-2.5 bg-transparent text-slate-800 placeholder-[#94a3b8] focus:outline-none text-[15px]"
+                className="w-full py-2.5 bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px]"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-slate-400 hover:text-slate-600 font-bold p-1"
+                  className="text-white/40 hover:text-white font-bold p-1"
                 >
                   ✕
                 </button>
@@ -244,8 +244,8 @@ const SearchPage = () => {
             <button
               onClick={() => setSortBy('rating')}
               className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'rating'
-                  ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
-                  : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
+                  ? 'bg-[#FACC15] text-black shadow-sm border border-[#FACC15]'
+                  : 'bg-[#1A1A1A] hover:bg-[#222] text-white/70 border border-[#333] shadow-sm'
                 }`}
             >
               Top Rated
@@ -253,8 +253,8 @@ const SearchPage = () => {
             <button
               onClick={() => setSortBy('price_asc')}
               className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'price_asc'
-                  ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
-                  : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
+                  ? 'bg-[#FACC15] text-black shadow-sm border border-[#FACC15]'
+                  : 'bg-[#1A1A1A] hover:bg-[#222] text-white/70 border border-[#333] shadow-sm'
                 }`}
             >
               Price ↑
@@ -262,15 +262,15 @@ const SearchPage = () => {
             <button
               onClick={() => setSortBy('price_desc')}
               className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'price_desc'
-                  ? 'bg-[#1952c4] text-white shadow-sm border border-[#1952c4]'
-                  : 'bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm'
+                  ? 'bg-[#FACC15] text-black shadow-sm border border-[#FACC15]'
+                  : 'bg-[#1A1A1A] hover:bg-[#222] text-white/70 border border-[#333] shadow-sm'
                 }`}
             >
               Price ↓
             </button>
             <Link to="/map">
               <button
-                className="px-5 py-3 bg-white hover:bg-slate-50 text-[#475569] border border-[#e2e8f0]/80 shadow-sm rounded-full font-bold text-[13px] transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-3 bg-[#1A1A1A] hover:bg-[#222] text-white/70 border border-[#333] shadow-sm rounded-full font-bold text-[13px] transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" />
@@ -287,13 +287,13 @@ const SearchPage = () => {
           <div className="flex flex-col lg:flex-row gap-8 items-start">
 
             {/* LEFT SIDEBAR FILTERS */}
-            <aside className="w-full lg:w-[280px] bg-white rounded-[24px] p-6 border border-[#e2e8f0]/60 shadow-sm flex-shrink-0">
-              <h3 className="text-xl font-bold text-[#0f172a] mb-6">Filters</h3>
+            <aside className="w-full lg:w-[280px] bg-[#1A1A1A] rounded-[24px] p-6 border border-[#333] shadow-sm flex-shrink-0">
+              <h3 className="text-xl font-bold text-white mb-6">Filters</h3>
 
               <div className="space-y-6">
                 {/* Max Monthly Price */}
                 <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-3 uppercase">
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">
                     Max Monthly Price
                   </label>
                   <input
@@ -303,34 +303,34 @@ const SearchPage = () => {
                     step="500"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#1952c4]"
+                    className="w-full h-1.5 bg-[#333] rounded-lg appearance-none cursor-pointer accent-[#FACC15]"
                   />
-                  <div className="flex justify-between items-center mt-2 text-[11px] font-bold text-slate-400">
+                  <div className="flex justify-between items-center mt-2 text-[11px] font-bold text-white/40">
                     <span>LKR 5,000</span>
                     <span>LKR 30,000</span>
                   </div>
                   <div className="text-center mt-2">
-                    <span className="text-[#1952c4] font-extrabold text-sm">LKR {maxPrice.toLocaleString()}</span>
+                    <span className="text-[#FACC15] font-extrabold text-sm">LKR {maxPrice.toLocaleString()}</span>
                   </div>
                 </div>
 
-                <hr className="border-[#e2e8f0]/50" />
+                <hr className="border-[#333]" />
 
                 {/* Gender Policy */}
                 <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-3 uppercase">
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">
                     Gender Policy
                   </label>
                   <div className="space-y-2.5">
                     {['Male', 'Female', 'Mixed'].map((g) => {
                       const key = g.toLowerCase();
                       return (
-                        <label key={g} className="flex items-center gap-3 text-[14px] text-slate-600 font-semibold cursor-pointer select-none">
+                        <label key={g} className="flex items-center gap-3 text-[14px] text-white/70 font-semibold cursor-pointer select-none">
                           <input
                             type="checkbox"
                             checked={genderFilter[key]}
                             onChange={() => setGenderFilter({ ...genderFilter, [key]: !genderFilter[key] })}
-                            className="w-4.5 h-4.5 rounded border-[#e2e8f0] text-[#1952c4] focus:ring-[#1952c4]/20 cursor-pointer"
+                            className="w-4.5 h-4.5 rounded border-[#333] text-[#FACC15] focus:ring-[#FACC15]/20 cursor-pointer bg-[#111]"
                           />
                           {g}
                         </label>
@@ -339,11 +339,11 @@ const SearchPage = () => {
                   </div>
                 </div>
 
-                <hr className="border-[#e2e8f0]/50" />
+                <hr className="border-[#333]" />
 
                 {/* Type */}
                 <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-3 uppercase">
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">
                     Type
                   </label>
                   <div className="space-y-2.5">
@@ -352,12 +352,12 @@ const SearchPage = () => {
                       { key: 'boarding_house', label: 'Boarding House' },
                       { key: 'studio_unit', label: 'Studio Unit' }
                     ].map((t) => (
-                      <label key={t.key} className="flex items-center gap-3 text-[14px] text-slate-600 font-semibold cursor-pointer select-none">
+                      <label key={t.key} className="flex items-center gap-3 text-[14px] text-white/70 font-semibold cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={typeFilter[t.key]}
                           onChange={() => setTypeFilter({ ...typeFilter, [t.key]: !typeFilter[t.key] })}
-                          className="w-4.5 h-4.5 rounded border-[#e2e8f0] text-[#1952c4] focus:ring-[#1952c4]/20 cursor-pointer"
+                          className="w-4.5 h-4.5 rounded border-[#333] text-[#FACC15] focus:ring-[#FACC15]/20 cursor-pointer bg-[#111]"
                         />
                         {t.label}
                       </label>
@@ -365,11 +365,11 @@ const SearchPage = () => {
                   </div>
                 </div>
 
-                <hr className="border-[#e2e8f0]/50" />
+                <hr className="border-[#333]" />
 
                 {/* Facilities */}
                 <div>
-                  <label className="block text-[11px] font-bold text-[#475569] tracking-wider mb-3 uppercase">
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">
                     Facilities
                   </label>
                   <div className="space-y-2.5">
@@ -382,12 +382,12 @@ const SearchPage = () => {
                       { key: 'gym', label: 'Gym', icon: '🏋️' },
                       { key: 'pool', label: 'Pool', icon: '🏊' }
                     ].map((f) => (
-                      <label key={f.key} className="flex items-center gap-3 text-[14px] text-slate-600 font-semibold cursor-pointer select-none">
+                      <label key={f.key} className="flex items-center gap-3 text-[14px] text-white/70 font-semibold cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={facilitiesFilter[f.key]}
                           onChange={() => setFacilitiesFilter({ ...facilitiesFilter, [f.key]: !facilitiesFilter[f.key] })}
-                          className="w-4.5 h-4.5 rounded border-[#e2e8f0] text-[#1952c4] focus:ring-[#1952c4]/20 cursor-pointer"
+                          className="w-4.5 h-4.5 rounded border-[#333] text-[#FACC15] focus:ring-[#FACC15]/20 cursor-pointer bg-[#111]"
                         />
                         <span className="text-base">{f.icon}</span>
                         <span>{f.label}</span>
@@ -402,7 +402,7 @@ const SearchPage = () => {
             {/* RIGHT LISTINGS GRID */}
             <div className="flex-grow w-full">
               <div className="mb-6">
-                <h3 className="font-extrabold text-[#0f172a] text-lg">
+                <h3 className="font-extrabold text-white text-lg">
                   {isLoading ? 'Loading...' : `${filteredListings.length} ${filteredListings.length === 1 ? 'boarding house' : 'boarding houses'} found`}
                 </h3>
               </div>
@@ -417,10 +417,10 @@ const SearchPage = () => {
                     <div
                       key={listing.id}
                       onClick={() => navigate(`/property/${listing.id}`)}
-                      className="bg-white rounded-[24px] overflow-hidden border border-[#e2e8f0]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+                      className="bg-[#1A1A1A] rounded-[24px] overflow-hidden border border-[#2a2a2a] shadow-sm hover:border-[#333] transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
                     >
                       {/* Photo Overlay */}
-                      <div className="h-52 w-full relative overflow-hidden bg-slate-100">
+                      <div className="h-52 w-full relative overflow-hidden bg-[#111]">
                         <img
                           src={listing.image}
                           alt={listing.name}
@@ -429,8 +429,8 @@ const SearchPage = () => {
 
                         {/* Fully Booked Overlay */}
                         {listing.isFullyBooked && (
-                          <div className="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-[2px] flex items-center justify-center z-10">
-                            <span className="bg-white text-slate-800 text-sm font-extrabold px-5 py-2 rounded-full shadow-lg uppercase tracking-wide">
+                          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                            <span className="bg-[#1A1A1A] text-white border border-[#333] text-sm font-extrabold px-5 py-2 rounded-full shadow-lg uppercase tracking-wide">
                               Fully Booked
                             </span>
                           </div>
@@ -438,7 +438,7 @@ const SearchPage = () => {
 
                         {/* Bottom Image Badges (Price / Gender) */}
                         <div className="absolute bottom-4 left-4 z-20 flex gap-2">
-                          <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
+                          <span className="bg-[#1A1A1A] border border-[#333] text-[#FACC15] text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                             LKR {listing.price.toLocaleString()}/mo
                           </span>
                           <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
@@ -471,7 +471,7 @@ const SearchPage = () => {
                               console.error("Failed to toggle save status", err);
                             }
                           }}
-                          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white hover:bg-slate-50 shadow-md flex items-center justify-center transition-transform hover:scale-105 border-none cursor-pointer"
+                          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-[#333] shadow-md flex items-center justify-center transition-transform hover:scale-105 border border-[#333] cursor-pointer"
                         >
                           <svg
                             className={`w-5 h-5 ${listing.liked ? 'text-red-500 fill-current' : 'text-slate-400'}`}
@@ -489,22 +489,22 @@ const SearchPage = () => {
                       <div className="p-6 flex-grow flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className="text-[11px] font-bold text-[#1952c4] uppercase tracking-wider block truncate">
+                            <span className="text-[11px] font-bold text-[#FACC15] uppercase tracking-wider block truncate">
                               {listing.university}
                             </span>
-                            <span className="bg-slate-100 text-[#475569] text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize">
+                            <span className="bg-[#111] text-white/70 border border-[#333] text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize">
                               {listing.type.replace('_', ' ')}
                             </span>
                           </div>
 
-                          <h3 className="text-lg font-bold text-[#0f172a] group-hover:text-[#1952c4] transition-colors line-clamp-1 mb-2">
+                          <h3 className="text-lg font-bold text-white group-hover:text-[#FACC15] transition-colors line-clamp-1 mb-2">
                             {listing.name}
                           </h3>
 
                           {/* Distance & Location Info */}
-                          <div className="flex items-center justify-between text-[13px] text-slate-500 mb-4 font-semibold">
+                          <div className="flex items-center justify-between text-[13px] text-white/50 mb-4 font-semibold">
                             <span className="truncate">📍 {listing.location}</span>
-                            <span className="flex-shrink-0 text-[#1952c4] font-bold">📏 {listing.distance}</span>
+                            <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distance}</span>
                           </div>
 
                           {/* Amenities Badges */}
@@ -512,7 +512,7 @@ const SearchPage = () => {
                             {listing.amenities.map((amenity, idx) => (
                               <span
                                 key={idx}
-                                className="bg-[#f0f4f9] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-md"
+                                className="bg-[#111] text-white/70 border border-[#333] text-[11px] font-semibold px-2.5 py-1 rounded-md"
                               >
                                 {amenity}
                               </span>
@@ -522,17 +522,17 @@ const SearchPage = () => {
 
                         {/* Footer Rating */}
                         <div>
-                          <div className="border-t border-[#e2e8f0]/60 my-4"></div>
+                          <div className="border-t border-[#333] my-4"></div>
                           <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-1 font-bold text-[13px] text-slate-700">
+                            <div className="flex items-center gap-1 font-bold text-[13px] text-white">
                               {Array.from({ length: 5 }).map((_, i) => (
-                                <span key={i} className={i < Math.floor(listing.rating) ? "text-amber-400" : "text-slate-200"}>★</span>
+                                <span key={i} className={i < Math.floor(listing.rating) ? "text-[#FACC15]" : "text-[#333]"}>★</span>
                               ))}
-                              <span className="text-[#0f172a] ml-1">{listing.rating}</span>
-                              <span className="text-slate-400 font-normal text-xs">({listing.reviews})</span>
+                              <span className="text-white ml-1">{listing.rating}</span>
+                              <span className="text-white/40 font-normal text-xs">({listing.reviews})</span>
                             </div>
 
-                            <span className="text-xs font-bold text-[#1952c4] hover:underline flex items-center gap-1">
+                            <span className="text-xs font-bold text-[#FACC15] hover:underline flex items-center gap-1">
                               View details ➔
                             </span>
                           </div>
@@ -542,10 +542,10 @@ const SearchPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-[32px] p-12 text-center shadow-sm border border-[#e2e8f0]/60">
+                <div className="bg-[#1A1A1A] rounded-[32px] p-12 text-center shadow-sm border border-[#333]">
                   <span className="text-5xl block mb-4">🔍</span>
-                  <h3 className="text-xl font-bold text-slate-800">No boarding houses matches filters</h3>
-                  <p className="text-slate-500 mt-2">Try adjusting your filters or search keywords.</p>
+                  <h3 className="text-xl font-bold text-white">No boarding houses matches filters</h3>
+                  <p className="text-white/50 mt-2">Try adjusting your filters or search keywords.</p>
                 </div>
               )}
             </div>
@@ -553,12 +553,12 @@ const SearchPage = () => {
           </div>
         ) : (
           /* ===== HIGH FIDELITY MAP VIEW ===== */
-          <div className="flex flex-col lg:flex-row gap-6 bg-white p-4 rounded-[32px] shadow-md border border-[#e2e8f0]/60 overflow-hidden">
+          <div className="flex flex-col lg:flex-row gap-6 bg-[#1A1A1A] p-4 rounded-[32px] shadow-md border border-[#333] overflow-hidden">
             {/* Map Mini Sidebar */}
             <div className="w-full lg:w-[35%] flex flex-col max-h-[550px] overflow-y-auto pr-2 gap-4">
               <div className="p-2">
-                <h3 className="font-bold text-[#0f172a] text-lg">Houses in this Area</h3>
-                <p className="text-xs text-slate-400 mt-0.5">{filteredListings.length} properties matches filters</p>
+                <h3 className="font-bold text-white text-lg">Houses in this Area</h3>
+                <p className="text-xs text-white/50 mt-0.5">{filteredListings.length} properties matches filters</p>
               </div>
 
               {filteredListings.map((listing) => (
@@ -568,8 +568,8 @@ const SearchPage = () => {
                   onMouseEnter={() => setHoveredMapListing(listing.id)}
                   onMouseLeave={() => setHoveredMapListing(null)}
                   className={`p-3 rounded-2xl border transition-all duration-200 flex gap-3 cursor-pointer ${selectedMapListing?.id === listing.id
-                      ? 'border-[#1952c4] bg-[#ebf3ff]/40 shadow-sm'
-                      : 'border-[#e2e8f0]/60 hover:bg-slate-50'
+                      ? 'border-[#FACC15] bg-[#FACC15]/10 shadow-sm'
+                      : 'border-[#333] hover:bg-[#222]'
                     }`}
                 >
                   <img
@@ -579,14 +579,14 @@ const SearchPage = () => {
                   />
                   <div className="flex flex-col justify-between overflow-hidden">
                     <div>
-                      <h4 className="font-bold text-[14px] text-[#0f172a] truncate">{listing.name}</h4>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{listing.university}</p>
+                      <h4 className="font-bold text-[14px] text-white truncate">{listing.name}</h4>
+                      <p className="text-[11px] text-white/50 truncate mt-0.5">{listing.university}</p>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-extrabold text-[#1952c4]">
-                        LKR {listing.price.toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
+                      <span className="text-[14px] font-extrabold text-[#FACC15]">
+                        LKR {listing.price.toLocaleString()}<span className="text-[10px] text-white/40 font-normal">/mo</span>
                       </span>
-                      <span className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5">
+                      <span className="text-[11px] font-bold text-white/50 flex items-center gap-0.5">
                         ⭐ {listing.rating}
                       </span>
                     </div>
@@ -596,26 +596,26 @@ const SearchPage = () => {
             </div>
 
             {/* SVG/Custom Styled Interactive Map */}
-            <div className="w-full lg:w-[65%] h-[400px] lg:h-[550px] rounded-[24px] bg-[#e8eff9] border border-[#e2e8f0] relative overflow-hidden shadow-inner flex items-center justify-center">
+            <div className="w-full lg:w-[65%] h-[400px] lg:h-[550px] rounded-[24px] bg-[#111] border border-[#333] relative overflow-hidden shadow-inner flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full z-0 opacity-40" xmlns="http://www.w3.org/2000/svg">
                 {/* River */}
-                <path d="M-50 150 C 200 180, 150 350, 600 450 L600 550 L-50 550 Z" fill="#b9d5fc" />
+                <path d="M-50 150 C 200 180, 150 350, 600 450 L600 550 L-50 550 Z" fill="#193c73" />
                 {/* Roads */}
-                <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="white" strokeWidth="12" strokeLinecap="round" />
-                <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeDasharray="5,5" />
+                <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="#333" strokeWidth="12" strokeLinecap="round" />
+                <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeDasharray="5,5" />
 
                 {/* University Shaded Zones */}
                 <rect x="30" y="30" width="180" height="80" rx="10" fill="#22c55e" fillOpacity="0.15" stroke="#22c55e" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="40" y="55" fill="#15803d" className="text-[11px] font-bold">MORATUWA ZONE</text>
+                <text x="40" y="55" fill="#22c55e" className="text-[11px] font-bold">MORATUWA ZONE</text>
 
                 <rect x="380" y="240" width="180" height="100" rx="10" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="390" y="265" fill="#1d4ed8" className="text-[11px] font-bold">COLOMBO ZONE</text>
+                <text x="390" y="265" fill="#3b82f6" className="text-[11px] font-bold">COLOMBO ZONE</text>
 
                 <rect x="260" y="10" width="150" height="80" rx="10" fill="#f59e0b" fillOpacity="0.1" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="270" y="35" fill="#b45309" className="text-[11px] font-bold">KELANIYA ZONE</text>
+                <text x="270" y="35" fill="#f59e0b" className="text-[11px] font-bold">KELANIYA ZONE</text>
               </svg>
 
-              <span className="absolute bottom-4 left-4 z-10 bg-white/80 backdrop-blur-sm border border-slate-200 text-[10px] text-slate-500 font-semibold px-3 py-1.5 rounded-md shadow-sm">
+              <span className="absolute bottom-4 left-4 z-10 bg-[#1A1A1A]/80 backdrop-blur-sm border border-[#333] text-[10px] text-white/50 font-semibold px-3 py-1.5 rounded-md shadow-sm">
                 Interactive Campus Map (Simulated)
               </span>
 
@@ -642,10 +642,10 @@ const SearchPage = () => {
                       onMouseEnter={() => setHoveredMapListing(listing.id)}
                       onMouseLeave={() => setHoveredMapListing(null)}
                       className={`px-3 py-1.5 rounded-full font-bold text-xs shadow-md border flex items-center gap-1 transition-all cursor-pointer ${isSelected
-                          ? 'bg-[#1952c4] border-[#1952c4] text-white ring-4 ring-[#1952c4]/20'
+                          ? 'bg-[#FACC15] border-[#FACC15] text-black ring-4 ring-[#FACC15]/20'
                           : isHovered
-                            ? 'bg-[#1546a8] border-[#1546a8] text-white shadow-lg'
-                            : 'bg-white border-[#1952c4]/45 text-[#1952c4]'
+                            ? 'bg-[#EAB308] border-[#EAB308] text-black shadow-lg'
+                            : 'bg-[#1A1A1A] border-[#333] text-[#FACC15]'
                         }`}
                     >
                       <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -655,14 +655,14 @@ const SearchPage = () => {
                     </button>
 
                     {isSelected && (
-                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-48 bg-white border border-[#e2e8f0] p-2.5 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-fadeIn">
+                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-48 bg-[#1A1A1A] border border-[#333] p-2.5 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-fadeIn">
                         <div className="relative">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedMapListing(null);
                             }}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-white border border-slate-200 rounded-full flex items-center justify-center text-[10px] text-slate-400 hover:text-slate-600 shadow-sm"
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-[#1A1A1A] border border-[#333] rounded-full flex items-center justify-center text-[10px] text-white/50 hover:text-white shadow-sm"
                           >
                             ✕
                           </button>
@@ -673,15 +673,15 @@ const SearchPage = () => {
                           />
                         </div>
                         <div>
-                          <h5 className="font-bold text-slate-800 text-[12px] truncate">{listing.name}</h5>
-                          <span className="text-[12px] font-extrabold text-[#1952c4] mt-0.5 block">LKR {listing.price.toLocaleString()}/mo</span>
+                          <h5 className="font-bold text-white text-[12px] truncate">{listing.name}</h5>
+                          <span className="text-[12px] font-extrabold text-[#FACC15] mt-0.5 block">LKR {listing.price.toLocaleString()}/mo</span>
                         </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/property/${listing.id}`);
                           }}
-                          className="w-full py-1 bg-[#ebf3ff] hover:bg-[#1952c4] hover:text-white text-[#1952c4] font-bold text-[10px] rounded-lg transition-all"
+                          className="w-full py-1 bg-[#FACC15] text-black font-bold text-[10px] rounded-lg transition-all"
                         >
                           View Details
                         </button>
@@ -695,12 +695,12 @@ const SearchPage = () => {
         )}
 
         {/* ===== HOW IT WORKS SECTION ===== */}
-        <div className="my-20 border-t border-[#e2e8f0]/60 pt-16">
+        <div className="my-20 border-t border-[#333] pt-16">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-[#0f172a] tracking-tight mb-3">
+            <h2 className="text-3xl font-bold text-white tracking-tight mb-3">
               How BoardingFinder Works
             </h2>
-            <p className="text-slate-500 text-[15px] font-normal">
+            <p className="text-white/50 text-[15px] font-normal">
               Simple steps to find your ideal boarding house
             </p>
           </div>
@@ -708,16 +708,16 @@ const SearchPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Step 1 */}
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FACC15]/10 border border-[#FACC15]/20 text-[#FACC15] flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1">Step 01</span>
-                <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">Search & Filter</h3>
-                <p className="text-slate-500 text-sm leading-relaxed font-normal">
+                <span className="text-[#FACC15] text-xs font-bold uppercase tracking-wider mb-1">Step 01</span>
+                <h3 className="text-lg font-bold text-white mb-1.5">Search & Filter</h3>
+                <p className="text-white/50 text-sm leading-relaxed font-normal">
                   Search for boarding houses near your university. Filter by price, gender policy, facilities, and more.
                 </p>
               </div>
@@ -725,16 +725,16 @@ const SearchPage = () => {
 
             {/* Step 2 */}
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FACC15]/10 border border-[#FACC15]/20 text-[#FACC15] flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1">Step 02</span>
-                <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">View & Compare</h3>
-                <p className="text-slate-500 text-sm leading-relaxed font-normal">
+                <span className="text-[#FACC15] text-xs font-bold uppercase tracking-wider mb-1">Step 02</span>
+                <h3 className="text-lg font-bold text-white mb-1.5">View & Compare</h3>
+                <p className="text-white/50 text-sm leading-relaxed font-normal">
                   Browse photos, read reviews from real students, and compare boarding houses side by side.
                 </p>
               </div>
@@ -742,16 +742,16 @@ const SearchPage = () => {
 
             {/* Step 3 */}
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FACC15]/10 border border-[#FACC15]/20 text-[#FACC15] flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   <path d="m9 11 2 2 4-4" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1">Step 03</span>
-                <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">Book Securely</h3>
-                <p className="text-slate-500 text-sm leading-relaxed font-normal">
+                <span className="text-[#FACC15] text-xs font-bold uppercase tracking-wider mb-1">Step 03</span>
+                <h3 className="text-lg font-bold text-white mb-1.5">Book Securely</h3>
+                <p className="text-white/50 text-sm leading-relaxed font-normal">
                   Send a booking request directly to the owner and confirm your stay with secure payment options.
                 </p>
               </div>
@@ -760,16 +760,16 @@ const SearchPage = () => {
         </div>
 
         {/* ===== OWN A BOARDING HOUSE CTA BANNER ===== */}
-        <div className="bg-[#1952c4] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 mb-10 shadow-md relative overflow-hidden">
+        <div className="bg-[#111] border border-[#333] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 mb-10 shadow-md relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
             <svg className="w-full h-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="20" y="20" width="60" height="160" rx="10" stroke="white" strokeWidth="6" />
-              <rect x="120" y="40" width="60" height="120" rx="10" stroke="white" strokeWidth="6" />
-              <circle cx="50" cy="50" r="10" fill="white" />
-              <circle cx="50" cy="90" r="10" fill="white" />
-              <circle cx="50" cy="130" r="10" fill="white" />
-              <circle cx="150" cy="70" r="10" fill="white" />
-              <circle cx="150" cy="110" r="10" fill="white" />
+              <rect x="20" y="20" width="60" height="160" rx="10" stroke="#FACC15" strokeWidth="6" />
+              <rect x="120" y="40" width="60" height="120" rx="10" stroke="#FACC15" strokeWidth="6" />
+              <circle cx="50" cy="50" r="10" fill="#FACC15" />
+              <circle cx="50" cy="90" r="10" fill="#FACC15" />
+              <circle cx="50" cy="130" r="10" fill="#FACC15" />
+              <circle cx="150" cy="70" r="10" fill="#FACC15" />
+              <circle cx="150" cy="110" r="10" fill="#FACC15" />
             </svg>
           </div>
 
@@ -785,13 +785,13 @@ const SearchPage = () => {
           <div className="flex flex-wrap gap-4 flex-shrink-0 relative z-10">
             <button
               onClick={() => navigate('/register')}
-              className="px-6 py-3 bg-white hover:bg-slate-100 text-[#1952c4] font-bold rounded-xl transition-all shadow-sm text-sm cursor-pointer border-none font-medium"
+              className="px-6 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-all shadow-sm text-sm cursor-pointer border-none font-medium"
             >
               List Your Property
             </button>
             <button
               onClick={() => navigate('/register')}
-              className="px-6 py-3 border border-white hover:bg-white/10 text-white font-bold rounded-xl transition-all text-sm cursor-pointer bg-transparent font-medium"
+              className="px-6 py-3 border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-all text-sm cursor-pointer bg-[#1A1A1A] font-medium"
             >
               Learn More
             </button>
@@ -801,7 +801,7 @@ const SearchPage = () => {
       </main>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#133076] text-white pt-16 pb-8 border-t border-[#1952c4]/20 mt-auto">
+      <footer className="bg-black text-white pt-16 pb-8 border-t border-[#333] mt-auto">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
 
@@ -860,8 +860,8 @@ const SearchPage = () => {
 
           </div>
 
-          <div className="border-t border-[#1e40af]/60 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[#94a3b8] text-xs font-normal">
+          <div className="border-t border-[#333] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-white/40 text-xs font-normal">
               © 2026 BoardingFinder. All rights reserved.
             </p>
           </div>

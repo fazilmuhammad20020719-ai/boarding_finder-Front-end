@@ -79,10 +79,10 @@ const NeighborhoodDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-black font-sans antialiased text-white flex flex-col items-center justify-center">
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-[#1952c4] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-[#FACC15] border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
     );
@@ -90,11 +90,11 @@ const NeighborhoodDetails = () => {
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col">
+      <div className="min-h-screen bg-black font-sans antialiased text-white flex flex-col">
         <Navbar />
         <div className="flex-grow flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="text-xl font-bold text-slate-700 mb-2">Listing Not Found</h2>
-          <Link to="/home" className="text-[#1952c4] font-bold hover:underline">Back to Search</Link>
+          <h2 className="text-xl font-bold text-white/70 mb-2">Listing Not Found</h2>
+          <Link to="/home" className="text-[#FACC15] font-bold hover:underline">Back to Search</Link>
         </div>
       </div>
     );
@@ -103,7 +103,7 @@ const NeighborhoodDetails = () => {
   const mapCenter = [listing.latitude, listing.longitude];
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-black font-sans antialiased text-white flex flex-col overflow-hidden">
       <Navbar />
 
       <main className="flex-grow flex flex-col md:flex-row relative">
@@ -127,7 +127,7 @@ const NeighborhoodDetails = () => {
             {/* 1km Radius Circle */}
             <Circle
               center={mapCenter}
-              pathOptions={{ fillColor: '#1952c4', fillOpacity: 0.1, color: '#1952c4', weight: 1 }}
+              pathOptions={{ fillColor: '#FACC15', fillOpacity: 0.1, color: '#FACC15', weight: 1 }}
               radius={1000}
             />
 
@@ -148,26 +148,26 @@ const NeighborhoodDetails = () => {
         </div>
 
         {/* Right Side: Details Panel */}
-        <div className="w-full md:w-1/3 bg-white border-l border-[#e2e8f0]/80 flex flex-col h-[50vh] md:h-[calc(100vh-80px)] z-10 shadow-xl">
+        <div className="w-full md:w-1/3 bg-[#1A1A1A] border-l border-[#333] flex flex-col h-[50vh] md:h-[calc(100vh-80px)] z-10 shadow-xl">
           {/* Panel Header */}
-          <div className="p-6 border-b border-[#e2e8f0]/80">
-            <Link to={`/property/${listing.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-[#64748b] hover:text-[#1952c4] transition-colors mb-4">
+          <div className="p-6 border-b border-[#333]">
+            <Link to={`/property/${listing.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-[#FACC15] transition-colors mb-4">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
               Back to Property
             </Link>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#0f172a] capitalize">Neighborhood Guide</h1>
-            <p className="text-sm text-[#64748b] mt-1 capitalize">Explore what's around {listing.title}.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-white capitalize">Neighborhood Guide</h1>
+            <p className="text-sm text-white/60 mt-1 capitalize">Explore what's around {listing.title}.</p>
           </div>
 
           {/* Category Filters */}
-          <div className="px-6 py-4 border-b border-[#e2e8f0]/80 overflow-x-auto no-scrollbar flex gap-2 flex-shrink-0">
+          <div className="px-6 py-4 border-b border-[#333] overflow-x-auto no-scrollbar flex gap-2 flex-shrink-0 custom-scrollbar">
             {CATEGORIES.map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${activeCategory === cat
-                    ? 'bg-[#0f172a] text-white shadow-sm'
-                    : 'bg-[#f0f4f9] text-[#475569] hover:bg-[#e2e8f0]'
+                    ? 'bg-[#FACC15] text-black shadow-sm'
+                    : 'bg-[#111] text-white/60 hover:bg-[#222]'
                   }`}
               >
                 {cat}
@@ -176,23 +176,23 @@ const NeighborhoodDetails = () => {
           </div>
 
           {/* POI List */}
-          <div className="flex-grow overflow-y-auto p-6 space-y-4">
+          <div className="flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar">
             {filteredPOIs.length === 0 ? (
-              <p className="text-[#64748b] text-center text-sm py-4">No places found for this category.</p>
+              <p className="text-white/60 text-center text-sm py-4">No places found for this category.</p>
             ) : (
               filteredPOIs.sort((a, b) => a.time - b.time).map(poi => (
-                <div key={poi.id} className="flex items-center gap-4 p-4 rounded-[16px] border border-[#e2e8f0]/60 hover:border-[#1952c4]/40 hover:bg-[#ebf3ff]/30 transition-colors group cursor-pointer">
+                <div key={poi.id} className="flex items-center gap-4 p-4 rounded-[16px] border border-[#333] hover:border-[#FACC15]/40 hover:bg-[#FACC15]/10 transition-colors group cursor-pointer">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${getCategoryColor(poi.category).classes}`}>
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       {getCategoryIcon(poi.category)}
                     </svg>
                   </div>
                   <div className="flex-grow min-w-0">
-                    <h3 className="font-bold text-[#0f172a] truncate text-sm">{poi.name}</h3>
-                    <p className="text-xs text-[#64748b] mt-0.5">{poi.category}</p>
+                    <h3 className="font-bold text-white truncate text-sm">{poi.name}</h3>
+                    <p className="text-xs text-white/60 mt-0.5">{poi.category}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1952c4] bg-[#ebf3ff] px-2.5 py-1 rounded-full whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FACC15] bg-[#FACC15]/20 px-2.5 py-1 rounded-full whitespace-nowrap border border-transparent">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       {poi.distance}
                     </span>
@@ -203,7 +203,7 @@ const NeighborhoodDetails = () => {
           </div>
 
           {/* Footer gradient for scroll affordance */}
-          <div className="h-12 bg-gradient-to-t from-white to-transparent absolute bottom-0 left-0 right-0 pointer-events-none md:hidden"></div>
+          <div className="h-12 bg-gradient-to-t from-[#1A1A1A] to-transparent absolute bottom-0 left-0 right-0 pointer-events-none md:hidden"></div>
         </div>
       </main>
     </div>

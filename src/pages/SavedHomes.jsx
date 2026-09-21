@@ -40,7 +40,7 @@ const SavedHomesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+      <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
         <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={listings.length} />
         <main className="flex-grow flex items-center justify-center">
           <p>Loading saved homes...</p>
@@ -50,7 +50,7 @@ const SavedHomesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={listings.length} />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-10">
@@ -58,14 +58,14 @@ const SavedHomesPage = () => {
         {/* Header bar */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">Saved Boarding Houses</h1>
-            <p className="text-slate-500 text-sm mt-1">Here are all the properties you saved for consideration.</p>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Saved Boarding Houses</h1>
+            <p className="text-white/50 text-sm mt-1">Here are all the properties you saved for consideration.</p>
           </div>
           <div className="flex items-center gap-3">
             {listings.length > 0 && (
               <Link
                 to="/compare"
-                className="px-5 py-3 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-full transition-all shadow-sm flex items-center gap-2"
+                className="px-5 py-3 bg-[#111] border border-[#333] hover:bg-[#222] text-white font-bold text-sm rounded-full transition-all shadow-sm flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 Compare ({Math.min(listings.length, 3)})
@@ -73,7 +73,7 @@ const SavedHomesPage = () => {
             )}
             <Link
               to="/home"
-              className="px-5 py-3 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-sm rounded-full transition-all shadow-sm flex items-center gap-1.5"
+              className="px-5 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold text-sm rounded-full transition-all shadow-sm flex items-center gap-1.5"
             >
               ← Back to Search
             </Link>
@@ -108,10 +108,10 @@ const SavedHomesPage = () => {
                 <div
                   key={listing.listing_id}
                   onClick={() => navigate(`/property/${listing.listing_id}`)}
-                  className="bg-white rounded-[24px] overflow-hidden border border-[#e2e8f0]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+                  className="bg-[#1A1A1A] rounded-[24px] overflow-hidden border border-[#333] hover:border-[#FACC15]/30 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
                 >
                   {/* Photo Overlay */}
-                  <div className="h-52 w-full relative overflow-hidden bg-slate-100">
+                  <div className="h-52 w-full relative overflow-hidden bg-black">
                     <img
                       src={displayImage}
                       alt={listing.title}
@@ -120,7 +120,7 @@ const SavedHomesPage = () => {
 
                     {/* Bottom Image Badges */}
                     <div className="absolute bottom-4 left-4 z-20 flex gap-2">
-                      <span className="bg-[#1952c4] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                      <span className="bg-[#FACC15] text-black text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
                         LKR {Number(listing.price).toLocaleString()}/mo
                       </span>
                     </div>
@@ -140,11 +140,11 @@ const SavedHomesPage = () => {
                   {/* Details */}
                   <div className="p-6 flex-grow flex flex-col justify-between">
                     <div>
-                      <h3 className="text-lg font-bold text-[#0f172a] group-hover:text-[#1952c4] transition-colors line-clamp-1 mb-2">
+                      <h3 className="text-lg font-bold text-white group-hover:text-[#FACC15] transition-colors line-clamp-1 mb-2">
                         {listing.title}
                       </h3>
 
-                      <div className="flex items-center justify-between text-[13px] text-slate-500 mb-4 font-semibold">
+                      <div className="flex items-center justify-between text-[13px] text-white/50 mb-4 font-semibold">
                         <span>📍 {listing.location}</span>
                       </div>
 
@@ -152,13 +152,13 @@ const SavedHomesPage = () => {
                         {amenitiesList.slice(0, 4).map((amenity, idx) => (
                           <span
                             key={idx}
-                            className="bg-[#f0f4f9] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-md"
+                            className="bg-[#111] border border-[#333] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md"
                           >
                             {typeof amenity === 'string' ? amenity.trim() : JSON.stringify(amenity)}
                           </span>
                         ))}
                         {amenitiesList.length > 4 && (
-                          <span className="bg-[#f0f4f9] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-md">
+                          <span className="bg-[#111] border border-[#333] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md">
                             +{amenitiesList.length - 4} more
                           </span>
                         )}
@@ -166,9 +166,9 @@ const SavedHomesPage = () => {
                     </div>
 
                     <div>
-                      <div className="border-t border-[#e2e8f0]/60 my-4"></div>
+                      <div className="border-t border-[#333] my-4"></div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-[#1952c4] hover:underline flex items-center gap-1">
+                        <span className="text-xs font-bold text-[#FACC15] hover:underline flex items-center gap-1">
                           View details ➔
                         </span>
                       </div>
@@ -180,13 +180,13 @@ const SavedHomesPage = () => {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-[32px] p-16 text-center shadow-sm border border-[#e2e8f0]/60">
+          <div className="bg-[#1A1A1A] rounded-[32px] p-16 text-center shadow-sm border border-[#333]">
             <span className="text-6xl block mb-5">❤️</span>
-            <h3 className="text-xl font-bold text-slate-800">No saved homes yet</h3>
-            <p className="text-slate-500 mt-2 max-w-sm mx-auto mb-8">Browse the listings in the search dashboard and click the heart icon to save them here.</p>
+            <h3 className="text-xl font-bold text-white">No saved homes yet</h3>
+            <p className="text-white/50 mt-2 max-w-sm mx-auto mb-8">Browse the listings in the search dashboard and click the heart icon to save them here.</p>
             <Link
               to="/home"
-              className="px-8 py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold text-sm rounded-full transition-all shadow-md inline-block"
+              className="px-8 py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold text-sm rounded-full transition-all shadow-md inline-block"
             >
               Explore Boarding Houses
             </Link>

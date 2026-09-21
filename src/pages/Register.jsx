@@ -25,6 +25,7 @@ const RegisterPage = () => {
   // Common Fields
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // UI States
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +39,10 @@ const RegisterPage = () => {
     setError('');
 
     if (step === 1) {
+      if (!agreedToTerms) {
+        setError('You must agree to the Terms of Service and Privacy Policy');
+        return;
+      }
       if (name && email && phone) {
         setStep(2);
       } else {
@@ -257,12 +262,21 @@ const RegisterPage = () => {
               )}
 
               {/* Terms */}
-              <p className="text-[12px] text-white/30 mt-5 mb-5 leading-relaxed">
-                I agree to the{' '}
-                <Link to="/terms" className="text-[#FACC15] font-semibold hover:text-[#EAB308] transition-colors">Terms of Service</Link>
-                {' '}and{' '}
-                <Link to="/privacy" className="text-[#FACC15] font-semibold hover:text-[#EAB308] transition-colors">Privacy Policy</Link>.
-              </p>
+              <label className="flex items-center gap-3 mt-5 mb-5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="w-4 h-4 rounded border-[#333] bg-[#111] text-[#FACC15] focus:ring-[#FACC15]/30 focus:ring-offset-0 focus:ring-2 cursor-pointer transition-colors accent-[#FACC15]"
+                  required
+                />
+                <span className="text-[12px] text-white/30 leading-relaxed">
+                  I agree to the{' '}
+                  <Link to="/terms" className="text-[#FACC15] font-semibold hover:text-[#EAB308] transition-colors" onClick={(e) => e.stopPropagation()}>Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link to="/privacy" className="text-[#FACC15] font-semibold hover:text-[#EAB308] transition-colors" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link>.
+                </span>
+              </label>
 
               {/* Submit */}
               <button

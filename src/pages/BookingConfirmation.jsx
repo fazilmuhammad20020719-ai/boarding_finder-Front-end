@@ -163,7 +163,7 @@ const BookingConfirmation = () => {
     return () => cancelAnimationFrame(animFrame);
   }, []);
 
-  if (!listing) return <div className="min-h-screen bg-[#f4f7f9] flex items-center justify-center">Loading...</div>;
+  if (!listing) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
 
   const rentPrice = parseFloat(listing.price) || 0;
   const securityDeposit = listing.security_deposit ? parseFloat(listing.security_deposit) : rentPrice;
@@ -236,7 +236,7 @@ const BookingConfirmation = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
       {/* Confetti Canvas */}
       <canvas
         ref={confettiRef}
@@ -288,7 +288,7 @@ const BookingConfirmation = () => {
           </div>
 
           <h1
-            className="text-3xl md:text-4xl font-extrabold text-[#0f172a] tracking-tight mb-3"
+            className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3"
             style={{
               opacity: showContent ? 1 : 0,
               transform: showContent ? 'translateY(0)' : 'translateY(16px)',
@@ -298,14 +298,14 @@ const BookingConfirmation = () => {
             Booking Confirmed!
           </h1>
           <p
-            className="text-[#64748b] font-medium text-[15px] max-w-md mx-auto leading-relaxed"
+            className="text-white/60 font-medium text-[15px] max-w-md mx-auto leading-relaxed"
             style={{
               opacity: showContent ? 1 : 0,
               transform: showContent ? 'translateY(0)' : 'translateY(16px)',
               transition: 'all 0.5s ease 0.1s',
             }}
           >
-            Your booking request for <span className="font-bold text-[#1952c4]">{listing.title}</span> has been successfully submitted. Here's your receipt.
+            Your booking request for <span className="font-bold text-[#FACC15]">{listing.title}</span> has been successfully submitted. Here's your receipt.
           </p>
         </div>
 
@@ -318,25 +318,24 @@ const BookingConfirmation = () => {
           }}
         >
           {/* Booking Reference Banner */}
-          <div className="bg-gradient-to-r from-[#1952c4] to-[#2563eb] rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg"
-            style={{ boxShadow: '0 8px 32px rgba(25,82,196,0.25)' }}
+          <div className="bg-[#111] border border-[#333] border-l-4 border-l-[#FACC15] rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <div className="w-12 h-12 rounded-xl bg-[#FACC15]/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-[#FACC15]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <div>
-                <div className="text-white/70 text-xs font-bold uppercase tracking-wider">Booking Reference</div>
+                <div className="text-white/50 text-xs font-bold uppercase tracking-wider">Booking Reference</div>
                 <div className="text-white text-xl font-black tracking-wide">{bookingRef}</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-white/70 text-xs font-bold uppercase tracking-wider">Status</div>
-              <div className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-full mt-1">
-                <div className="w-2 h-2 rounded-full bg-[#fbbf24] animate-pulse" />
-                <span className="text-white font-bold text-sm">Pending Review</span>
+              <div className="text-white/50 text-xs font-bold uppercase tracking-wider">Status</div>
+              <div className="inline-flex items-center gap-1.5 bg-[#FACC15]/20 px-3 py-1.5 rounded-full mt-1">
+                <div className="w-2 h-2 rounded-full bg-[#FACC15] animate-pulse" />
+                <span className="text-[#FACC15] font-bold text-sm">Pending Review</span>
               </div>
             </div>
           </div>
@@ -346,9 +345,9 @@ const BookingConfirmation = () => {
             <div className="lg:col-span-3 space-y-6">
 
               {/* Property Card */}
-              <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 overflow-hidden">
+              <div className="bg-[#1A1A1A] rounded-3xl shadow-sm border border-[#333] overflow-hidden">
                 <div className="flex flex-col sm:flex-row">
-                  <div className="sm:w-48 h-44 sm:h-auto flex-shrink-0 bg-slate-100">
+                  <div className="sm:w-48 h-44 sm:h-auto flex-shrink-0 bg-[#111]">
                     <img
                       src={listing.parsed_image_url}
                       alt={listing.title}
@@ -359,13 +358,13 @@ const BookingConfirmation = () => {
                   <div className="p-6 flex-grow">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
-                        <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">{listing.title}</h3>
-                        <div className="flex items-center gap-1.5 text-sm text-[#64748b] font-medium">
+                        <h3 className="text-lg font-extrabold text-white mb-1">{listing.title}</h3>
+                        <div className="flex items-center gap-1.5 text-sm text-white/60 font-medium">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                           {listing.location}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 bg-[#fff8e6] text-[#f59e0b] px-2.5 py-1 rounded-lg flex-shrink-0">
+                      <div className="flex items-center gap-1 bg-[#FACC15]/20 text-[#FACC15] px-2.5 py-1 rounded-lg flex-shrink-0">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                         <span className="text-sm font-bold">{listing.rating}</span>
                       </div>
@@ -373,7 +372,7 @@ const BookingConfirmation = () => {
 
                     <div className="flex flex-wrap gap-2 mt-3">
                       {listing.parsed_amenities?.slice(0, 4).map(a => (
-                        <span key={a} className="bg-[#f4f7f9] text-[#475569] text-xs font-semibold px-3 py-1 rounded-full">{a}</span>
+                        <span key={a} className="bg-[#333] text-white/70 text-xs font-semibold px-3 py-1 rounded-full">{a}</span>
                       ))}
                     </div>
                   </div>
@@ -381,71 +380,71 @@ const BookingConfirmation = () => {
               </div>
 
               {/* Booking Details */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60">
-                <h3 className="text-[15px] font-extrabold text-[#0f172a] mb-5 tracking-tight flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+              <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333]">
+                <h3 className="text-[15px] font-extrabold text-white mb-5 tracking-tight flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#FACC15]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                   Booking Details
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                   <div>
-                    <div className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Guest Name</div>
-                    <div className="text-[15px] font-bold text-[#0f172a]">{bookingName}</div>
+                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Guest Name</div>
+                    <div className="text-[15px] font-bold text-white">{bookingName}</div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Email</div>
-                    <div className="text-[15px] font-bold text-[#0f172a]">{bookingEmail}</div>
+                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Email</div>
+                    <div className="text-[15px] font-bold text-white">{bookingEmail}</div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Duration</div>
-                    <div className="text-[15px] font-bold text-[#0f172a]">{duration} months</div>
+                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Duration</div>
+                    <div className="text-[15px] font-bold text-white">{duration} months</div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Payment Method</div>
-                    <div className="text-[15px] font-bold text-[#0f172a]">{paymentMethod}</div>
+                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Payment Method</div>
+                    <div className="text-[15px] font-bold text-white">{paymentMethod}</div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Booking Date</div>
-                    <div className="text-[15px] font-bold text-[#0f172a]">{bookingDate}</div>
+                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Booking Date</div>
+                    <div className="text-[15px] font-bold text-white">{bookingDate}</div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Property Type</div>
-                    <div className="text-[15px] font-bold text-[#0f172a] capitalize">{listing.type?.replace(/_/g, ' ')}</div>
+                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Property Type</div>
+                    <div className="text-[15px] font-bold text-white capitalize">{listing.type?.replace(/_/g, ' ')}</div>
                   </div>
                 </div>
               </div>
 
               {/* Cost Breakdown */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60">
-                <h3 className="text-[15px] font-extrabold text-[#0f172a] mb-5 tracking-tight flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+              <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333]">
+                <h3 className="text-[15px] font-extrabold text-white mb-5 tracking-tight flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#FACC15]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                   Payment Summary
                 </h3>
 
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between items-center text-[14px]">
-                    <span className="text-[#64748b] font-medium">Monthly Rent</span>
-                    <span className="font-bold text-[#0f172a]">LKR {rentPrice.toLocaleString()}</span>
+                    <span className="text-white/60 font-medium">Monthly Rent</span>
+                    <span className="font-bold text-white">LKR {rentPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
-                    <span className="text-[#64748b] font-medium">Duration</span>
-                    <span className="font-bold text-[#0f172a]">× {duration} months</span>
+                    <span className="text-white/60 font-medium">Duration</span>
+                    <span className="font-bold text-white">× {duration} months</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
-                    <span className="text-[#64748b] font-medium">Subtotal (Rent)</span>
-                    <span className="font-bold text-[#0f172a]">LKR {totalRent.toLocaleString()}</span>
+                    <span className="text-white/60 font-medium">Subtotal (Rent)</span>
+                    <span className="font-bold text-white">LKR {totalRent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
-                    <span className="text-[#64748b] font-medium">Security Deposit (1 month)</span>
-                    <span className="font-bold text-[#0f172a]">LKR {securityDeposit.toLocaleString()}</span>
+                    <span className="text-white/60 font-medium">Security Deposit (1 month)</span>
+                    <span className="font-bold text-white">LKR {securityDeposit.toLocaleString()}</span>
                   </div>
                 </div>
 
-                <div className="border-t border-dashed border-[#e2e8f0] my-4" />
+                <div className="border-t border-dashed border-[#333] my-4" />
 
                 <div className="flex justify-between items-center">
-                  <span className="text-[16px] font-extrabold text-[#0f172a]">Total Amount</span>
-                  <span className="text-[20px] font-black text-[#1952c4]">LKR {total.toLocaleString()}</span>
+                  <span className="text-[16px] font-extrabold text-white">Total Amount</span>
+                  <span className="text-[20px] font-black text-[#FACC15]">LKR {total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -454,9 +453,9 @@ const BookingConfirmation = () => {
             <div className="lg:col-span-2 space-y-6">
 
               {/* What Happens Next — Timeline */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60">
-                <h3 className="text-[15px] font-extrabold text-[#0f172a] mb-6 tracking-tight flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#1952c4]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333]">
+                <h3 className="text-[15px] font-extrabold text-white mb-6 tracking-tight flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#FACC15]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                   What Happens Next
                 </h3>
 
@@ -470,7 +469,7 @@ const BookingConfirmation = () => {
                           style={{
                             background: step.status === 'done'
                               ? '#10b981'
-                              : '#e2e8f0'
+                              : '#333'
                           }}
                         />
                       )}
@@ -479,14 +478,14 @@ const BookingConfirmation = () => {
                         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 z-10"
                         style={{
                           background: step.status === 'done'
-                            ? '#e8f7ec'
+                            ? 'rgba(16,185,129,0.2)'
                             : step.status === 'active'
-                              ? '#ebf3ff'
-                              : '#f4f7f9',
+                              ? 'rgba(250,204,21,0.2)'
+                              : '#111',
                           color: step.status === 'done'
                             ? '#10b981'
                             : step.status === 'active'
-                              ? '#1952c4'
+                              ? '#FACC15'
                               : '#94a3b8',
                         }}
                       >
@@ -494,10 +493,10 @@ const BookingConfirmation = () => {
                       </div>
                       {/* Text */}
                       <div className="pb-6">
-                        <div className={`text-sm font-bold mb-0.5 ${step.status === 'pending' ? 'text-[#94a3b8]' : 'text-[#0f172a]'}`}>
+                        <div className={`text-sm font-bold mb-0.5 ${step.status === 'pending' ? 'text-white/40' : 'text-white'}`}>
                           {step.title}
                         </div>
-                        <div className={`text-xs leading-relaxed ${step.status === 'pending' ? 'text-[#cbd5e1]' : 'text-[#64748b]'}`}>
+                        <div className={`text-xs leading-relaxed ${step.status === 'pending' ? 'text-white/20' : 'text-white/60'}`}>
                           {step.desc}
                         </div>
                       </div>
@@ -507,16 +506,16 @@ const BookingConfirmation = () => {
               </div>
 
               {/* Important Notice */}
-              <div className="bg-gradient-to-br from-[#fff8e6] to-[#fffdf5] rounded-3xl p-5 border border-[#fde68a]/60">
+              <div className="bg-[#1A1A1A] rounded-3xl p-5 border border-[#FACC15]/30">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#fef3c7] text-[#f59e0b] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#FACC15]/20 text-[#FACC15] flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-[#92400e] mb-1">Important</div>
-                    <div className="text-xs text-[#a16207] leading-relaxed">
+                    <div className="text-sm font-bold text-[#FACC15] mb-1">Important</div>
+                    <div className="text-xs text-white/70 leading-relaxed">
                       A confirmation email has been sent to <span className="font-bold">{bookingEmail}</span>. The property owner will review your request and respond within 24 hours.
                     </div>
                   </div>
@@ -527,7 +526,7 @@ const BookingConfirmation = () => {
               <div className="space-y-3">
                 <button
                   onClick={handlePrint}
-                  className="w-full py-3.5 bg-white border-2 border-[#e2e8f0] hover:border-[#1952c4] text-[#0f172a] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 text-[14px]"
+                  className="w-full py-3.5 bg-[#111] border-2 border-[#333] hover:border-[#FACC15] text-white font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 text-[14px]"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -537,7 +536,7 @@ const BookingConfirmation = () => {
 
                 <button
                   onClick={() => navigate('/my-bookings')}
-                  className="w-full py-3.5 bg-white border-2 border-[#e2e8f0] hover:border-[#1952c4] text-[#0f172a] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 text-[14px]"
+                  className="w-full py-3.5 bg-[#111] border-2 border-[#333] hover:border-[#FACC15] text-white font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 text-[14px]"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -547,8 +546,7 @@ const BookingConfirmation = () => {
 
                 <button
                   onClick={() => navigate('/home')}
-                  className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors cursor-pointer border-none flex items-center justify-center gap-2 text-[14px] shadow-sm"
-                  style={{ boxShadow: '0 4px 16px rgba(25,82,196,0.25)' }}
+                  className="w-full py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors cursor-pointer border-none flex items-center justify-center gap-2 text-[14px]"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -558,21 +556,21 @@ const BookingConfirmation = () => {
               </div>
 
               {/* Help Card */}
-              <div className="bg-white rounded-3xl p-5 shadow-sm border border-[#e2e8f0]/60">
+              <div className="bg-[#1A1A1A] rounded-3xl p-5 shadow-sm border border-[#333]">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#f0e6ff] text-[#8b5cf6] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-purple-900/30 text-purple-400 flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-[#0f172a]">Need Help?</div>
-                    <div className="text-xs text-[#64748b]">Our support team is here for you</div>
+                    <div className="text-sm font-bold text-white">Need Help?</div>
+                    <div className="text-xs text-white/60">Our support team is here for you</div>
                   </div>
                 </div>
                 <button
                   onClick={() => navigate('/contact')}
-                  className="w-full py-2.5 bg-[#f4f7f9] hover:bg-[#e8ecf0] text-[#475569] font-semibold rounded-xl transition-colors cursor-pointer border-none text-[13px]"
+                  className="w-full py-2.5 bg-[#111] hover:bg-[#222] text-white/80 font-semibold rounded-xl transition-colors cursor-pointer border-none text-[13px]"
                 >
                   Contact Support
                 </button>

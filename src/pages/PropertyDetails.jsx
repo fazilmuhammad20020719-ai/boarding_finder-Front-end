@@ -242,20 +242,20 @@ const PropertyDetails = () => {
     navigate(`/book/${listing.id}?date=${moveInDate}&duration=${activeDuration}`);
   };
 
-  if (!listing) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">Loading...</div>;
+  if (!listing) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={2} activeTab="" />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-6">
         {/* ===== BREADCRUMBS ===== */}
-        <div className="flex items-center gap-2 text-sm text-[#64748b] font-medium mb-6">
-          <Link to="/home" className="hover:text-[#1952c4] transition-colors">Home</Link>
+        <div className="flex items-center gap-2 text-sm text-white/50 font-medium mb-6">
+          <Link to="/home" className="hover:text-[#FACC15] transition-colors">Home</Link>
           <span>›</span>
-          <Link to="/search" className="hover:text-[#1952c4] transition-colors">Search</Link>
+          <Link to="/search" className="hover:text-[#FACC15] transition-colors">Search</Link>
           <span>›</span>
-          <span className="text-[#0f172a] font-semibold">{listing.name}</span>
+          <span className="text-white font-semibold">{listing.name}</span>
         </div>
 
         {user && user.role === 'admin' && (
@@ -281,7 +281,7 @@ const PropertyDetails = () => {
 
             {/* Images */}
             <div className="flex flex-col gap-3">
-              <div className="w-full h-[400px] rounded-[24px] overflow-hidden bg-slate-200">
+              <div className="w-full h-[400px] rounded-[24px] overflow-hidden bg-[#111]">
                 <img src={listing.images[activeImageIndex] || listing.image} alt={listing.name} className="w-full h-full object-cover" />
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2">
@@ -289,7 +289,7 @@ const PropertyDetails = () => {
                   <div
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden bg-slate-200 cursor-pointer transition-opacity ${activeImageIndex === idx ? 'border-2 border-[#1952c4] opacity-100' : 'opacity-70 hover:opacity-100'}`}
+                    className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden bg-[#111] cursor-pointer transition-opacity ${activeImageIndex === idx ? 'border-2 border-[#FACC15] opacity-100' : 'opacity-70 hover:opacity-100'}`}
                   >
                     <img src={imgUrl} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
                   </div>
@@ -300,7 +300,7 @@ const PropertyDetails = () => {
             {/* Header & Badges */}
             <div>
               <div className="flex justify-between items-start mb-2">
-                <h1 className="text-4xl font-extrabold tracking-tight text-[#0f172a]">{listing.name}</h1>
+                <h1 className="text-4xl font-extrabold tracking-tight text-white">{listing.name}</h1>
                 <button
                   onClick={async () => {
                     if (!user || user.role === 'owner') {
@@ -318,16 +318,16 @@ const PropertyDetails = () => {
                       console.error("Failed to toggle save status", err);
                     }
                   }}
-                  className="flex items-center gap-2 px-4 py-2 border border-[#e2e8f0] rounded-full hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600 bg-white shadow-sm cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 border border-[#333] rounded-full hover:bg-[#222] transition-colors text-sm font-semibold text-white/80 bg-[#1A1A1A] shadow-sm cursor-pointer"
                 >
-                  <svg className={`w-4 h-4 ${listing.liked ? 'text-red-500 fill-current' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-4 h-4 ${listing.liked ? 'text-red-500 fill-current' : 'text-white/40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                   Save
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px] text-slate-500 font-medium mb-4">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px] text-white/50 font-medium mb-4">
                 <div className="flex items-center gap-1.5">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   {listing.location}
@@ -339,50 +339,50 @@ const PropertyDetails = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-3 py-1 rounded-md font-bold text-sm">
+                <div className="flex items-center gap-1 bg-[#FACC15]/10 text-[#FACC15] px-3 py-1 rounded-md font-bold text-sm">
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  {listing.rating} <span className="text-amber-600/70 ml-1 font-medium">({listing.reviews} reviews)</span>
+                  {listing.rating} <span className="text-[#FACC15]/70 ml-1 font-medium">({listing.reviews} reviews)</span>
                 </div>
-                <span className="bg-purple-50 text-purple-600 font-bold text-[13px] px-3 py-1 rounded-md capitalize">{listing.gender}</span>
-                <span className="bg-blue-50 text-blue-600 font-bold text-[13px] px-3 py-1 rounded-md capitalize">{listing.type.replace('_', ' ')}</span>
-                <span className="bg-slate-100 text-slate-500 font-bold text-[13px] px-3 py-1 rounded-md">{listing.distance} from campus</span>
+                <span className="bg-[#1A1A1A] border border-[#333] text-white font-bold text-[13px] px-3 py-1 rounded-md capitalize">{listing.gender}</span>
+                <span className="bg-[#1A1A1A] border border-[#333] text-white font-bold text-[13px] px-3 py-1 rounded-md capitalize">{listing.type.replace('_', ' ')}</span>
+                <span className="bg-[#111] border border-[#333] text-white/70 font-bold text-[13px] px-3 py-1 rounded-md">{listing.distance} from campus</span>
               </div>
             </div>
 
             {/* Feature Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-[#f0f4f9] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#e2e8f0]/50">
-                <svg className="w-6 h-6 text-[#1952c4] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                <span className="font-extrabold text-[#0f172a]">{listing.beds} Rooms</span>
-                <span className="text-xs font-semibold text-[#1952c4]">Available</span>
+              <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
+                <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                <span className="font-extrabold text-white">{listing.beds} Rooms</span>
+                <span className="text-xs font-semibold text-[#FACC15]">Available</span>
               </div>
-              <div className="bg-[#f0f4f9] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#e2e8f0]/50">
-                <svg className="w-6 h-6 text-[#1952c4] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
-                <span className="font-extrabold text-[#0f172a]">1 Bathroom</span>
-                <span className="text-xs font-semibold text-slate-400">Included</span>
+              <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
+                <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
+                <span className="font-extrabold text-white">1 Bathroom</span>
+                <span className="text-xs font-semibold text-white/50">Included</span>
               </div>
-              <div className="bg-[#f0f4f9] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#e2e8f0]/50">
-                <svg className="w-6 h-6 text-[#1952c4] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                <span className="font-extrabold text-[#0f172a]">{listing.distance}</span>
-                <span className="text-xs font-semibold text-slate-400">from campus</span>
+              <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
+                <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span className="font-extrabold text-white">{listing.distance}</span>
+                <span className="text-xs font-semibold text-white/50">from campus</span>
               </div>
             </div>
 
             {/* About */}
             <div>
-              <h3 className="text-lg font-bold text-[#0f172a] mb-3">About this place</h3>
-              <p className="text-slate-600 leading-relaxed text-[15px]">
+              <h3 className="text-lg font-bold text-white mb-3">About this place</h3>
+              <p className="text-white/70 leading-relaxed text-[15px]">
                 {listing.description}
               </p>
             </div>
 
             {/* Amenities */}
             <div>
-              <h3 className="text-lg font-bold text-[#0f172a] mb-4">Facilities & Amenities</h3>
+              <h3 className="text-lg font-bold text-white mb-4">Facilities & Amenities</h3>
               <div className="flex flex-wrap gap-3">
                 {listing.amenities.map(amenity => (
-                  <div key={amenity} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e2e8f0] rounded-full shadow-sm text-[14px] font-semibold text-[#0f172a]">
-                    <svg className="w-4 h-4 text-[#1952c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                  <div key={amenity} className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] border border-[#333] rounded-full shadow-sm text-[14px] font-semibold text-white">
+                    <svg className="w-4 h-4 text-[#FACC15]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
                     {amenity}
                   </div>
                 ))}
@@ -392,20 +392,20 @@ const PropertyDetails = () => {
             {/* Location */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#0f172a]">Location</h3>
+                <h3 className="text-lg font-bold text-white">Location</h3>
                 <a
                   href={`https://maps.google.com/maps?q=${encodeURIComponent(listing.location)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#1952c4] text-sm font-bold flex items-center gap-1 hover:underline"
+                  className="text-[#FACC15] text-sm font-bold flex items-center gap-1 hover:underline"
                 >
                   Open map <span className="text-lg leading-none">›</span>
                 </a>
               </div>
 
               {/* Address label */}
-              <div className="flex items-center gap-2 text-sm text-slate-500 font-medium mb-3">
-                <svg className="w-4 h-4 text-[#1952c4] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center gap-2 text-sm text-white/50 font-medium mb-3">
+                <svg className="w-4 h-4 text-[#FACC15] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -413,8 +413,8 @@ const PropertyDetails = () => {
               </div>
 
               {/* OpenStreetMap embed */}
-              <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-sm relative z-0">
-                <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={15} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+              <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#333] shadow-sm relative z-0">
+                <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={15} style={{ height: '100%', width: '100%', filter: 'invert(90%) hue-rotate(180deg)' }} scrollWheelZoom={false}>
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -428,7 +428,7 @@ const PropertyDetails = () => {
                 href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(listing.location)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 w-full py-2.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm no-underline"
+                className="mt-3 w-full py-2.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-[#FACC15] font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm no-underline"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -440,26 +440,26 @@ const PropertyDetails = () => {
 
             {/* Reviews */}
             <div>
-              <div className="flex justify-between items-center mb-6 border-b border-[#e2e8f0] pb-4">
-                <h3 className="text-xl font-black text-[#0f172a]">Reviews</h3>
-                <div className="text-sm font-bold text-[#1952c4] flex items-center gap-1 bg-[#ebf3ff] px-3 py-1 rounded-full">
-                  ⭐ {listing.avg_rating || "New"} <span className="text-slate-400 font-medium">({listing.review_count || 0})</span>
+              <div className="flex justify-between items-center mb-6 border-b border-[#333] pb-4">
+                <h3 className="text-xl font-black text-white">Reviews</h3>
+                <div className="text-sm font-bold text-[#FACC15] flex items-center gap-1 bg-[#FACC15]/10 px-3 py-1 rounded-full">
+                  ⭐ {listing.avg_rating || "New"} <span className="text-white/40 font-medium">({listing.review_count || 0})</span>
                 </div>
               </div>
 
               {/* Write Review Form (Only for logged-in students) */}
               {user && user.role === 'student' && (
-                <div className="bg-[#f8fafc] border border-[#e2e8f0] p-5 rounded-2xl mb-6">
-                  <h4 className="font-bold text-[#0f172a] text-sm mb-3">Write a Review</h4>
+                <div className="bg-[#111] border border-[#333] p-5 rounded-2xl mb-6">
+                  <h4 className="font-bold text-white text-sm mb-3">Write a Review</h4>
                   <form onSubmit={handleReviewSubmit}>
                     <div className="mb-3 flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Rating:</span>
+                      <span className="text-xs font-bold text-white/50 uppercase tracking-wide">Rating:</span>
                       <div className="flex cursor-pointer text-xl">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
                             onClick={() => setReviewRating(star)}
-                            className={star <= reviewRating ? "text-amber-400" : "text-slate-300"}
+                            className={star <= reviewRating ? "text-[#FACC15]" : "text-[#333]"}
                           >
                             ★
                           </span>
@@ -470,13 +470,13 @@ const PropertyDetails = () => {
                       value={reviewText}
                       onChange={(e) => setReviewText(e.target.value)}
                       placeholder="Share your experience..."
-                      className="w-full bg-white border border-[#e2e8f0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1952c4] min-h-[80px]"
+                      className="w-full bg-[#1A1A1A] border border-[#333] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FACC15] min-h-[80px]"
                       required
                     ></textarea>
                     <button
                       type="submit"
                       disabled={isSubmittingReview || !reviewText.trim()}
-                      className="mt-3 px-5 py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
+                      className="mt-3 px-5 py-2.5 bg-[#FACC15] hover:bg-[#EAB308] text-black text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
                     >
                       {isSubmittingReview ? "Submitting..." : "Submit Review"}
                     </button>
@@ -487,30 +487,30 @@ const PropertyDetails = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {listing.reviews_data && listing.reviews_data.length > 0 ? (
                   listing.reviews_data.map(review => (
-                    <div key={review.id} className="bg-white p-5 rounded-2xl border border-[#e2e8f0]/80 shadow-sm flex flex-col justify-between">
+                    <div key={review.id} className="bg-[#1A1A1A] p-5 rounded-2xl border border-[#333] shadow-sm flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#ebf3ff] text-[#1952c4] font-bold flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-[#FACC15]/10 text-[#FACC15] font-bold flex items-center justify-center">
                               {review.initial}
                             </div>
                             <div>
-                              <div className="font-bold text-[#0f172a] text-sm">{review.name}</div>
-                              <div className="text-xs text-slate-400">{review.date}</div>
+                              <div className="font-bold text-white text-sm">{review.name}</div>
+                              <div className="text-xs text-white/40">{review.date}</div>
                             </div>
                           </div>
-                          <div className="flex text-amber-400 text-sm">
+                          <div className="flex text-[#FACC15] text-sm">
                             {Array.from({ length: 5 }).map((_, i) => (
-                              <span key={i} className={i < review.rating ? "" : "text-slate-200"}>★</span>
+                              <span key={i} className={i < review.rating ? "" : "text-[#333]"}>★</span>
                             ))}
                           </div>
                         </div>
-                        <p className="text-slate-600 text-sm leading-relaxed">{review.text}</p>
+                        <p className="text-white/70 text-sm leading-relaxed">{review.text}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-full py-8 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-[#e2e8f0] rounded-2xl">
+                  <div className="col-span-full py-8 text-center text-white/50 text-sm font-medium border-2 border-dashed border-[#333] rounded-2xl">
                     No reviews yet. Be the first to review!
                   </div>
                 )}
@@ -519,36 +519,36 @@ const PropertyDetails = () => {
 
           {/* ===== RIGHT COLUMN: BOOKING CARD ===== */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-xl border border-[#e2e8f0]/60 sticky top-28">
+            <div className="bg-[#1A1A1A] rounded-[32px] p-6 sm:p-8 shadow-xl border border-[#333] sticky top-28">
               {/* Price */}
               <div className="mb-6">
-                <span className="text-3xl font-black text-[#1952c4]">LKR {listing.price.toLocaleString()}</span>
-                <span className="text-slate-400 font-medium ml-1">/ month</span>
+                <span className="text-3xl font-black text-[#FACC15]">LKR {listing.price.toLocaleString()}</span>
+                <span className="text-white/50 font-medium ml-1">/ month</span>
               </div>
 
               {/* Rating Mini */}
               <div className="flex items-center gap-1.5 mb-6 text-sm">
-                <div className="flex text-amber-400">★</div>
-                <span className="font-bold text-[#0f172a]">{listing.avg_rating || "New"}</span>
-                <span className="text-slate-400 underline">({listing.review_count || 0} reviews)</span>
+                <div className="flex text-[#FACC15]">★</div>
+                <span className="font-bold text-white">{listing.avg_rating || "New"}</span>
+                <span className="text-white/50 underline">({listing.review_count || 0} reviews)</span>
               </div>
 
               {/* Owner Info */}
-              <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#e2e8f0]">
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#333]">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-[#ebf3ff] text-[#1952c4] font-bold flex items-center justify-center text-lg">
+                  <div className="w-11 h-11 rounded-full bg-[#FACC15]/10 text-[#FACC15] font-bold flex items-center justify-center text-lg">
                     {listing.ownerName.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div className="font-bold text-[#0f172a] text-sm">{listing.ownerName}</div>
-                    <div className="text-xs text-slate-400">Property Owner</div>
+                    <div className="font-bold text-white text-sm">{listing.ownerName}</div>
+                    <div className="text-xs text-white/40">Property Owner</div>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   {listing.ownerPhone && (
                     <a
                       href={`tel:${listing.ownerPhone}`}
-                      className="w-9 h-9 rounded-full bg-[#f0f4f9] text-[#1952c4] flex items-center justify-center hover:bg-[#e1e9f5] transition-colors"
+                      className="w-9 h-9 rounded-full bg-[#111] text-[#FACC15] flex items-center justify-center hover:bg-[#222] transition-colors border border-[#333]"
                       title={listing.ownerPhone}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -557,7 +557,7 @@ const PropertyDetails = () => {
                   {listing.ownerEmail && (
                     <a
                       href={`mailto:${listing.ownerEmail}`}
-                      className="w-9 h-9 rounded-full bg-[#f0f4f9] text-[#1952c4] flex items-center justify-center hover:bg-[#e1e9f5] transition-colors"
+                      className="w-9 h-9 rounded-full bg-[#111] text-[#FACC15] flex items-center justify-center hover:bg-[#222] transition-colors border border-[#333]"
                       title={listing.ownerEmail}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
@@ -568,25 +568,25 @@ const PropertyDetails = () => {
 
               {user && user.id === listing.ownerId ? (
                 <div className="flex flex-col gap-4">
-                  <div className="bg-[#ebf3ff] rounded-2xl p-4 flex items-start gap-3 border border-[#1952c4]/20 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-[#1952c4] text-white flex items-center justify-center flex-shrink-0">
+                  <div className="bg-[#111] rounded-2xl p-4 flex items-start gap-3 border border-[#333] mb-2">
+                    <div className="w-10 h-10 rounded-full bg-[#FACC15] text-black flex items-center justify-center flex-shrink-0">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-[#1952c4] mb-1">Your Listing</h4>
-                      <p className="text-xs text-slate-600 font-medium">You are the owner of this property. Manage it from your dashboard.</p>
+                      <h4 className="text-sm font-bold text-[#FACC15] mb-1">Your Listing</h4>
+                      <p className="text-xs text-white/70 font-medium">You are the owner of this property. Manage it from your dashboard.</p>
                     </div>
                   </div>
 
                   <button
                     onClick={() => navigate(`/edit-listing/${listing.id}`)}
-                    className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none"
+                    className="w-full py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none"
                   >
                     Edit Listing Details
                   </button>
                   <button
                     onClick={() => navigate('/manage-reservations')}
-                    className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#0f172a] font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                    className="w-full py-3.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
                   >
                     Manage Reservations
                   </button>
@@ -594,25 +594,25 @@ const PropertyDetails = () => {
               ) : user && user.role === 'admin' ? (
                 /* ── Admin Controls ── */
                 <div className="flex flex-col gap-4">
-                  <div className={`rounded-2xl p-4 flex items-start gap-3 border mb-2 ${listing.approval_status === 'approved' ? 'bg-emerald-50 border-emerald-200' :
-                      listing.approval_status === 'rejected' ? 'bg-red-50 border-red-200' :
-                        listing.approval_status === 'suspended' ? 'bg-amber-50 border-amber-200' :
-                          'bg-blue-50 border-blue-200'
+                  <div className={`rounded-2xl p-4 flex items-start gap-3 border mb-2 ${listing.approval_status === 'approved' ? 'bg-[#064e3b] border-emerald-500/50' :
+                      listing.approval_status === 'rejected' ? 'bg-[#7f1d1d] border-red-500/50' :
+                        listing.approval_status === 'suspended' ? 'bg-[#78350f] border-amber-500/50' :
+                          'bg-[#1e3a8a] border-blue-500/50'
                     }`}>
                     <div className="mt-1">
-                      {listing.approval_status === 'approved' && <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-                      {(listing.approval_status === 'rejected' || listing.approval_status === 'suspended') && <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
-                      {listing.approval_status === 'pending' && <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                      {listing.approval_status === 'approved' && <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                      {(listing.approval_status === 'rejected' || listing.approval_status === 'suspended') && <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>}
+                      {listing.approval_status === 'pending' && <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold uppercase tracking-wider mb-1" style={{
-                        color: listing.approval_status === 'approved' ? '#059669' :
-                          listing.approval_status === 'rejected' ? '#dc2626' :
-                            listing.approval_status === 'suspended' ? '#d97706' : '#2563eb'
+                        color: listing.approval_status === 'approved' ? '#34d399' :
+                          listing.approval_status === 'rejected' ? '#f87171' :
+                            listing.approval_status === 'suspended' ? '#fbbf24' : '#60a5fa'
                       }}>
                         Status: {listing.approval_status}
                       </h4>
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                      <p className="text-xs text-white/80 font-medium leading-relaxed">
                         {listing.approval_status === 'approved' && 'This listing is visible to all students.'}
                         {listing.approval_status === 'pending' && 'This listing is awaiting your review before it goes public.'}
                         {listing.approval_status === 'rejected' && 'This listing was rejected and is not visible to students.'}
@@ -658,12 +658,12 @@ const PropertyDetails = () => {
                 </div>
               ) : listing.isFullyBooked ? (
                 <div className="flex flex-col items-center justify-center py-4 text-center">
-                  <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-red-400 mb-4 border border-red-100">
+                  <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4 border border-red-500/20">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </div>
-                  <h4 className="text-lg font-extrabold text-[#0f172a] mb-1.5">Fully Booked</h4>
-                  <p className="text-sm text-slate-500 font-medium mb-6">Check back later or save to get notified</p>
-                  <button className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm cursor-pointer">
+                  <h4 className="text-lg font-extrabold text-white mb-1.5">Fully Booked</h4>
+                  <p className="text-sm text-white/50 font-medium mb-6">Check back later or save to get notified</p>
+                  <button className="w-full py-3.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-[#FACC15] font-bold rounded-xl transition-colors shadow-sm cursor-pointer">
                     Save for Later
                   </button>
                 </div>
@@ -711,32 +711,32 @@ const PropertyDetails = () => {
                   </div>
 
                   {/* Booking Details */}
-                  <div className="bg-[#f8fafc] rounded-xl p-4 space-y-2 text-sm">
+                  <div className="bg-[#111] border border-[#333] rounded-xl p-4 space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-medium">Move-in Date</span>
-                      <span className="font-bold text-[#0f172a]">{new Date(existingBooking.move_in_date).toLocaleDateString()}</span>
+                      <span className="text-white/50 font-medium">Move-in Date</span>
+                      <span className="font-bold text-white">{new Date(existingBooking.move_in_date).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-medium">Duration</span>
-                      <span className="font-bold text-[#0f172a]">{existingBooking.duration_months} months</span>
+                      <span className="text-white/50 font-medium">Duration</span>
+                      <span className="font-bold text-white">{existingBooking.duration_months} months</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-medium">Total</span>
-                      <span className="font-bold text-[#1952c4]">LKR {Number(existingBooking.total_amount).toLocaleString()}</span>
+                      <span className="text-white/50 font-medium">Total</span>
+                      <span className="font-bold text-[#FACC15]">LKR {Number(existingBooking.total_amount).toLocaleString()}</span>
                     </div>
                   </div>
 
                   {/* Disabled Book Button */}
                   <button
                     disabled
-                    className="w-full py-3.5 bg-slate-100 text-slate-400 font-bold rounded-xl cursor-not-allowed border-none"
+                    className="w-full py-3.5 bg-[#111] border border-[#333] text-white/40 font-bold rounded-xl cursor-not-allowed"
                   >
                     Already Booked
                   </button>
 
                   <button
                     onClick={() => navigate('/my-bookings')}
-                    className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#1952c4] font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                    className="w-full py-3.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
                   >
                     View My Bookings
                   </button>
@@ -746,23 +746,24 @@ const PropertyDetails = () => {
                   {/* Booking Form */}
                   <div className="space-y-5 mb-8">
                     <div>
-                      <label className="block text-[11px] font-bold text-[#64748b] tracking-wider mb-2 uppercase">Move-In Date</label>
+                      <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Move-In Date</label>
                       <input
                         type="date"
                         value={moveInDate}
                         onChange={(e) => setMoveInDate(e.target.value)}
-                        className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#1952c4] focus:ring-1 focus:ring-[#1952c4]"
+                        className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15]"
+                        style={{ colorScheme: 'dark' }}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-[#64748b] tracking-wider mb-2 uppercase">Duration</label>
+                      <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Duration</label>
                       <div className="grid grid-cols-4 gap-2">
                         {['3', '6', '9', '12'].map(dur => (
                           <button
                             key={dur}
                             onClick={() => setActiveDuration(dur)}
-                            className={`py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${activeDuration === dur ? 'bg-[#ebf3ff] border-[#1952c4] text-[#1952c4]' : 'bg-white border-[#e2e8f0] text-slate-500 hover:bg-slate-50'}`}
+                            className={`py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${activeDuration === dur ? 'bg-[#FACC15] border-[#FACC15] text-black' : 'bg-[#1A1A1A] border-[#333] text-white/50 hover:bg-[#222]'}`}
                           >
                             {dur} mo
                           </button>
@@ -776,13 +777,13 @@ const PropertyDetails = () => {
                     <button
                       onClick={handleBookNow}
                       disabled={bookingStatus === "Submitting..."}
-                      className="w-full py-3.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none disabled:opacity-50"
+                      className="w-full py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none disabled:opacity-50"
                     >
                       {bookingStatus || "Book Now"}
                     </button>
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="w-full py-3.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#0f172a] font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                      className="w-full py-3.5 bg-[#111] border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
                     >
                       Send Inquiry
                     </button>
@@ -790,7 +791,7 @@ const PropertyDetails = () => {
                 </>
               )}
 
-              <p className="text-center text-xs text-slate-400 mt-5 font-medium">
+              <p className="text-center text-xs text-white/40 mt-5 font-medium">
                 No payment charged until approved by owner
               </p>
             </div>
@@ -801,25 +802,25 @@ const PropertyDetails = () => {
       {/* ===== SEND INQUIRY MODAL ===== */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="relative bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl z-10 animate-modalIn border border-slate-100">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 w-8 h-8 bg-slate-50 hover:bg-slate-100 text-[#1952c4] rounded-full flex items-center justify-center font-bold text-sm transition-colors cursor-pointer border-none">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="relative bg-[#1A1A1A] rounded-3xl w-full max-w-md p-6 shadow-2xl z-10 animate-modalIn border border-[#333]">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 w-8 h-8 bg-[#111] border border-[#333] hover:bg-[#222] text-[#FACC15] rounded-full flex items-center justify-center font-bold text-sm transition-colors cursor-pointer">
               ✕
             </button>
-            <h3 className="text-[17px] font-bold text-[#0f172a] mb-0.5">Send Inquiry</h3>
-            <p className="text-[13px] text-[#1952c4] mb-6">{listing.name}</p>
+            <h3 className="text-[17px] font-bold text-white mb-0.5">Send Inquiry</h3>
+            <p className="text-[13px] text-[#FACC15] mb-6">{listing.name}</p>
 
             <textarea
               rows="4"
               placeholder="Type your message to the owner..."
-              className="w-full px-4 py-4 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1952c4] focus:border-[#1952c4] text-[14px] resize-none mb-4 font-medium"
+              className="w-full px-4 py-4 rounded-xl bg-[#111] border border-[#333] text-white focus:outline-none focus:ring-1 focus:ring-[#FACC15] focus:border-[#FACC15] text-[14px] resize-none mb-4 font-medium"
             ></textarea>
 
-            <button onClick={() => { alert('Inquiry sent!'); setIsModalOpen(false); }} className="w-full py-3.5 bg-[#96baf7] hover:bg-[#1952c4] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none mb-4">
+            <button onClick={() => { alert('Inquiry sent!'); setIsModalOpen(false); }} className="w-full py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none mb-4">
               Send
             </button>
 
-            <p className="text-center text-[10px] text-slate-400 font-medium">
+            <p className="text-center text-[10px] text-white/40 font-medium">
               No payment charged until approved by owner
             </p>
           </div>

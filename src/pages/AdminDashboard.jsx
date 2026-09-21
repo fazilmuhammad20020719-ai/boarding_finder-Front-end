@@ -165,41 +165,41 @@ const AdminDashboard = () => {
   const renderVerificationModal = () => {
     if (!selectedUser) return null;
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-        <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
-          <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-3xl">
-            <h3 className="text-xl font-bold text-slate-800">Review Identity Documents</h3>
-            <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600 bg-transparent border-none cursor-pointer">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+        <div className="bg-[#1A1A1A] border border-[#333] rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+          <div className="p-6 border-b border-[#333] flex justify-between items-center bg-[#111] rounded-t-3xl">
+            <h3 className="text-xl font-bold text-white">Review Identity Documents</h3>
+            <button onClick={() => setSelectedUser(null)} className="text-white/40 hover:text-white bg-transparent border-none cursor-pointer transition-colors">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
 
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-100">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#111]">
             {/* User Details */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm">
-              <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">User Details</h4>
+            <div className="bg-[#1A1A1A] border border-[#333] p-5 rounded-2xl shadow-sm">
+              <h4 className="font-bold text-white mb-4 border-b border-[#333] pb-2">User Details</h4>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Name:</span>
-                  <span className="font-semibold text-slate-800">{selectedUser.name}</span>
+                  <span className="text-white/60">Name:</span>
+                  <span className="font-semibold text-white">{selectedUser.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Email:</span>
-                  <span className="font-semibold text-slate-800">{selectedUser.email}</span>
+                  <span className="text-white/60">Email:</span>
+                  <span className="font-semibold text-white">{selectedUser.email}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Role:</span>
-                  <span className="font-semibold text-[#1952c4] capitalize">{selectedUser.role}</span>
+                  <span className="text-white/60">Role:</span>
+                  <span className="font-semibold text-[#FACC15] capitalize">{selectedUser.role}</span>
                 </div>
                 {selectedUser.role === 'student' && (
                   <>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">University:</span>
-                      <span className="font-semibold text-slate-800">{selectedUser.university}</span>
+                      <span className="text-white/60">University:</span>
+                      <span className="font-semibold text-white">{selectedUser.university}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Student ID:</span>
-                      <span className="font-semibold text-slate-800">{selectedUser.student_id}</span>
+                      <span className="text-white/60">Student ID:</span>
+                      <span className="font-semibold text-white">{selectedUser.student_id}</span>
                     </div>
                   </>
                 )}
@@ -207,16 +207,16 @@ const AdminDashboard = () => {
             </div>
 
             {/* Actions */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+            <div className="bg-[#1A1A1A] border border-[#333] p-5 rounded-2xl shadow-sm flex flex-col justify-between">
               <div>
-                <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Admin Actions</h4>
+                <h4 className="font-bold text-white mb-4 border-b border-[#333] pb-2">Admin Actions</h4>
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold text-slate-600 mb-2">Rejection Note (required for rejection):</label>
+                  <label className="block text-sm font-semibold text-white/60 mb-2">Rejection Note (required for rejection):</label>
                   <textarea
                     value={actionNote}
                     onChange={(e) => setActionNote(e.target.value)}
                     placeholder="e.g. Blurry ID, Expired document..."
-                    className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#1952c4]/20 focus:border-[#1952c4] transition-all resize-none h-24"
+                    className="w-full bg-[#111] text-white border border-[#333] rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#FACC15]/20 focus:border-[#FACC15]/30 transition-all resize-none h-24 placeholder-white/40"
                   />
                 </div>
               </div>
@@ -224,14 +224,14 @@ const AdminDashboard = () => {
                 <button
                   onClick={() => handleVerifyAction('reject')}
                   disabled={isProcessing || !actionNote}
-                  className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 border-none cursor-pointer"
+                  className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 border-none cursor-pointer"
                 >
                   Reject
                 </button>
                 <button
                   onClick={() => handleVerifyAction('approve')}
                   disabled={isProcessing}
-                  className="flex-1 bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50 border-none cursor-pointer"
+                  className="flex-1 bg-[#10b981] hover:bg-[#059669] text-black font-bold py-3 rounded-xl transition-colors disabled:opacity-50 border-none cursor-pointer"
                 >
                   Approve
                 </button>
@@ -239,8 +239,8 @@ const AdminDashboard = () => {
             </div>
 
             {/* Documents */}
-            <div className="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm">
-              <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submitted Documents</h4>
+            <div className="md:col-span-2 bg-[#1A1A1A] border border-[#333] p-5 rounded-2xl shadow-sm">
+              <h4 className="font-bold text-white mb-4 border-b border-[#333] pb-2">Submitted Documents</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {selectedUser.verification_docs?.map((doc, idx) => {
                   let fileUrl = doc;
@@ -263,13 +263,13 @@ const AdminDashboard = () => {
                   }
 
                   return (
-                    <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex flex-col">
-                      <div className="bg-slate-200 py-2 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    <div key={idx} className="border border-[#333] rounded-xl overflow-hidden bg-[#111] flex flex-col">
+                      <div className="bg-[#222] py-2 px-4 text-xs font-bold text-white/60 uppercase tracking-wider">
                         Document {idx + 1}
                       </div>
                       <div className="p-4 flex-grow flex items-center justify-center min-h-[300px]">
                         {isPdf ? (
-                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 text-[#1952c4] hover:underline">
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 text-[#FACC15] hover:underline">
                             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <span className="font-semibold">View Document</span>
                           </a>
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
                   );
                 })}
                 {(!selectedUser.verification_docs || selectedUser.verification_docs.length === 0) && (
-                  <div className="col-span-2 text-center text-slate-500 py-8 italic">No documents uploaded.</div>
+                  <div className="col-span-2 text-center text-white/40 py-8 italic">No documents uploaded.</div>
                 )}
               </div>
             </div>
@@ -294,20 +294,20 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black font-sans antialiased text-white">
       {/* Top Bar */}
-      <header className="bg-[#1e293b] text-white px-8 py-5 flex items-center justify-between">
+      <header className="bg-black border-b border-[#333] text-white px-8 py-5 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/10">
+          <div className="w-12 h-12 rounded-full border border-[#FACC15]/20 flex items-center justify-center bg-[#FACC15]/10 text-[#FACC15]">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
           <div>
-            <div className="text-xs font-semibold text-[#60a5fa] uppercase tracking-wide">System Administrator</div>
+            <div className="text-xs font-semibold text-[#FACC15] uppercase tracking-wide">System Administrator</div>
             <div className="text-xl font-extrabold text-white">BoardingFinder Admin</div>
           </div>
         </div>
 
-        <button onClick={handleLogout} className="flex items-center gap-2 text-white/90 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
+        <button onClick={handleLogout} className="flex items-center gap-2 text-white/60 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           Logout
         </button>
@@ -318,53 +318,53 @@ const AdminDashboard = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center">
+          <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-[#1952c4]/20 text-[#1952c4] flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </div>
             <div>
-              <div className="text-[22px] font-black text-[#0f172a]">{stats?.total_users || 0}</div>
-              <div className="text-xs font-semibold text-[#64748b]">Total Users</div>
+              <div className="text-[22px] font-black text-white">{stats?.total_users || 0}</div>
+              <div className="text-xs font-semibold text-white/60">Total Users</div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#e8f7ec] text-[#10b981] flex items-center justify-center">
+          <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-[#10b981]/20 text-[#10b981] flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
-              <div className="text-[22px] font-black text-[#0f172a]">{stats?.verified_users || 0}</div>
-              <div className="text-xs font-semibold text-[#64748b]">Verified Users</div>
+              <div className="text-[22px] font-black text-white">{stats?.verified_users || 0}</div>
+              <div className="text-xs font-semibold text-white/60">Verified Users</div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-[#fff8e6] text-[#f59e0b] flex items-center justify-center">
+          <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-[#f59e0b]/20 text-[#f59e0b] flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
-              <div className="text-[22px] font-black text-[#0f172a]">{stats?.pending_verifications || 0}</div>
-              <div className="text-xs font-semibold text-[#64748b]">Pending Approval</div>
+              <div className="text-[22px] font-black text-white">{stats?.pending_verifications || 0}</div>
+              <div className="text-xs font-semibold text-white/60">Pending Approval</div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center">
+          <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-red-500/20 text-red-500 flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
-              <div className="text-[22px] font-black text-[#0f172a]">{stats?.rejected_verifications || 0}</div>
-              <div className="text-xs font-semibold text-[#64748b]">Rejected Verifications</div>
+              <div className="text-[22px] font-black text-white">{stats?.rejected_verifications || 0}</div>
+              <div className="text-xs font-semibold text-white/60">Rejected Verifications</div>
             </div>
           </div>
 
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-[#e2e8f0] mb-8 overflow-x-auto">
+        <div className="flex border-b border-[#333] mb-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('verifications')}
-            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'verifications' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800 border-none'}`}
+            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'verifications' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white border-none'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
             Pending Verifications
@@ -375,7 +375,7 @@ const AdminDashboard = () => {
 
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             User Management
@@ -383,7 +383,7 @@ const AdminDashboard = () => {
 
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'listings' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'listings' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             Listing Management
@@ -391,7 +391,7 @@ const AdminDashboard = () => {
 
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-[#1952c4] border-b-2 border-[#1952c4] border-solid' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             Overview & Analytics
@@ -400,22 +400,22 @@ const AdminDashboard = () => {
 
         {/* Content Area */}
         {activeTab === 'verifications' && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
             {loadingUsers ? (
-              <div className="p-12 text-center text-slate-500">Loading pending users...</div>
+              <div className="p-12 text-center text-white/60">Loading pending users...</div>
             ) : pendingUsers.length === 0 ? (
               <div className="p-12 text-center flex flex-col items-center">
-                <div className="w-16 h-16 bg-[#ecfdf5] text-[#10b981] rounded-full flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-[#10b981]/20 text-[#10b981] rounded-full flex items-center justify-center mb-4">
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">All Caught Up!</h3>
-                <p className="text-slate-500">There are no pending identity verifications to review.</p>
+                <h3 className="text-xl font-bold text-white mb-2">All Caught Up!</h3>
+                <p className="text-white/60">There are no pending identity verifications to review.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[900px]">
                   <thead>
-                    <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
                       <th className="px-6 py-5 rounded-tl-3xl">USER</th>
                       <th className="px-6 py-5">ROLE</th>
                       <th className="px-6 py-5">EMAIL</th>
@@ -423,32 +423,32 @@ const AdminDashboard = () => {
                       <th className="px-6 py-5 rounded-tr-3xl">ACTION</th>
                     </tr>
                   </thead>
-                  <tbody className="text-[14px] font-medium text-[#0f172a]">
+                  <tbody className="text-[14px] font-medium text-white">
                     {pendingUsers.map(user => (
-                      <tr key={user.id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                      <tr key={user.id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-[#1952c4]/20 text-[#1952c4] flex items-center justify-center font-bold text-sm shrink-0">
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                             <span className="font-bold">{user.name}</span>
                           </div>
                         </td>
                         <td className="px-6 py-5">
-                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.role === 'owner' ? 'bg-[#ebf3ff] text-[#1952c4]' : 'bg-[#f3e8ff] text-[#9333ea]'}`}>
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.role === 'owner' ? 'bg-[#1952c4]/20 text-[#1952c4]' : 'bg-[#9333ea]/20 text-[#c084fc]'}`}>
                             {user.role}
                           </span>
                         </td>
-                        <td className="px-6 py-5 text-[#64748b]">{user.email}</td>
+                        <td className="px-6 py-5 text-white/60">{user.email}</td>
                         <td className="px-6 py-5">
-                          <span className="text-xs font-bold text-[#f59e0b] bg-[#fff8e6] px-3 py-1.5 rounded-full border border-[#f59e0b]/20">
+                          <span className="text-xs font-bold text-[#f59e0b] bg-[#f59e0b]/20 px-3 py-1.5 rounded-full border border-[#f59e0b]/20">
                             {user.verification_docs?.length || 0} Docs Uploaded
                           </span>
                         </td>
                         <td className="px-6 py-5">
                           <button
                             onClick={() => setSelectedUser(user)}
-                            className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition-colors border-none cursor-pointer shadow-sm"
+                            className="bg-[#111] hover:bg-[#222] border border-[#333] text-white font-bold py-2 px-4 rounded-xl text-xs transition-colors cursor-pointer shadow-sm"
                           >
                             Review Docs
                           </button>
@@ -463,16 +463,16 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'users' && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
             {loadingAllUsers ? (
-              <div className="p-12 text-center text-slate-500">Loading users...</div>
+              <div className="p-12 text-center text-white/60">Loading users...</div>
             ) : allUsers.length === 0 ? (
-              <div className="p-12 text-center text-slate-500">No users found.</div>
+              <div className="p-12 text-center text-white/60">No users found.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[1000px]">
                   <thead>
-                    <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
                       <th className="px-6 py-5 rounded-tl-3xl">USER</th>
                       <th className="px-6 py-5">ROLE</th>
                       <th className="px-6 py-5">STATUS</th>
@@ -480,13 +480,13 @@ const AdminDashboard = () => {
                       <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
                     </tr>
                   </thead>
-                  <tbody className="text-[14px] font-medium text-[#0f172a]">
+                  <tbody className="text-[14px] font-medium text-white">
                     {allUsers.map(user => (
-                      <tr key={user.id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                      <tr key={user.id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
                         <td className="px-6 py-5">
                           <div className="flex flex-col">
                             <span className="font-bold">{user.name}</span>
-                            <span className="text-xs text-slate-500">{user.email}</span>
+                            <span className="text-xs text-white/60">{user.email}</span>
                           </div>
                         </td>
                         <td className="px-6 py-5">
@@ -494,7 +494,7 @@ const AdminDashboard = () => {
                             value={user.role}
                             onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                             disabled={isProcessing}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer outline-none ${user.role === 'admin' ? 'bg-red-50 text-red-600 border-red-200' : user.role === 'owner' ? 'bg-[#ebf3ff] text-[#1952c4] border-[#1952c4]/20' : 'bg-[#f3e8ff] text-[#9333ea] border-[#9333ea]/20'}`}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer outline-none bg-[#111] ${user.role === 'admin' ? 'text-red-500 border-red-500/20' : user.role === 'owner' ? 'text-[#1952c4] border-[#1952c4]/20' : 'text-[#c084fc] border-[#9333ea]/20'}`}
                           >
                             <option value="student">Student</option>
                             <option value="owner">Owner</option>
@@ -502,21 +502,21 @@ const AdminDashboard = () => {
                           </select>
                         </td>
                         <td className="px-6 py-5">
-                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.account_status === 'active' ? 'bg-emerald-50 text-emerald-600' : user.account_status === 'paused' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.account_status === 'active' ? 'bg-[#10b981]/20 text-[#10b981]' : user.account_status === 'paused' ? 'bg-amber-500/20 text-amber-500' : 'bg-[#333] text-white/60'}`}>
                             {user.account_status || 'active'}
                           </span>
                         </td>
-                        <td className="px-6 py-5 text-slate-500 text-sm">
+                        <td className="px-6 py-5 text-white/60 text-sm">
                           {new Date(user.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-5 flex gap-2">
                           {(!user.account_status || user.account_status === 'active') ? (
                             <>
-                              <button onClick={() => handleUpdateStatus(user.id, 'paused')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors border-none cursor-pointer">Suspend</button>
-                              <button onClick={() => handleUpdateStatus(user.id, 'removed')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors border-none cursor-pointer">Ban</button>
+                              <button onClick={() => handleUpdateStatus(user.id, 'paused')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg transition-colors border-none cursor-pointer">Suspend</button>
+                              <button onClick={() => handleUpdateStatus(user.id, 'removed')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors border-none cursor-pointer">Ban</button>
                             </>
                           ) : (
-                            <button onClick={() => handleUpdateStatus(user.id, 'active')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors border-none cursor-pointer">Activate</button>
+                            <button onClick={() => handleUpdateStatus(user.id, 'active')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-[#10b981]/20 text-[#10b981] hover:bg-[#10b981]/30 rounded-lg transition-colors border-none cursor-pointer">Activate</button>
                           )}
                         </td>
                       </tr>
@@ -529,16 +529,16 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'listings' && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#e2e8f0]/60">
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
             {loadingListings ? (
-              <div className="p-12 text-center text-slate-500">Loading listings...</div>
+              <div className="p-12 text-center text-white/60">Loading listings...</div>
             ) : allListings.length === 0 ? (
-              <div className="p-12 text-center text-slate-500">No listings found.</div>
+              <div className="p-12 text-center text-white/60">No listings found.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[1000px]">
                   <thead>
-                    <tr className="bg-[#f0f4f9] text-[#64748b] text-[11px] uppercase tracking-wider font-bold">
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
                       <th className="px-6 py-5 rounded-tl-3xl">TITLE & LOCATION</th>
                       <th className="px-6 py-5">OWNER</th>
                       <th className="px-6 py-5">PRICE</th>
@@ -546,26 +546,26 @@ const AdminDashboard = () => {
                       <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
                     </tr>
                   </thead>
-                  <tbody className="text-[14px] font-medium text-[#0f172a]">
+                  <tbody className="text-[14px] font-medium text-white">
                     {allListings.map(listing => (
-                      <tr key={listing.listing_id} className="border-b border-[#e2e8f0]/60 hover:bg-slate-50 transition-colors">
+                      <tr key={listing.listing_id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
                         <td className="px-6 py-5">
                           <div className="flex flex-col">
-                            <span className="font-bold cursor-pointer hover:text-[#1952c4] transition-colors" onClick={() => navigate(`/property/${listing.listing_id}`)}>{listing.title}</span>
-                            <span className="text-xs text-slate-500 max-w-xs truncate">{listing.location}</span>
+                            <span className="font-bold cursor-pointer hover:text-[#FACC15] transition-colors" onClick={() => navigate(`/property/${listing.listing_id}`)}>{listing.title}</span>
+                            <span className="text-xs text-white/60 max-w-xs truncate">{listing.location}</span>
                           </div>
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex flex-col">
                             <span className="font-semibold">{listing.owner_name}</span>
-                            <span className="text-xs text-slate-500">{listing.owner_email}</span>
+                            <span className="text-xs text-white/60">{listing.owner_email}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-5 font-bold text-slate-700">
+                        <td className="px-6 py-5 font-bold text-white">
                           ${listing.price}/mo
                         </td>
                         <td className="px-6 py-5">
-                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${listing.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600' : listing.approval_status === 'pending' ? 'bg-amber-50 text-amber-600' : listing.approval_status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${listing.approval_status === 'approved' ? 'bg-[#10b981]/20 text-[#10b981]' : listing.approval_status === 'pending' ? 'bg-amber-500/20 text-amber-500' : listing.approval_status === 'rejected' ? 'bg-red-500/20 text-red-500' : 'bg-[#333] text-white/60'}`}>
                             {listing.approval_status || 'approved'}
                           </span>
                         </td>
@@ -574,7 +574,7 @@ const AdminDashboard = () => {
                             value={listing.approval_status || 'approved'}
                             onChange={(e) => handleUpdateListingStatus(listing.listing_id, e.target.value)}
                             disabled={isProcessing}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer outline-none ${listing.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : listing.approval_status === 'rejected' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer outline-none bg-[#111] ${listing.approval_status === 'approved' ? 'text-[#10b981] border-[#10b981]/20' : listing.approval_status === 'rejected' ? 'text-red-500 border-red-500/20' : 'text-amber-500 border-amber-500/20'}`}
                           >
                             <option value="pending">Pending</option>
                             <option value="approved">Approved</option>
@@ -582,7 +582,7 @@ const AdminDashboard = () => {
                             <option value="rejected">Rejected</option>
                           </select>
 
-                          <button onClick={() => navigate(`/property/${listing.listing_id}`)} className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors border-none cursor-pointer">View</button>
+                          <button onClick={() => navigate(`/property/${listing.listing_id}`)} className="px-3 py-1.5 text-xs font-bold bg-[#111] border border-[#333] text-white hover:bg-[#222] rounded-lg transition-colors cursor-pointer">View</button>
                         </td>
                       </tr>
                     ))}
@@ -596,69 +596,69 @@ const AdminDashboard = () => {
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {loadingAnalytics || !analyticsData ? (
-              <div className="p-12 text-center text-slate-500 bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60">Loading analytics...</div>
+              <div className="p-12 text-center text-white/60 bg-[#1A1A1A] rounded-3xl shadow-sm border border-[#333]">Loading analytics...</div>
             ) : (
               <>
                 {/* KPI Row 1: Finances & Bookings */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-gradient-to-br from-[#1952c4] to-[#1546a8] rounded-3xl p-6 shadow-md text-white flex flex-col justify-between">
+                  <div className="bg-[#1A1A1A] border border-[#333] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="text-white/80 font-semibold text-sm">Total Gross Revenue</h4>
-                      <div className="p-2 bg-white/20 rounded-xl">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <h4 className="text-white/60 font-semibold text-sm">Total Gross Revenue</h4>
+                      <div className="p-2 bg-[#1952c4]/20 rounded-xl">
+                        <svg className="w-5 h-5 text-[#1952c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </div>
                     </div>
                     <div>
-                      <div className="text-3xl font-black mb-1">Rs {analyticsData.revenue.totalGross.toLocaleString()}</div>
-                      <div className="text-xs font-medium text-white/80">+{(analyticsData.revenue.platformNet || 0).toLocaleString()} (5% Platform Fee)</div>
+                      <div className="text-3xl font-black text-white mb-1">Rs {analyticsData.revenue.totalGross.toLocaleString()}</div>
+                      <div className="text-xs font-medium text-white/60">+{(analyticsData.revenue.platformNet || 0).toLocaleString()} (5% Platform Fee)</div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex flex-col justify-between">
+                  <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="text-slate-500 font-semibold text-sm">Total Bookings</h4>
-                      <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
+                      <h4 className="text-white/60 font-semibold text-sm">Total Bookings</h4>
+                      <div className="p-2 bg-purple-500/20 rounded-xl text-purple-400">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       </div>
                     </div>
                     <div>
-                      <div className="text-3xl font-black text-[#0f172a] mb-1">{analyticsData.bookings.total}</div>
-                      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                        <span className="text-emerald-500 flex items-center"><svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg> {analyticsData.bookings.approved} Approved</span>
+                      <div className="text-3xl font-black text-white mb-1">{analyticsData.bookings.total}</div>
+                      <div className="flex items-center gap-2 text-xs font-medium text-white/60">
+                        <span className="text-[#10b981] flex items-center"><svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg> {analyticsData.bookings.approved} Approved</span>
                         <span>•</span>
                         <span>{analyticsData.bookings.pending} Pending</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex flex-col justify-between">
+                  <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="text-slate-500 font-semibold text-sm">Property Listings</h4>
-                      <div className="p-2 bg-blue-50 rounded-xl text-blue-600">
+                      <h4 className="text-white/60 font-semibold text-sm">Property Listings</h4>
+                      <div className="p-2 bg-[#1952c4]/20 rounded-xl text-[#60a5fa]">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                       </div>
                     </div>
                     <div>
-                      <div className="text-3xl font-black text-[#0f172a] mb-1">{analyticsData.listings.total}</div>
-                      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                        <span className="text-emerald-500 flex items-center"><svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg> {analyticsData.listings.approved} Live</span>
+                      <div className="text-3xl font-black text-white mb-1">{analyticsData.listings.total}</div>
+                      <div className="flex items-center gap-2 text-xs font-medium text-white/60">
+                        <span className="text-[#10b981] flex items-center"><svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg> {analyticsData.listings.approved} Live</span>
                         <span>•</span>
                         <span>{analyticsData.listings.pending} Pending Review</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e2e8f0]/60 flex flex-col justify-between">
+                  <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="text-slate-500 font-semibold text-sm">Platform Reviews</h4>
-                      <div className="p-2 bg-amber-50 rounded-xl text-amber-500">
+                      <h4 className="text-white/60 font-semibold text-sm">Platform Reviews</h4>
+                      <div className="p-2 bg-amber-500/20 rounded-xl text-amber-500">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                       </div>
                     </div>
                     <div>
-                      <div className="text-3xl font-black text-[#0f172a] mb-1">{analyticsData.reviews.total}</div>
-                      <div className="text-xs font-medium text-slate-500">
-                        <span className="font-bold text-amber-500">{analyticsData.reviews.averageRating}</span> Avg Rating System-wide
+                      <div className="text-3xl font-black text-white mb-1">{analyticsData.reviews.total}</div>
+                      <div className="text-xs font-medium text-white/60">
+                        <span className="font-bold text-amber-400">{analyticsData.reviews.averageRating}</span> Avg Rating System-wide
                       </div>
                     </div>
                   </div>
@@ -668,30 +668,30 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                   {/* User Demographics */}
-                  <div className="lg:col-span-1 bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col h-[380px]">
-                    <h3 className="text-[17px] font-extrabold text-[#0f172a] mb-6">User Demographics</h3>
+                  <div className="lg:col-span-1 bg-[#1A1A1A] rounded-3xl p-8 shadow-sm border border-[#333] flex flex-col h-[380px]">
+                    <h3 className="text-[17px] font-extrabold text-white mb-6">User Demographics</h3>
                     <div className="flex-grow flex flex-col justify-center">
                       <div className="flex items-center justify-between mb-8">
                         <div className="text-center">
-                          <div className="text-4xl font-black text-[#1952c4] mb-1">{analyticsData.users.students}</div>
-                          <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Students</div>
+                          <div className="text-4xl font-black text-[#60a5fa] mb-1">{analyticsData.users.students}</div>
+                          <div className="text-sm font-semibold text-white/60 uppercase tracking-wide">Students</div>
                         </div>
-                        <div className="text-slate-300 font-light text-4xl">/</div>
+                        <div className="text-[#333] font-light text-4xl">/</div>
                         <div className="text-center">
-                          <div className="text-4xl font-black text-purple-600 mb-1">{analyticsData.users.owners}</div>
-                          <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Owners</div>
+                          <div className="text-4xl font-black text-purple-400 mb-1">{analyticsData.users.owners}</div>
+                          <div className="text-sm font-semibold text-white/60 uppercase tracking-wide">Owners</div>
                         </div>
                       </div>
 
-                      <div className="w-full bg-slate-100 rounded-full h-4 mb-2 overflow-hidden flex">
+                      <div className="w-full bg-[#111] rounded-full h-4 mb-2 overflow-hidden flex">
                         {analyticsData.users.total > 0 && (
                           <>
-                            <div className="bg-[#1952c4] h-full" style={{ width: `${(analyticsData.users.students / analyticsData.users.total) * 100}%` }}></div>
+                            <div className="bg-[#60a5fa] h-full" style={{ width: `${(analyticsData.users.students / analyticsData.users.total) * 100}%` }}></div>
                             <div className="bg-purple-500 h-full" style={{ width: `${(analyticsData.users.owners / analyticsData.users.total) * 100}%` }}></div>
                           </>
                         )}
                       </div>
-                      <div className="flex justify-between text-xs font-semibold text-slate-500">
+                      <div className="flex justify-between text-xs font-semibold text-white/60">
                         <span>{analyticsData.users.total > 0 ? Math.round((analyticsData.users.students / analyticsData.users.total) * 100) : 0}% Students</span>
                         <span>{analyticsData.users.total > 0 ? Math.round((analyticsData.users.owners / analyticsData.users.total) * 100) : 0}% Owners</span>
                       </div>
@@ -699,22 +699,22 @@ const AdminDashboard = () => {
                   </div>
 
                   {/* Booking Status Chart */}
-                  <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-[#e2e8f0]/60 flex flex-col h-[380px]">
+                  <div className="lg:col-span-2 bg-[#1A1A1A] rounded-3xl p-8 shadow-sm border border-[#333] flex flex-col h-[380px]">
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-[17px] font-extrabold text-[#0f172a]">Booking Funnel</h3>
-                      <div className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">All Time</div>
+                      <h3 className="text-[17px] font-extrabold text-white">Booking Funnel</h3>
+                      <div className="text-xs font-semibold text-white/60 bg-[#111] px-3 py-1 rounded-full">All Time</div>
                     </div>
                     <div className="flex-grow flex items-end justify-between px-6 pb-2 relative">
-                      <div className="absolute bottom-6 left-6 right-6 border-b border-dashed border-[#e2e8f0]"></div>
-                      <div className="absolute bottom-20 left-6 right-6 border-b border-dashed border-[#e2e8f0]"></div>
-                      <div className="absolute bottom-36 left-6 right-6 border-b border-dashed border-[#e2e8f0]"></div>
-                      <div className="absolute bottom-52 left-6 right-6 border-b border-dashed border-[#e2e8f0]"></div>
+                      <div className="absolute bottom-6 left-6 right-6 border-b border-dashed border-[#333]"></div>
+                      <div className="absolute bottom-20 left-6 right-6 border-b border-dashed border-[#333]"></div>
+                      <div className="absolute bottom-36 left-6 right-6 border-b border-dashed border-[#333]"></div>
+                      <div className="absolute bottom-52 left-6 right-6 border-b border-dashed border-[#333]"></div>
 
                       {[
-                        { label: 'Total Requests', val: analyticsData.bookings.total, h: 'h-52', color: 'bg-slate-300' },
-                        { label: 'Pending', val: analyticsData.bookings.pending, h: 'h-24', color: 'bg-amber-400' },
-                        { label: 'Approved', val: analyticsData.bookings.approved, h: 'h-40', color: 'bg-emerald-500' },
-                        { label: 'Cancelled/Rejected', val: analyticsData.bookings.cancelled, h: 'h-10', color: 'bg-red-400' }
+                        { label: 'Total Requests', val: analyticsData.bookings.total, h: 'h-52', color: 'bg-[#333]' },
+                        { label: 'Pending', val: analyticsData.bookings.pending, h: 'h-24', color: 'bg-amber-500' },
+                        { label: 'Approved', val: analyticsData.bookings.approved, h: 'h-40', color: 'bg-[#10b981]' },
+                        { label: 'Cancelled/Rejected', val: analyticsData.bookings.cancelled, h: 'h-10', color: 'bg-red-500' }
                       ].map((bar, index) => {
                         // Calculate dynamic height based on max value if total > 0
                         const maxVal = Math.max(analyticsData.bookings.total, 1);
@@ -725,11 +725,11 @@ const AdminDashboard = () => {
                               className={`w-full max-w-[70px] ${bar.color} rounded-t-xl relative group cursor-pointer transition-all hover:opacity-80`}
                               style={{ height: `${heightPct}%`, minHeight: '20px' }}
                             >
-                              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl">
+                              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#111] text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl border border-[#333]">
                                 {bar.val} Bookings
                               </div>
                             </div>
-                            <div className="text-[11px] font-bold text-slate-500 uppercase text-center">{bar.label}</div>
+                            <div className="text-[11px] font-bold text-white/40 uppercase text-center">{bar.label}</div>
                           </div>
                         );
                       })}

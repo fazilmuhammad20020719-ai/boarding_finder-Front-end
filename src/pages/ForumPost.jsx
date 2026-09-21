@@ -77,10 +77,10 @@ const ForumPost = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#f4f7f9]">
+            <div className="min-h-screen bg-black">
                 <Navbar />
                 <div className="flex justify-center items-center h-[60vh]">
-                    <p className="text-[#64748b]">Loading post...</p>
+                    <p className="text-white/60">Loading post...</p>
                 </div>
             </div>
         );
@@ -88,12 +88,12 @@ const ForumPost = () => {
 
     if (error || !post) {
         return (
-            <div className="min-h-screen bg-[#f4f7f9]">
+            <div className="min-h-screen bg-black">
                 <Navbar />
                 <div className="max-w-[800px] mx-auto px-4 py-20 text-center">
-                    <h2 className="text-2xl font-bold text-[#0f172a] mb-4">Oops!</h2>
-                    <p className="text-[#64748b] mb-6">{error}</p>
-                    <Link to="/community-forum" className="text-[#1952c4] font-semibold hover:underline">
+                    <h2 className="text-2xl font-bold text-white mb-4">Oops!</h2>
+                    <p className="text-white/60 mb-6">{error}</p>
+                    <Link to="/community-forum" className="text-[#FACC15] font-semibold hover:underline">
                         &larr; Back to Forum
                     </Link>
                 </div>
@@ -102,56 +102,56 @@ const ForumPost = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
+        <div className="min-h-screen bg-black font-sans antialiased text-white">
             <Navbar />
 
             <main className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-                <Link to="/community-forum" className="inline-flex items-center gap-2 text-sm font-semibold text-[#64748b] hover:text-[#1952c4] mb-6 transition-colors">
+                <Link to="/community-forum" className="inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-[#FACC15] mb-6 transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                     Back to Discussions
                 </Link>
 
                 {/* Original Post */}
-                <div className="bg-white rounded-[24px] border border-[#e2e8f0]/60 shadow-sm overflow-hidden mb-8">
+                <div className="bg-[#1A1A1A] rounded-[24px] border border-[#333] shadow-sm overflow-hidden mb-8">
                     <div className="p-8">
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="text-xs font-black uppercase tracking-wider text-[#1952c4] bg-[#ebf3ff] px-3 py-1 rounded-md">
+                            <span className="text-xs font-black uppercase tracking-wider text-[#FACC15] bg-[#FACC15]/20 px-3 py-1 rounded-md">
                                 {post.category}
                             </span>
-                            <span className="text-sm text-[#94a3b8] flex items-center gap-1">
+                            <span className="text-sm text-white/40 flex items-center gap-1">
                                 • {formatDate(post.created_at)}
                             </span>
                         </div>
 
-                        <h1 className="text-3xl font-extrabold text-[#0f172a] mb-6 leading-tight">
+                        <h1 className="text-3xl font-extrabold text-white mb-6 leading-tight">
                             {post.title}
                         </h1>
 
-                        <div className="flex items-center gap-4 mb-8 pb-8 border-b border-[#e2e8f0]">
+                        <div className="flex items-center gap-4 mb-8 pb-8 border-b border-[#333]">
                             <img
                                 src={post.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name)}&background=random`}
                                 alt={post.author_name}
-                                className="w-12 h-12 rounded-full border border-[#e2e8f0]"
+                                className="w-12 h-12 rounded-full border border-[#333]"
                             />
                             <div>
-                                <p className="font-bold text-[#0f172a]">{post.author_name}</p>
-                                <p className="text-sm text-[#64748b]">Original Poster</p>
+                                <p className="font-bold text-white">{post.author_name}</p>
+                                <p className="text-sm text-white/60">Original Poster</p>
                             </div>
                         </div>
 
-                        <div className="prose max-w-none text-[#334155] leading-relaxed whitespace-pre-wrap">
+                        <div className="prose max-w-none text-white/80 leading-relaxed whitespace-pre-wrap">
                             {post.content}
                         </div>
                     </div>
 
-                    <div className="px-8 py-4 bg-slate-50 border-t border-[#e2e8f0]/60 flex items-center justify-between">
-                        <div className="flex items-center gap-6 text-sm font-semibold text-[#64748b]">
+                    <div className="px-8 py-4 bg-[#222] border-t border-[#333] flex items-center justify-between">
+                        <div className="flex items-center gap-6 text-sm font-semibold text-white/60">
                             <button
                                 onClick={handleUpvote}
-                                className="flex items-center gap-2 hover:text-red-500 transition-colors group"
+                                className="flex items-center gap-2 hover:text-[#FACC15] transition-colors group cursor-pointer"
                             >
-                                <svg className="w-5 h-5 group-hover:fill-red-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                <svg className="w-5 h-5 group-hover:fill-[#FACC15]/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                 {post.upvotes_count || 0} Upvotes
                             </button>
                             <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ const ForumPost = () => {
                                 {post.comments.length} Replies
                             </div>
                         </div>
-                        <div className="text-sm font-semibold text-[#94a3b8] flex items-center gap-1.5">
+                        <div className="text-sm font-semibold text-white/40 flex items-center gap-1.5">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             {post.views} Views
                         </div>
@@ -168,29 +168,29 @@ const ForumPost = () => {
 
                 {/* Comments Section */}
                 <div className="mb-12">
-                    <h3 className="text-xl font-bold text-[#0f172a] mb-6 border-b border-[#e2e8f0] pb-2">
+                    <h3 className="text-xl font-bold text-white mb-6 border-b border-[#333] pb-2">
                         Discussion ({post.comments.length})
                     </h3>
 
                     <div className="space-y-6">
                         {post.comments.length === 0 ? (
-                            <p className="text-[#64748b] text-center py-6">No replies yet. Be the first to answer!</p>
+                            <p className="text-white/60 text-center py-6">No replies yet. Be the first to answer!</p>
                         ) : (
                             post.comments.map(comment => (
-                                <div key={comment.id} className="flex gap-4 p-6 bg-white rounded-2xl shadow-sm border border-[#e2e8f0]/60">
+                                <div key={comment.id} className="flex gap-4 p-6 bg-[#1A1A1A] rounded-2xl shadow-sm border border-[#333]">
                                     <div className="shrink-0 hidden sm:block">
                                         <img
                                             src={comment.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author_name)}&background=random`}
                                             alt={comment.author_name}
-                                            className="w-10 h-10 rounded-full border border-[#e2e8f0]"
+                                            className="w-10 h-10 rounded-full border border-[#333]"
                                         />
                                     </div>
                                     <div className="flex-grow">
                                         <div className="flex items-baseline justify-between mb-2">
-                                            <h4 className="font-bold text-[#0f172a]">{comment.author_name}</h4>
-                                            <span className="text-xs font-semibold text-[#94a3b8]">{formatDate(comment.created_at)}</span>
+                                            <h4 className="font-bold text-white">{comment.author_name}</h4>
+                                            <span className="text-xs font-semibold text-white/40">{formatDate(comment.created_at)}</span>
                                         </div>
-                                        <div className="text-[#334155] leading-relaxed whitespace-pre-wrap text-[15px]">
+                                        <div className="text-white/80 leading-relaxed whitespace-pre-wrap text-[15px]">
                                             {comment.content}
                                         </div>
                                     </div>
@@ -201,21 +201,21 @@ const ForumPost = () => {
                 </div>
 
                 {/* Add Comment Form */}
-                <div className="bg-white rounded-2xl shadow-sm border border-[#e2e8f0]/60 p-6">
-                    <h4 className="font-bold text-[#0f172a] mb-4 text-lg">Leave a Reply</h4>
+                <div className="bg-[#1A1A1A] rounded-2xl shadow-sm border border-[#333] p-6">
+                    <h4 className="font-bold text-white mb-4 text-lg">Leave a Reply</h4>
                     <form onSubmit={handleAddComment}>
                         <textarea
                             required
                             rows="4"
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            className="w-full px-4 py-3 border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#1952c4]/20 outline-none mb-4 resize-none"
+                            className="w-full px-4 py-3 bg-[#111] border border-[#333] text-white rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none mb-4 resize-none"
                             placeholder="Share your thoughts or answer the question..."
                         ></textarea>
                         <div className="flex justify-end">
                             <button
                                 type="submit"
-                                className="px-6 py-2.5 bg-[#1952c4] text-white font-bold rounded-lg hover:bg-[#1546a8] transition-colors shadow-sm"
+                                className="px-6 py-2.5 bg-[#FACC15] text-black font-bold rounded-lg hover:bg-[#EAB308] transition-colors shadow-sm cursor-pointer"
                             >
                                 Post Reply
                             </button>

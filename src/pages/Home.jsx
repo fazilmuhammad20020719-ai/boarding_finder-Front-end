@@ -158,15 +158,15 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f9] flex flex-col font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="home" />
 
       {/* ===== HERO SECTION ===== */}
-      <section className="relative bg-gradient-to-br from-[#0f2d7a] via-[#1952c4] to-[#2563eb] text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#111] via-[#1A1A1A] to-black border-b border-[#333] text-white overflow-hidden">
         {/* Background decorative blobs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-[#3b82f6]/20 blur-3xl" />
+          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-[#FACC15]/5 blur-3xl" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-20">
@@ -184,8 +184,8 @@ const HomePage = () => {
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-white rounded-2xl shadow-2xl p-2 max-w-2xl mb-6">
-            <svg className="w-5 h-5 text-slate-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-[#1A1A1A] border border-[#333] rounded-2xl shadow-2xl p-2 max-w-2xl mb-6">
+            <svg className="w-5 h-5 text-white/50 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -194,11 +194,11 @@ const HomePage = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by university, location, or boarding name..."
-              className="flex-grow py-3 bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none text-[15px]"
+              className="flex-grow py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px]"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl text-sm transition-all flex-shrink-0 cursor-pointer border-none"
+              className="px-6 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl text-sm transition-all flex-shrink-0 cursor-pointer border-none"
             >
               Search Now
             </button>
@@ -244,10 +244,10 @@ const HomePage = () => {
         <section className="max-w-7xl mx-auto px-6 md:px-12 py-14">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-[#0f172a] tracking-tight">Browse by University</h2>
-              <p className="text-slate-500 text-sm mt-1 font-normal">Find boarding houses near your campus</p>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Browse by University</h2>
+              <p className="text-white/50 text-sm mt-1 font-normal">Find boarding houses near your campus</p>
             </div>
-            <Link to="/search" className="text-sm font-bold text-[#1952c4] hover:underline flex items-center gap-1">
+            <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1">
               View all →
             </Link>
           </div>
@@ -257,17 +257,16 @@ const HomePage = () => {
               <button
                 key={uni.name}
                 onClick={() => navigate('/search')}
-                className="flex flex-col items-center gap-3 p-4 bg-white rounded-2xl border border-[#e2e8f0]/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer group"
+                className="flex flex-col items-center gap-3 p-4 bg-[#1A1A1A] rounded-2xl border border-[#2a2a2a] shadow-sm hover:border-[#FACC15]/50 hover:-translate-y-1 transition-all duration-200 cursor-pointer group"
               >
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm"
-                  style={{ backgroundColor: `${uni.color}15` }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm bg-[#111]"
                 >
                   {uni.icon}
                 </div>
                 <div className="text-center">
-                  <div className="text-[13px] font-bold text-[#0f172a] group-hover:text-[#1952c4] transition-colors leading-tight">{uni.name}</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">{uni.listings} listings</div>
+                  <div className="text-[13px] font-bold text-white group-hover:text-[#FACC15] transition-colors leading-tight">{uni.name}</div>
+                  <div className="text-[11px] text-white/40 mt-0.5">{uni.listings} listings</div>
                 </div>
               </button>
             ))}
@@ -278,10 +277,10 @@ const HomePage = () => {
         <section className="max-w-7xl mx-auto px-6 md:px-12 pb-14">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-[#0f172a] tracking-tight">Featured Listings</h2>
-              <p className="text-slate-500 text-sm mt-1 font-normal">Top-rated boarding houses this month</p>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Featured Listings</h2>
+              <p className="text-white/50 text-sm mt-1 font-normal">Top-rated boarding houses this month</p>
             </div>
-            <Link to="/search" className="text-sm font-bold text-[#1952c4] hover:underline flex items-center gap-1">
+            <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1">
               See all listings →
             </Link>
           </div>
@@ -299,7 +298,7 @@ const HomePage = () => {
               <div
                 key={listing.id}
                 onClick={() => navigate(`/property/${listing.id}`)}
-                className="bg-white rounded-[24px] overflow-hidden border border-[#e2e8f0]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+                className="bg-[#1A1A1A] rounded-[24px] overflow-hidden border border-[#2a2a2a] shadow-sm hover:border-[#333] transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
               >
                 {/* Photo */}
                 <div className="h-48 w-full relative overflow-hidden bg-slate-100">
@@ -368,56 +367,56 @@ const HomePage = () => {
                 <div className="p-5 flex-grow flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <span className="text-[11px] font-bold text-[#1952c4] uppercase tracking-wider truncate">
+                      <span className="text-[11px] font-bold text-[#FACC15] uppercase tracking-wider truncate">
                         {listing.university}
                       </span>
-                      <span className="bg-slate-100 text-[#475569] text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize flex-shrink-0">
+                      <span className="bg-[#111] text-white/70 text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize flex-shrink-0 border border-[#333]">
                         {listing.type.replace('_', ' ')}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-[#0f172a] group-hover:text-[#1952c4] transition-colors line-clamp-1 mb-1.5">
+                    <h3 className="text-base font-bold text-white group-hover:text-[#FACC15] transition-colors line-clamp-1 mb-1.5">
                       {listing.name}
                     </h3>
 
-                    <div className="flex items-center justify-between text-[12px] text-slate-500 mb-3 font-semibold">
+                    <div className="flex items-center justify-between text-[12px] text-white/50 mb-3 font-semibold">
                       <span className="truncate">📍 {listing.location}</span>
-                      <span className="flex-shrink-0 text-[#1952c4] font-bold">📏 {listing.distance}</span>
+                      <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distance}</span>
                     </div>
 
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {listing.amenities.slice(0, 3).map((amenity, idx) => (
                         <span
                           key={idx}
-                          className="bg-[#f0f4f9] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-md"
+                          className="bg-[#111] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#333]"
                         >
                           {amenity}
                         </span>
                       ))}
                       {listing.amenities.length > 3 && (
-                        <span className="bg-[#f0f4f9] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-md">
+                        <span className="bg-[#111] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#333]">
                           +{listing.amenities.length - 3}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="border-t border-[#e2e8f0]/60 pt-3 flex justify-between items-center">
-                    <div className="flex items-center gap-1 font-bold text-[13px] text-slate-700">
+                  <div className="border-t border-[#333] pt-3 flex justify-between items-center">
+                    <div className="flex items-center gap-1 font-bold text-[13px] text-white">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <span key={i} className={i < Math.floor(listing.rating) ? "text-amber-400" : "text-slate-200"}>★</span>
+                        <span key={i} className={i < Math.floor(listing.rating) ? "text-[#FACC15]" : "text-white/20"}>★</span>
                       ))}
-                      <span className="text-[#0f172a] ml-1">{listing.rating}</span>
-                      <span className="text-slate-400 font-normal text-xs">({listing.reviews})</span>
+                      <span className="text-white ml-1">{listing.rating}</span>
+                      <span className="text-white/40 font-normal text-xs">({listing.reviews})</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
-                        className="text-xs font-bold text-slate-500 hover:text-[#1952c4] transition-colors border border-slate-200 rounded-md px-2 py-1 bg-white cursor-pointer"
+                        className="text-xs font-bold text-white/60 hover:text-[#FACC15] transition-colors border border-[#333] rounded-md px-2 py-1 bg-transparent cursor-pointer"
                       >
                         Compare
                       </button>
-                      <span className="text-xs font-bold text-[#1952c4]">View details ➔</span>
+                      <span className="text-xs font-bold text-[#FACC15]">View details ➔</span>
                     </div>
                   </div>
                 </div>
@@ -427,11 +426,11 @@ const HomePage = () => {
         </section>
 
         {/* ===== HOW IT WORKS ===== */}
-        <section className="bg-white py-16 border-t border-[#e2e8f0]/60">
+        <section className="bg-[#111] py-16 border-t border-[#2a2a2a]">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <div className="text-center mb-14">
-              <h2 className="text-3xl font-bold text-[#0f172a] tracking-tight mb-2">How BoardingFinder Works</h2>
-              <p className="text-slate-500 text-[15px] font-normal">Simple steps to find your ideal boarding house</p>
+              <h2 className="text-3xl font-bold text-white tracking-tight mb-2">How BoardingFinder Works</h2>
+              <p className="text-white/50 text-[15px] font-normal">Simple steps to find your ideal boarding house</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -471,13 +470,13 @@ const HomePage = () => {
                 },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#ebf3ff] text-[#1952c4] flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FACC15]/10 text-[#FACC15] flex items-center justify-center flex-shrink-0 border border-[#FACC15]/20">
                     {item.icon}
                   </div>
                   <div>
-                    <span className="text-[#1952c4] text-xs font-bold uppercase tracking-wider mb-1 block">{item.step}</span>
-                    <h3 className="text-lg font-bold text-[#0f172a] mb-1.5">{item.title}</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed font-normal">{item.desc}</p>
+                    <span className="text-[#FACC15] text-xs font-bold uppercase tracking-wider mb-1 block">{item.step}</span>
+                    <h3 className="text-lg font-bold text-white mb-1.5">{item.title}</h3>
+                    <p className="text-white/50 text-sm leading-relaxed font-normal">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -488,7 +487,7 @@ const HomePage = () => {
       </main>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#133076] text-white pt-16 pb-8 border-t border-[#1952c4]/20 mt-auto">
+      <footer className="bg-black text-white pt-16 pb-8 border-t border-[#333] mt-auto">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
 
@@ -542,8 +541,8 @@ const HomePage = () => {
             </div>
           </div>
 
-          <div className="border-t border-[#1e40af]/60 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[#94a3b8] text-xs font-normal">
+          <div className="border-t border-[#333] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-white/40 text-xs font-normal">
               © 2026 BoardingFinder. All rights reserved.
             </p>
           </div>

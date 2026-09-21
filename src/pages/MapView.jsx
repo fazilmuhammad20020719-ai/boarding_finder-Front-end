@@ -148,23 +148,23 @@ const MapViewPage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex flex-col bg-[#f8fafc] font-sans antialiased text-[#0f172a] overflow-hidden">
+      <div className="h-screen flex flex-col bg-black font-sans antialiased text-white overflow-hidden">
         <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={savedListingIds.length} activeTab="map" />
         <div className="flex-grow flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-[#1952c4] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-[#FACC15] border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#f8fafc] font-sans antialiased text-[#0f172a] overflow-hidden">
+    <div className="h-screen flex flex-col bg-black font-sans antialiased text-white overflow-hidden">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={savedListingIds.length} activeTab="map" />
 
       <div className="flex-grow flex flex-col lg:flex-row overflow-hidden relative">
 
         {/* LEFT MAP VIEW PANEL */}
-        <div className="flex-grow h-full relative bg-[#e2e8f0] z-0">
+        <div className="flex-grow h-full relative bg-[#1A1A1A] z-0">
           <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -189,14 +189,14 @@ const MapViewPage = () => {
                   <Popup>
                     <div className="w-48 flex flex-col gap-2">
                       <img src={listing.image} alt={listing.name} className="w-full h-24 rounded-lg object-cover" />
-                      <h5 className="font-bold text-[13px] leading-tight">{listing.name}</h5>
+                      <h5 className="font-bold text-[13px] leading-tight text-black">{listing.name}</h5>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-[#1952c4]">LKR {listing.price.toLocaleString()}</span>
+                        <span className="font-extrabold text-[#FACC15]">LKR {listing.price.toLocaleString()}</span>
                         <span className="text-xs text-yellow-500 font-bold">★ {listing.rating}</span>
                       </div>
                       <button
                         onClick={() => navigate(`/property/${listing.id}`)}
-                        className="mt-1 py-1.5 w-full bg-[#1952c4] text-white text-xs font-bold rounded"
+                        className="mt-1 py-1.5 w-full bg-[#FACC15] hover:bg-[#EAB308] text-black text-xs font-bold rounded"
                       >
                         View Details
                       </button>
@@ -209,8 +209,8 @@ const MapViewPage = () => {
 
           {/* Top Control Bar Floating on Map */}
           <div className="absolute top-6 left-6 right-6 z-[1000] flex items-center gap-3">
-            <div className="flex items-center flex-grow bg-white px-4 py-3 rounded-full shadow-md border border-[#e2e8f0] max-w-md">
-              <svg className="w-5 h-5 text-slate-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <div className="flex items-center flex-grow bg-[#1A1A1A] px-4 py-3 rounded-full shadow-md border border-[#333] max-w-md">
+              <svg className="w-5 h-5 text-white/40 mr-2 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -219,12 +219,12 @@ const MapViewPage = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search map..."
-                className="w-full bg-transparent text-slate-800 placeholder-[#94a3b8] focus:outline-none text-[15px] font-medium"
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px] font-medium"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-slate-400 hover:text-slate-600 font-bold ml-1.5"
+                  className="text-white/40 hover:text-white font-bold ml-1.5"
                 >
                   ✕
                 </button>
@@ -232,7 +232,7 @@ const MapViewPage = () => {
             </div>
 
             <Link to="/home">
-              <button className="flex items-center gap-2 bg-[#0f172a] hover:bg-[#1e293b] text-white px-5 py-3 rounded-full font-bold shadow-md transition-colors whitespace-nowrap text-sm cursor-pointer border-none">
+              <button className="flex items-center gap-2 bg-[#FACC15] hover:bg-[#EAB308] text-black px-5 py-3 rounded-full font-bold shadow-md transition-colors whitespace-nowrap text-sm cursor-pointer border-none">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -243,15 +243,15 @@ const MapViewPage = () => {
         </div>
 
         {/* RIGHT SIDE PANEL (All Listings) */}
-        <div className="w-full lg:w-[420px] bg-white border-l border-[#e2e8f0] flex flex-col h-full flex-shrink-0 z-10 shadow-lg">
+        <div className="w-full lg:w-[420px] bg-[#1A1A1A] border-l border-[#333] flex flex-col h-full flex-shrink-0 z-10 shadow-lg">
           {/* Header */}
-          <div className="p-6 border-b border-[#e2e8f0]/80">
-            <h3 className="text-xl font-bold text-[#0f172a] tracking-tight">All Listings</h3>
-            <p className="text-sm text-slate-500 mt-0.5">{filteredListings.length} boarding houses</p>
+          <div className="p-6 border-b border-[#333]">
+            <h3 className="text-xl font-bold text-white tracking-tight">All Listings</h3>
+            <p className="text-sm text-white/60 mt-0.5">{filteredListings.length} boarding houses</p>
           </div>
 
           {/* Listings List */}
-          <div className="flex-grow overflow-y-auto p-4 space-y-4">
+          <div className="flex-grow overflow-y-auto p-4 space-y-4 custom-scrollbar">
             {filteredListings.length > 0 ? (
               filteredListings.map((listing) => {
                 const isHovered = hoveredListingId === listing.id;
@@ -263,13 +263,13 @@ const MapViewPage = () => {
                     onMouseEnter={() => setHoveredListingId(listing.id)}
                     onMouseLeave={() => setHoveredListingId(null)}
                     className={`p-4 rounded-3xl border transition-all duration-300 flex gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${isSelected
-                        ? 'border-[#1952c4] bg-[#ebf3ff]/40'
+                        ? 'border-[#FACC15] bg-[#333]'
                         : isHovered
-                          ? 'border-slate-300 bg-slate-50'
-                          : 'border-[#e2e8f0] bg-white'
+                          ? 'border-[#555] bg-[#222]'
+                          : 'border-[#333] bg-[#111]'
                       }`}
                   >
-                    <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0">
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden bg-[#1A1A1A] flex-shrink-0">
                       <img
                         src={listing.image}
                         alt={listing.name}
@@ -278,20 +278,20 @@ const MapViewPage = () => {
                     </div>
                     <div className="flex flex-col justify-between flex-grow overflow-hidden">
                       <div>
-                        <h4 className="font-bold text-base text-[#0f172a] truncate group-hover:text-[#1952c4] capitalize">
+                        <h4 className="font-bold text-base text-white truncate hover:text-[#FACC15] capitalize">
                           {listing.name}
                         </h4>
-                        <div className="flex items-center text-xs text-slate-500 mt-1 truncate font-medium">
+                        <div className="flex items-center text-xs text-white/60 mt-1 truncate font-medium">
                           <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                           {listing.location}
                         </div>
                       </div>
                       <div className="flex justify-between items-end mt-2">
                         <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Monthly</span>
-                          <span className="text-lg font-extrabold text-[#1952c4] leading-none">LKR {listing.price.toLocaleString()}</span>
+                          <span className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Monthly</span>
+                          <span className="text-lg font-extrabold text-[#FACC15] leading-none">LKR {listing.price.toLocaleString()}</span>
                         </div>
-                        <div className="flex items-center bg-[#fffbeb] text-[#d97706] px-2 py-0.5 rounded-md border border-[#fef3c7]">
+                        <div className="flex items-center bg-[#FACC15]/20 text-[#FACC15] px-2 py-0.5 rounded-md border border-transparent">
                           <svg className="w-3 h-3 mr-0.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                           <span className="text-xs font-bold">{listing.rating}</span>
                         </div>
@@ -301,10 +301,10 @@ const MapViewPage = () => {
                 );
               })
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 pb-10">
+              <div className="h-full flex flex-col items-center justify-center text-white/40 pb-10">
                 <svg className="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <p className="font-semibold text-lg">No listings found</p>
-                <p className="text-sm mt-1 text-slate-500">Try adjusting your search criteria</p>
+                <p className="font-semibold text-lg text-white/60">No listings found</p>
+                <p className="text-sm mt-1 text-white/40">Try adjusting your search criteria</p>
               </div>
             )}
           </div>

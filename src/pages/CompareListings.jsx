@@ -10,7 +10,7 @@ const CheckIcon = () => (
 );
 
 const CrossIcon = () => (
-  <svg className="w-6 h-6 text-slate-300 mx-auto" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+  <svg className="w-6 h-6 text-white/20 mx-auto" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
@@ -95,7 +95,7 @@ const CompareListings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] pb-20">
+    <div className="min-h-screen bg-black font-sans antialiased text-white pb-20">
       <Navbar activeTab="" />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
@@ -104,51 +104,51 @@ const CompareListings = () => {
           <div>
             <button
               onClick={() => navigate('/saved')}
-              className="flex items-center gap-2 text-slate-500 hover:text-[#1952c4] transition-colors font-semibold text-sm bg-transparent border-none cursor-pointer mb-2"
+              className="flex items-center gap-2 text-white/50 hover:text-[#FACC15] transition-colors font-semibold text-sm bg-transparent border-none cursor-pointer mb-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
               Back to Saved Homes
             </button>
-            <h1 className="text-3xl font-extrabold text-[#0f172a] tracking-tight">Compare Properties</h1>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Compare Properties</h1>
           </div>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center p-12">
-            <div className="w-8 h-8 border-4 border-[#1952c4] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-[#FACC15] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : compareData.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 p-12 text-center">
-            <h2 className="text-xl font-bold text-slate-700 mb-2">No Properties to Compare</h2>
-            <p className="text-slate-500 mb-6">Save some properties to your favorites to compare them here.</p>
-            <button onClick={() => navigate('/search')} className="bg-[#1952c4] text-white px-6 py-3 rounded-full font-bold shadow-sm hover:bg-[#1546a8] transition-colors">
+          <div className="bg-[#1A1A1A] rounded-3xl shadow-sm border border-[#333] p-12 text-center">
+            <h2 className="text-xl font-bold text-white mb-2">No Properties to Compare</h2>
+            <p className="text-white/60 mb-6">Save some properties to your favorites to compare them here.</p>
+            <button onClick={() => navigate('/search')} className="bg-[#FACC15] text-black px-6 py-3 rounded-full font-bold shadow-sm hover:bg-[#EAB308] transition-colors">
               Find Properties
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 overflow-hidden overflow-x-auto">
+          <div className="bg-[#1A1A1A] rounded-3xl shadow-sm border border-[#333] overflow-hidden overflow-x-auto">
             <table className="w-full min-w-[800px] text-left border-collapse">
 
               {/* Header / Images Row */}
               <thead>
                 <tr>
-                  <th className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 w-1/4 align-bottom">
-                    <div className="text-slate-500 font-medium text-sm">Comparing your saved properties side-by-side.</div>
+                  <th className="p-6 bg-[#111] border-b border-[#333] w-1/4 align-bottom">
+                    <div className="text-white/50 font-medium text-sm">Comparing your saved properties side-by-side.</div>
                   </th>
                   {compareData.map((item) => (
-                    <th key={item.id} className="p-6 border-b border-l border-[#e2e8f0]/60 w-1/4 align-top relative group">
-                      <button onClick={() => handleRemove(item.id)} className="absolute top-8 right-8 w-8 h-8 bg-white/90 backdrop-blur border border-slate-200 rounded-full text-slate-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center transition-all cursor-pointer shadow-sm z-10 opacity-0 group-hover:opacity-100">
+                    <th key={item.id} className="p-6 border-b border-l border-[#333] w-1/4 align-top relative group">
+                      <button onClick={() => handleRemove(item.id)} className="absolute top-8 right-8 w-8 h-8 bg-black/90 backdrop-blur border border-[#333] rounded-full text-white/50 hover:text-red-500 hover:border-red-500 flex items-center justify-center transition-all cursor-pointer shadow-sm z-10 opacity-0 group-hover:opacity-100">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                       <div className="rounded-2xl overflow-hidden aspect-video mb-4 relative cursor-pointer" onClick={() => navigate(`/property/${item.id}`)}>
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       </div>
-                      <h3 className="font-extrabold text-lg text-[#0f172a] mb-1 leading-tight capitalize">{item.name}</h3>
-                      <div className="flex items-center gap-1 text-sm font-bold text-[#f59e0b] mb-4">
+                      <h3 className="font-extrabold text-lg text-white mb-1 leading-tight capitalize">{item.name}</h3>
+                      <div className="flex items-center gap-1 text-sm font-bold text-[#FACC15] mb-4">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                        {item.rating} <span className="text-slate-400 font-normal">({item.reviews})</span>
+                        {item.rating} <span className="text-white/40 font-normal">({item.reviews})</span>
                       </div>
-                      <button onClick={() => navigate(`/property/${item.id}`)} className="w-full py-2.5 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-xl transition-colors cursor-pointer text-sm border-none shadow-sm">
+                      <button onClick={() => navigate(`/property/${item.id}`)} className="w-full py-2.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors cursor-pointer text-sm border-none shadow-sm">
                         View Details
                       </button>
                     </th>
@@ -159,25 +159,25 @@ const CompareListings = () => {
               {/* Core Info Rows */}
               <tbody>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700">Monthly Rent</td>
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80">Monthly Rent</td>
                   {compareData.map((item) => (
-                    <td key={`price-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center font-extrabold text-[#1952c4] text-lg">
+                    <td key={`price-${item.id}`} className="p-6 border-b border-l border-[#333] text-center font-extrabold text-[#FACC15] text-lg">
                       {item.price}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700">Room Type</td>
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80">Room Type</td>
                   {compareData.map((item) => (
-                    <td key={`type-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center font-semibold text-[#0f172a] capitalize">
+                    <td key={`type-${item.id}`} className="p-6 border-b border-l border-[#333] text-center font-semibold text-white capitalize">
                       {item.type}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700">Distance to Uni</td>
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80">Distance to Uni</td>
                   {compareData.map((item) => (
-                    <td key={`dist-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center font-semibold text-slate-600">
+                    <td key={`dist-${item.id}`} className="p-6 border-b border-l border-[#333] text-center font-semibold text-white/70">
                       {item.distance}
                     </td>
                   ))}
@@ -185,47 +185,47 @@ const CompareListings = () => {
 
                 {/* Amenities Divider */}
                 <tr>
-                  <td colSpan={compareData.length + 1} className="p-4 bg-[#f8fafc] border-b border-[#e2e8f0]/60 font-black text-xs text-slate-400 uppercase tracking-widest text-center">
+                  <td colSpan={compareData.length + 1} className="p-4 bg-black/40 border-b border-[#333] font-black text-xs text-white/40 uppercase tracking-widest text-center">
                     Amenities Included
                   </td>
                 </tr>
 
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700 flex items-center gap-2">
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80 flex items-center gap-2">
                     WiFi
                   </td>
                   {compareData.map((item) => (
-                    <td key={`wifi-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center bg-slate-50/20">
+                    <td key={`wifi-${item.id}`} className="p-6 border-b border-l border-[#333] text-center">
                       {item.amenities.wifi ? <CheckIcon /> : <CrossIcon />}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700 flex items-center gap-2">
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80 flex items-center gap-2">
                     Air Conditioning
                   </td>
                   {compareData.map((item) => (
-                    <td key={`ac-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center">
+                    <td key={`ac-${item.id}`} className="p-6 border-b border-l border-[#333] text-center">
                       {item.amenities.ac ? <CheckIcon /> : <CrossIcon />}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700 flex items-center gap-2">
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80 flex items-center gap-2">
                     Kitchen Access
                   </td>
                   {compareData.map((item) => (
-                    <td key={`kit-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center bg-slate-50/20">
+                    <td key={`kit-${item.id}`} className="p-6 border-b border-l border-[#333] text-center">
                       {item.amenities.kitchen ? <CheckIcon /> : <CrossIcon />}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700 flex items-center gap-2">
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80 flex items-center gap-2">
                     Parking Space
                   </td>
                   {compareData.map((item) => (
-                    <td key={`park-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center">
+                    <td key={`park-${item.id}`} className="p-6 border-b border-l border-[#333] text-center">
                       {item.amenities.parking ? <CheckIcon /> : <CrossIcon />}
                     </td>
                   ))}
@@ -233,23 +233,23 @@ const CompareListings = () => {
 
                 {/* Policy Divider */}
                 <tr>
-                  <td colSpan={compareData.length + 1} className="p-4 bg-[#f8fafc] border-b border-[#e2e8f0]/60 font-black text-xs text-slate-400 uppercase tracking-widest text-center">
+                  <td colSpan={compareData.length + 1} className="p-4 bg-black/40 border-b border-[#333] font-black text-xs text-white/40 uppercase tracking-widest text-center">
                     Terms & Policies
                   </td>
                 </tr>
 
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b border-[#e2e8f0]/60 font-bold text-slate-700">Security Deposit</td>
+                  <td className="p-6 bg-[#111] border-b border-[#333] font-bold text-white/80">Security Deposit</td>
                   {compareData.map((item) => (
-                    <td key={`dep-${item.id}`} className="p-6 border-b border-l border-[#e2e8f0]/60 text-center font-semibold text-slate-600">
+                    <td key={`dep-${item.id}`} className="p-6 border-b border-l border-[#333] text-center font-semibold text-white/70">
                       {item.deposit}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="p-6 bg-slate-50/50 border-b-0 border-[#e2e8f0]/60 font-bold text-slate-700">Availability</td>
+                  <td className="p-6 bg-[#111] border-b-0 border-[#333] font-bold text-white/80">Availability</td>
                   {compareData.map((item) => (
-                    <td key={`avail-${item.id}`} className="p-6 border-b-0 border-l border-[#e2e8f0]/60 text-center font-semibold text-[#10b981]">
+                    <td key={`avail-${item.id}`} className="p-6 border-b-0 border-l border-[#333] text-center font-semibold text-[#10b981]">
                       {item.availableDate}
                     </td>
                   ))}

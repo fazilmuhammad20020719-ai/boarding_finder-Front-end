@@ -69,25 +69,25 @@ const PendingApproval = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen flex flex-col bg-black font-sans antialiased text-white">
       <Navbar />
 
       <div className="flex-grow flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-[520px]">
-          <div className="bg-white rounded-[32px] p-8 sm:p-10 shadow-sm border border-[#e2e8f0]/60 flex flex-col items-center">
+          <div className="bg-[#1A1A1A] rounded-[24px] p-8 sm:p-10 shadow-2xl border border-[#2a2a2a] flex flex-col items-center">
 
             {/* Clock Icon */}
-            <div className="w-16 h-16 bg-[#fff8e6] text-[#f59e0b] rounded-full flex items-center justify-center mb-6 border border-[#f59e0b]/20">
+            <div className="w-16 h-16 bg-[#FACC15]/10 text-[#FACC15] rounded-full flex items-center justify-center mb-6 border border-[#FACC15]/20">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
 
-            <h2 className="text-[28px] font-bold text-[#0f172a] tracking-tight leading-none mb-3 text-center">
+            <h2 className="text-[28px] font-bold text-white tracking-tight leading-none mb-3 text-center">
               Account Under Review
             </h2>
-            <p className="text-[#64748b] text-[15px] leading-relaxed mb-8 font-normal text-center max-w-sm">
-              Your documents have been submitted. An admin will review and verify your account within <strong className="text-[#0f172a]">24 hours</strong>.
+            <p className="text-white/50 text-[15px] leading-relaxed mb-8 font-normal text-center max-w-sm">
+              Your documents have been submitted. An admin will review and verify your account within <strong className="text-white">24 hours</strong>.
             </p>
 
             {/* Progress Steps */}
@@ -97,18 +97,18 @@ const PendingApproval = () => {
                   key={idx}
                   className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
                     step.done
-                      ? 'bg-[#ecfdf5] border-[#10b981]/20'
+                      ? 'bg-[#10b981]/10 border-[#10b981]/30'
                       : step.active
-                      ? 'bg-[#fff8e6] border-[#f59e0b]/20'
-                      : 'bg-[#f8fafc] border-[#e2e8f0]/60'
+                      ? 'bg-[#FACC15]/10 border-[#FACC15]/30'
+                      : 'bg-[#111] border-[#333]'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                     step.done
-                      ? 'bg-[#10b981] text-white'
+                      ? 'bg-[#10b981] text-black'
                       : step.active
-                      ? 'bg-[#f59e0b] text-white animate-pulse'
-                      : 'bg-[#e2e8f0] text-[#94a3b8]'
+                      ? 'bg-[#FACC15] text-black animate-pulse'
+                      : 'bg-[#222] text-white/30'
                   }`}>
                     {step.done ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -120,12 +120,12 @@ const PendingApproval = () => {
                   </div>
                   <div>
                     <div className={`text-[14px] font-bold ${
-                      step.done ? 'text-[#10b981]' : step.active ? 'text-[#f59e0b]' : 'text-[#94a3b8]'
+                      step.done ? 'text-[#10b981]' : step.active ? 'text-[#FACC15]' : 'text-white/40'
                     }`}>
                       {step.label}
                     </div>
                     {step.active && (
-                      <div className="text-xs text-[#92400e] font-medium mt-0.5">In progress...</div>
+                      <div className="text-xs text-[#FACC15]/70 font-medium mt-0.5">In progress...</div>
                     )}
                   </div>
                 </div>
@@ -134,10 +134,10 @@ const PendingApproval = () => {
 
             {/* Refresh Message */}
             {refreshMessage && (
-              <div className={`w-full p-3 rounded-xl text-sm text-center font-medium mb-4 ${
-                refreshMessage.includes('approved') ? 'bg-[#ecfdf5] text-[#10b981]' :
-                refreshMessage.includes('rejected') ? 'bg-red-50 text-red-600' :
-                'bg-[#f0f4f9] text-[#64748b]'
+              <div className={`w-full p-3 rounded-[12px] text-sm text-center font-medium mb-4 border ${
+                refreshMessage.includes('approved') ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/30' :
+                refreshMessage.includes('rejected') ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                'bg-[#111] text-white/60 border-[#333]'
               }`}>
                 {refreshMessage}
               </div>
@@ -147,13 +147,13 @@ const PendingApproval = () => {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`w-full py-4 bg-[#1952c4] hover:bg-[#1546a8] text-white font-bold rounded-[16px] flex items-center justify-center gap-2 text-[15px] transition-all shadow-sm border-none ${
+              className={`w-full py-4 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-[14px] flex items-center justify-center gap-2 text-[15px] transition-all shadow-sm tracking-wide ${
                 isRefreshing ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
               }`}
             >
               {isRefreshing ? (
                 <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                   </svg>
@@ -169,7 +169,7 @@ const PendingApproval = () => {
               )}
             </button>
 
-            <p className="text-center text-xs text-[#94a3b8] mt-5 font-medium">
+            <p className="text-center text-xs text-white/40 mt-5 font-medium">
               You'll be redirected automatically once approved
             </p>
           </div>

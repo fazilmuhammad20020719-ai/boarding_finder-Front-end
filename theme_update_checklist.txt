@@ -16,81 +16,80 @@ LEGEND:
   [✅] Register.jsx                — Dark theme done
   [✅] VerifyAccount.jsx           — Dark theme done
   [✅] IdentityVerification.jsx    — Dark theme done
-  [❌] ForgotPassword.jsx          — Needs update
-  [❌] ResetPassword.jsx           — Needs update
-  [❌] PendingApproval.jsx         — Needs update
+  [✅] ForgotPassword.jsx          — Dark theme done
+  [✅] ResetPassword.jsx           — Dark theme done
+  [✅] PendingApproval.jsx         — Dark theme done
 
 --------------------------------------------------------------------------------
   PUBLIC / LANDING PAGES (High Priority)
 --------------------------------------------------------------------------------
   [✅] Landing.jsx                 — Dark theme done
-  [❌] Home.jsx                    — Needs update (main listing browse page)
-  [❌] Search.jsx                  — Needs update (search & filter page)
-  [❌] PropertyDetails.jsx         — Needs update (single listing view)
-  [❌] AboutUs.jsx                 — Needs update
-  [❌] ContactUs.jsx               — Needs update
-  [❌] FAQ.jsx                     — Needs update
-  [❌] TermsPrivacy.jsx            — Needs update
-  [❌] NotFound.jsx                — Needs update
-  [❌] Unauthorized.jsx            — Needs update
+  [✅] Home.jsx                    — Dark theme done
+  [✅] Search.jsx                  — Dark theme done
+  [✅] PropertyDetails.jsx         — Dark theme done
+  [✅] AboutUs.jsx                 — Dark theme done
+  [✅] ContactUs.jsx               — Dark theme done
+  [✅] FAQ.jsx                     — Dark theme done
+  [✅] TermsPrivacy.jsx            — Dark theme done
+  [✅] NotFound.jsx                — Dark theme done
+  [✅] Unauthorized.jsx            — Dark theme done
 
 --------------------------------------------------------------------------------
   STUDENT PAGES (Medium Priority)
 --------------------------------------------------------------------------------
-  [❌] MyBookings.jsx              — Needs update
-  [❌] SavedHomes.jsx              — Needs update
-  [❌] Profile.jsx                 — Needs update
-  [❌] Settings.jsx                — Needs update
-  [❌] Notifications.jsx           — Needs update
-  [❌] Messages.jsx                — Needs update
-  [❌] RoommateMatcher.jsx         — Needs update
-  [❌] CompareListings.jsx         — Needs update
-  [❌] ReviewPage.jsx              — Needs update
-  [❌] BookingPage.jsx             — Needs update
-  [❌] BookingConfirmation.jsx     — Needs update
-  [❌] MapView.jsx                 — Needs update
-  [❌] NeighborhoodDetails.jsx     — Needs update
-  [❌] VirtualTour.jsx             — Needs update
-  [❌] DigitalLease.jsx            — Needs update
-  [❌] CommunityForum.jsx          — Needs update
-  [❌] ForumPost.jsx               — Needs update
+  [✅] MyBookings.jsx              — Dark theme done
+  [✅] SavedHomes.jsx              — Dark theme done
+  [✅] Profile.jsx                 — Dark theme done
+  [✅] Settings.jsx                — Dark theme done
+  [✅] Notifications.jsx           — Dark theme done
+  [✅] Messages.jsx                — Dark theme done
+  [✅] RoommateMatcher.jsx         — Dark theme done
+  [✅] CompareListings.jsx         — Dark theme done
+  [✅] ReviewPage.jsx              — Dark theme done
+  [✅] BookingPage.jsx             — Dark theme done
+  [✅] BookingConfirmation.jsx     — Dark theme done
+  [✅] MapView.jsx                 — Dark theme done
+  [✅] NeighborhoodDetails.jsx     — Dark theme done
+  [✅] VirtualTour.jsx             — Dark theme done
+  [✅] DigitalLease.jsx            — Dark theme done
+  [✅] CommunityForum.jsx          — Dark theme done
+  [✅] ForumPost.jsx               — Dark theme done
 
 --------------------------------------------------------------------------------
   OWNER PAGES (Medium Priority)
 --------------------------------------------------------------------------------
-  [❌] OwnerDashboard.jsx          — Needs update
-  [❌] OwnerListingForm.jsx        — Needs update (add/edit listing)
-  [❌] MyListings.jsx              — Needs update
-  [❌] ManageListings.jsx          — Needs update
-  [❌] ManageReservations.jsx      — Needs update
-  [❌] CalendarManagement.jsx      — Needs update
-  [❌] Earnings.jsx                — Needs update
-  [❌] PaymentHistory.jsx          — Needs update
-  [❌] MaintenancePortal.jsx       — Needs update
-  [❌] PromoteProperty.jsx         — Needs update
+  [✅] OwnerDashboard.jsx          — Dark theme done
+  [✅] OwnerListingForm.jsx        — Dark theme done
+  [✅] MyListings.jsx              — Dark theme done
+  [✅] ManageListings.jsx          — Dark theme done
+  [✅] ManageReservations.jsx      — Dark theme done
+  [✅] CalendarManagement.jsx      — Dark theme done
+  [✅] Earnings.jsx                — Dark theme done
+  [✅] PaymentHistory.jsx          — Dark theme done
+  [✅] MaintenancePortal.jsx       — Dark theme done
+  [✅] PromoteProperty.jsx         — Dark theme done
 
 --------------------------------------------------------------------------------
   ADMIN PAGES (Lower Priority)
 --------------------------------------------------------------------------------
-  [⚙️ ] AdminDashboard.jsx         — Needs update
-  [⚙️ ] ManageUsers.jsx            — Needs update
-  [⚙️ ] DatabaseViewer.jsx         — Needs update
+  [✅] AdminDashboard.jsx           — Dark theme done
+  [✅] ManageUsers.jsx              — Dark theme done
+  [✅] DatabaseViewer.jsx           — Dark theme done
 
 --------------------------------------------------------------------------------
   COMPONENTS (Shared)
 --------------------------------------------------------------------------------
   [✅] Navbar.jsx                  — Dark theme done
-  [❌] Footer.jsx                  — Needs update
-  [❌] ReportModal.jsx             — Needs update
+  [✅] Footer.jsx                  — Dark theme done
+  [✅] ReportModal.jsx             — Dark theme done
   [--] ProtectedRoute.jsx          — No UI, skip
 
 --------------------------------------------------------------------------------
   SUMMARY
 --------------------------------------------------------------------------------
   Total files:       48 pages + 4 components = 52 items
-  Already done:      6  (Landing, login, Register, VerifyAccount,
-                        IdentityVerification, Navbar)
-  Remaining:         46 items
+  Already done:      52 (Landing, Auth, Student, Owner, Admin, Components)
+  Remaining:         0 items
 
   Suggested order:
     1. ForgotPassword, ResetPassword, PendingApproval  (auth flow)
