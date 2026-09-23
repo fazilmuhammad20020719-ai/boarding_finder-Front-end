@@ -535,3 +535,33 @@ export const deleteNotification = async (id) => {
   return request(`/notifications/${id}`, { method: "DELETE" });
 };
 
+// ─── Calendar API Methods ─────────────────────
+
+export const getCalendarBlocks = async (listingId) => {
+  return request(`/calendar/${listingId}`, { method: "GET" });
+};
+
+export const addCalendarBlock = async (listingId, data) => {
+  return request(`/calendar/${listingId}/block`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+};
+
+
+export const removeCalendarBlock = async (listingId, blockId) => {
+  return request(`/calendar/${listingId}/block/${blockId}`, { method: "DELETE" });
+};
+
+export const updateCalendarBlock = async (listingId, blockId, data) => {
+  return request(`/calendar/${listingId}/block/${blockId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+};
+
+// ─── Listings API Methods ─────────────────────
+
+export const getMyListings = async () => {
+  return request("/listings/owner/mine", { method: "GET" });
+};

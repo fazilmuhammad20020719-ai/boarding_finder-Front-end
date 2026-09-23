@@ -162,30 +162,30 @@ const HomePage = () => {
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="home" />
 
       {/* ===== HERO SECTION ===== */}
-      <section className="relative bg-gradient-to-br from-[#111] via-[#1A1A1A] to-black border-b border-[#333] text-white overflow-hidden">
+      <section className="relative bg-white border-b border-gray-200 text-black overflow-hidden">
         {/* Background decorative blobs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-[#FACC15]/5 blur-3xl" />
+          <div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-blue-50/50 blur-3xl" />
+          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-[#FACC15]/10 blur-3xl" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-20">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs font-semibold text-white/90">{stats ? `${stats.activeListings}+` : "0+"} verified listings available</span>
+          <div className="inline-flex items-center gap-2 bg-black/5 backdrop-blur-sm border border-black/10 rounded-full px-4 py-1.5 mb-6">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs font-semibold text-gray-800">{stats ? `${stats.activeListings}+` : "0+"} verified listings available</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-white max-w-2xl mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-black max-w-2xl mb-4">
             Find Your Home<br />Near Campus
           </h1>
-          <p className="text-white/75 text-base sm:text-lg max-w-lg mb-8 font-normal leading-relaxed">
+          <p className="text-gray-600 text-base sm:text-lg max-w-lg mb-8 font-normal leading-relaxed">
             Discover verified boarding houses, dormitories, and studio units close to top universities in Sri Lanka.
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-[#1A1A1A] border border-[#333] rounded-2xl shadow-2xl p-2 max-w-2xl mb-6">
-            <svg className="w-5 h-5 text-white/50 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl shadow-lg p-2 max-w-2xl mb-6">
+            <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -194,7 +194,7 @@ const HomePage = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by university, location, or boarding name..."
-              className="flex-grow py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px]"
+              className="flex-grow py-3 bg-transparent text-black placeholder-gray-400 focus:outline-none text-[15px]"
             />
             <button
               type="submit"
@@ -206,12 +206,12 @@ const HomePage = () => {
 
           {/* Popular filters chips */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-white/60 text-xs font-semibold mr-1">Popular:</span>
+            <span className="text-gray-500 text-xs font-semibold mr-1">Popular:</span>
             {["Anuradhapura", "Colombo", "Nugegoda", "Peradeniya"].map((chip) => (
               <button
                 key={chip}
                 onClick={() => navigate('/search')}
-                className="px-3.5 py-1.5 bg-white/15 hover:bg-white/25 border border-white/20 rounded-full text-white text-xs font-semibold transition-all cursor-pointer"
+                className="px-3.5 py-1.5 bg-black/5 hover:bg-black/10 border border-black/10 rounded-full text-gray-700 text-xs font-semibold transition-all cursor-pointer"
               >
                 {chip}
               </button>
@@ -220,7 +220,7 @@ const HomePage = () => {
         </div>
 
         {/* Stats Row */}
-        <div className="relative z-10 bg-white/10 backdrop-blur-sm border-t border-white/10">
+        <div className="relative z-10 bg-black/5 backdrop-blur-sm border-t border-black/5">
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
               { value: stats ? `${stats.activeListings}+` : "0+", label: "Active listings" },
@@ -229,8 +229,8 @@ const HomePage = () => {
               { value: stats ? `${stats.avgRating}★` : "0.0★", label: "Average rating" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-white/60 text-xs mt-1 font-normal">{stat.label}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-black">{stat.value}</div>
+                <div className="text-gray-500 text-xs mt-1 font-normal">{stat.label}</div>
               </div>
             ))}
           </div>
