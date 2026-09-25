@@ -48,6 +48,7 @@ import DatabaseViewer from './pages/DatabaseViewer';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import Support from './pages/Support';
+import SystemDocs from './pages/SystemDocs/SystemDocs';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -65,6 +66,7 @@ function App() {
       <Route path="/terms" element={<TermsPrivacy />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
+      <Route path="/system-docs" element={<SystemDocs />} />
 
       {/* ─── Verification Flow Routes (Authenticated but unverified) ── */}
       <Route path="/verify-account" element={<ProtectedRoute skipVerification={true}><VerifyAccount /></ProtectedRoute>} />
