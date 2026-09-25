@@ -9,6 +9,7 @@ async function request(endpoint, options = {}) {
   const config = {
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-Token": "boarding-finder-csrf-protection",
       ...options.headers,
     },
     ...options,
@@ -21,9 +22,14 @@ async function request(endpoint, options = {}) {
   }
 
   const response = await fetch(url, config);
-  const data = await response.json();
+  const data = await response.json().catch(() => ({})); // gracefully handle empty/non-json responses
 
   if (!response.ok) {
+    // ── Session Expiration UX ──
+    if (response.status === 401) {
+      localStorage.removeItem("token");
+      window.dispatchEvent(new Event("auth:session-expired"));
+    }
     throw new Error(data.error || data.message || "Something went wrong");
   }
 
@@ -89,6 +95,25 @@ export async function updateListing(id, listingData) {
 export async function deleteListing(id) {
   return request(`/listings/${id}`, {
     method: "DELETE",
+  });
+}
+
+export async function pauseListing(id, is_paused) {
+  return request(`/listings/${id}/pause`, {
+    method: "PUT",
+    body: JSON.stringify({ is_paused }),
+  });
+}
+
+export async function duplicateListing(id) {
+  return request(`/listings/${id}/duplicate`, {
+    method: "POST",
+  });
+}
+
+export async function getListingAnalytics(id) {
+  return request(`/listings/${id}/analytics`, {
+    method: "GET",
   });
 }
 
@@ -293,6 +318,80 @@ export async function updateListingStatusAdmin(listingId, status) {
     method: "PUT",
     body: JSON.stringify({ status }),
   });
+}
+
+export async function getAllAdminBookings() {
+  return request("/admin/bookings", { method: "GET" });
+}
+
+export async function updateBookingStatusAdmin(bookingId, status) {
+  return request(`/admin/bookings/${bookingId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function getAllAdminReviews() {
+  return request("/admin/reviews", { method: "GET" });
+}
+
+export async function updateReviewStatusAdmin(reviewId, status) {
+  return request(`/admin/reviews/${reviewId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function deleteReviewAdmin(reviewId) {
+  return request(`/admin/reviews/${reviewId}`, {
+    method: "DELETE",
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Admin Tickets API Methods - HMR force reload
+// ─────────────────────────────────────────────────────────────────
+export async function getAllAdminTickets() {
+  return request("/admin/tickets", { method: "GET" });
+}
+
+export async function updateTicketStatusAdmin(ticketId, status) {
+  return request(`/admin/tickets/${ticketId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function broadcastAnnouncement(title, message, target_audience) {
+  return request("/admin/announcements", {
+    method: "POST",
+    body: JSON.stringify({ title, message, target_audience }),
+  });
+}
+
+export async function getPlatformSettings() {
+  return request("/admin/settings", { method: "GET" });
+}
+
+export async function updatePlatformSettings(settings) {
+  return request("/admin/settings", {
+    method: "PUT",
+    body: JSON.stringify({ settings }),
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// User Tickets API Methods
+// ─────────────────────────────────────────────────────────────────
+export async function createTicket(subject, description) {
+  return request("/tickets", {
+    method: "POST",
+    body: JSON.stringify({ subject, description }),
+  });
+}
+
+export async function getMyTickets() {
+  return request("/tickets/my-tickets", { method: "GET" });
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -551,13 +650,6 @@ export const addCalendarBlock = async (listingId, data) => {
 
 export const removeCalendarBlock = async (listingId, blockId) => {
   return request(`/calendar/${listingId}/block/${blockId}`, { method: "DELETE" });
-};
-
-export const updateCalendarBlock = async (listingId, blockId, data) => {
-  return request(`/calendar/${listingId}/block/${blockId}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
 };
 
 // ─── Listings API Methods ─────────────────────

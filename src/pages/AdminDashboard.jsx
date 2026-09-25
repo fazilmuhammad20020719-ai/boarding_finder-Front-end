@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getPendingUsers, verifyUserAdmin, getVerificationStats, getAllUsers, updateUserStatusAdmin, updateUserRoleAdmin, getAllAdminListings, updateListingStatusAdmin, getPlatformAnalytics } from '../services/api';
+import {
+  getPendingUsers, verifyUserAdmin, getVerificationStats,
+  getAllUsers, updateUserStatusAdmin, updateUserRoleAdmin,
+  getAllAdminListings, updateListingStatusAdmin, getPlatformAnalytics,
+  getAllAdminBookings, updateBookingStatusAdmin,
+  getAllAdminReviews, updateReviewStatusAdmin, deleteReviewAdmin,
+  getAllAdminTickets, updateTicketStatusAdmin, broadcastAnnouncement,
+  getPlatformSettings, updatePlatformSettings
+} from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 // We need to resolve image urls for verification docs.
@@ -16,26 +24,112 @@ const AdminDashboard = () => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [allListings, setAllListings] = useState([]);
+  const [allBookings, setAllBookings] = useState([]);
+  const [allReviews, setAllReviews] = useState([]);
+  const [allTickets, setAllTickets] = useState([]);
 
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingAllUsers, setLoadingAllUsers] = useState(true);
   const [loadingListings, setLoadingListings] = useState(true);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [loadingTickets, setLoadingTickets] = useState(true);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionNote, setActionNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [analyticsData, setAnalyticsData] = useState(null);
+  const [platformSettings, setPlatformSettings] = useState({
+    platform_fee_percentage: '5',
+    maintenance_mode: 'false',
+    terms_of_service_url: 'https://boardingfinder.com/terms'
+  });
+
+  // Broadcast state
+  const [announcementTitle, setAnnouncementTitle] = useState('');
+  const [announcementMessage, setAnnouncementMessage] = useState('');
+  const [announcementAudience, setAnnouncementAudience] = useState('all');
+
+  // User Management filters
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userFilterRole, setUserFilterRole] = useState('all');
+  const [userFilterStatus, setUserFilterStatus] = useState('all');
+
+  // Booking filters
+  const [bookingFilterStatus, setBookingFilterStatus] = useState('all');
+
+  // Review filters
+  const [reviewFilterStatus, setReviewFilterStatus] = useState('all');
+
+  // Ticket filters
+  const [ticketFilterStatus, setTicketFilterStatus] = useState('all');
 
   useEffect(() => {
     fetchStats();
     fetchPendingUsers();
     fetchAllUsersList();
     fetchAllListingsList();
+    fetchAllBookingsList();
+    fetchAllReviewsList();
+    fetchAllTicketsList();
     fetchAnalytics();
+    fetchPlatformSettingsData();
   }, []);
+
+  const fetchPlatformSettingsData = async () => {
+    try {
+      setLoadingSettings(true);
+      const data = await getPlatformSettings();
+      if (data.settings) {
+        setPlatformSettings(data.settings);
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
+
+  const handleUpdateSettings = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    try {
+      await updatePlatformSettings(platformSettings);
+      alert('Settings updated successfully!');
+    } catch (err) {
+      alert(err.message || 'Failed to update settings');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const fetchAllTicketsList = async () => {
+    try {
+      setLoadingTickets(true);
+      const data = await getAllAdminTickets();
+      setAllTickets(data.tickets || []);
+    } catch (err) {
+      console.error('Failed to fetch all tickets:', err);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
+  const fetchAllReviewsList = async () => {
+    try {
+      setLoadingReviews(true);
+      const data = await getAllAdminReviews();
+      setAllReviews(data.reviews || []);
+    } catch (err) {
+      console.error('Failed to fetch all reviews:', err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
 
   const fetchAnalytics = async () => {
     try {
@@ -46,6 +140,18 @@ const AdminDashboard = () => {
       console.error('Failed to fetch analytics:', err);
     } finally {
       setLoadingAnalytics(false);
+    }
+  };
+
+  const fetchAllBookingsList = async () => {
+    try {
+      setLoadingBookings(true);
+      const data = await getAllAdminBookings();
+      setAllBookings(data.bookings || []);
+    } catch (err) {
+      console.error('Failed to fetch all bookings:', err);
+    } finally {
+      setLoadingBookings(false);
     }
   };
 
@@ -157,6 +263,83 @@ const AdminDashboard = () => {
       await fetchAllListingsList();
     } catch (err) {
       alert(err.message || 'Failed to update listing status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateBookingStatus = async (bookingId, status) => {
+    if (!window.confirm(`Are you sure you want to change this booking's status to ${status}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateBookingStatusAdmin(bookingId, status);
+      await fetchAllBookingsList();
+      await fetchAnalytics();
+    } catch (err) {
+      alert(err.message || 'Failed to update booking status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateReviewStatus = async (reviewId, status) => {
+    if (!window.confirm(`Are you sure you want to change this review's status to ${status}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateReviewStatusAdmin(reviewId, status);
+      await fetchAllReviewsList();
+    } catch (err) {
+      alert(err.message || 'Failed to update review status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm(`Are you sure you want to PERMANENTLY DELETE this review? This action cannot be undone.`)) return;
+    setIsProcessing(true);
+    try {
+      await deleteReviewAdmin(reviewId);
+      await fetchAllReviewsList();
+      await fetchAnalytics(); // Might impact reviews stat
+    } catch (err) {
+      alert(err.message || 'Failed to delete review');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateTicketStatus = async (ticketId, status) => {
+    if (!window.confirm(`Are you sure you want to change this ticket's status to ${status}?`)) return;
+    setIsProcessing(true);
+    try {
+      await updateTicketStatusAdmin(ticketId, status);
+      await fetchAllTicketsList();
+    } catch (err) {
+      alert(err.message || 'Failed to update ticket status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleBroadcastAnnouncement = async (e) => {
+    e.preventDefault();
+    if (!announcementTitle || !announcementMessage) {
+      alert("Title and message are required.");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to broadcast this message to ${announcementAudience === 'all' ? 'everyone' : announcementAudience + 's'}?`)) return;
+
+    setIsProcessing(true);
+    try {
+      const result = await broadcastAnnouncement(announcementTitle, announcementMessage, announcementAudience);
+      alert(`Success! Broadcasted to ${result.count} users.`);
+      setAnnouncementTitle('');
+      setAnnouncementMessage('');
+      setAnnouncementAudience('all');
+    } catch (err) {
+      alert(err.message || 'Failed to broadcast announcement');
     } finally {
       setIsProcessing(false);
     }
@@ -390,6 +573,46 @@ const AdminDashboard = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('bookings')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'bookings' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            Bookings
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'reviews' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+            Review Moderation
+          </button>
+
+          <button
+            onClick={() => setActiveTab('tickets')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'tickets' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            Support Tickets
+          </button>
+
+          <button
+            onClick={() => setActiveTab('announcements')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'announcements' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+            System Announcements
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'settings' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Global Settings
+          </button>
+
+          <button
             onClick={() => setActiveTab('overview')}
             className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
           >
@@ -462,71 +685,162 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'users' && (
-          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
-            {loadingAllUsers ? (
-              <div className="p-12 text-center text-white/60">Loading users...</div>
-            ) : allUsers.length === 0 ? (
-              <div className="p-12 text-center text-white/60">No users found.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[1000px]">
-                  <thead>
-                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
-                      <th className="px-6 py-5 rounded-tl-3xl">USER</th>
-                      <th className="px-6 py-5">ROLE</th>
-                      <th className="px-6 py-5">STATUS</th>
-                      <th className="px-6 py-5">JOINED</th>
-                      <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-[14px] font-medium text-white">
-                    {allUsers.map(user => (
-                      <tr key={user.id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
-                        <td className="px-6 py-5">
-                          <div className="flex flex-col">
-                            <span className="font-bold">{user.name}</span>
-                            <span className="text-xs text-white/60">{user.email}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <select
-                            value={user.role}
-                            onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                            disabled={isProcessing}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer outline-none bg-[#111] ${user.role === 'admin' ? 'text-red-500 border-red-500/20' : user.role === 'owner' ? 'text-[#1952c4] border-[#1952c4]/20' : 'text-[#c084fc] border-[#9333ea]/20'}`}
-                          >
-                            <option value="student">Student</option>
-                            <option value="owner">Owner</option>
-                            <option value="admin">Admin</option>
-                          </select>
-                        </td>
-                        <td className="px-6 py-5">
-                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.account_status === 'active' ? 'bg-[#10b981]/20 text-[#10b981]' : user.account_status === 'paused' ? 'bg-amber-500/20 text-amber-500' : 'bg-[#333] text-white/60'}`}>
-                            {user.account_status || 'active'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-white/60 text-sm">
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-5 flex gap-2">
-                          {(!user.account_status || user.account_status === 'active') ? (
-                            <>
-                              <button onClick={() => handleUpdateStatus(user.id, 'paused')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg transition-colors border-none cursor-pointer">Suspend</button>
-                              <button onClick={() => handleUpdateStatus(user.id, 'removed')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors border-none cursor-pointer">Ban</button>
-                            </>
-                          ) : (
-                            <button onClick={() => handleUpdateStatus(user.id, 'active')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-[#10b981]/20 text-[#10b981] hover:bg-[#10b981]/30 rounded-lg transition-colors border-none cursor-pointer">Activate</button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {activeTab === 'users' && (() => {
+          // ── Filter state (scoped to this tab render) ──
+          // We use a stateless filter approach: filter controls update parent state
+          // defined alongside the other state vars at the top of the component.
+          const filteredUsers = allUsers.filter(user => {
+            const q = (userSearchQuery || '').toLowerCase();
+            const matchesSearch = !q || user.name?.toLowerCase().includes(q) || user.email?.toLowerCase().includes(q);
+            const matchesRole = userFilterRole === 'all' || user.role === userFilterRole;
+            const status = user.account_status || 'active';
+            const matchesStatus = userFilterStatus === 'all' || status === userFilterStatus;
+            return matchesSearch && matchesRole && matchesStatus;
+          });
+
+          return (
+            <div className="space-y-4">
+              {/* ── Filter Bar ── */}
+              <div className="bg-[#1A1A1A] rounded-2xl border border-[#333] p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search by name or email…"
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#111] border border-[#333] rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 focus:border-[#FACC15]/40 transition-all"
+                  />
+                </div>
+
+                {/* Role Filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-white/40 tracking-widest uppercase whitespace-nowrap">Role</span>
+                  <select
+                    value={userFilterRole}
+                    onChange={(e) => setUserFilterRole(e.target.value)}
+                    className="bg-[#111] border border-[#333] text-white rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 cursor-pointer appearance-none pr-8"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    <option value="all">All Roles</option>
+                    <option value="student">Student</option>
+                    <option value="owner">Owner</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                {/* Status Filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-white/40 tracking-widest uppercase whitespace-nowrap">Status</span>
+                  <select
+                    value={userFilterStatus}
+                    onChange={(e) => setUserFilterStatus(e.target.value)}
+                    className="bg-[#111] border border-[#333] text-white rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 cursor-pointer appearance-none pr-8"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="paused">Suspended</option>
+                    <option value="removed">Banned</option>
+                  </select>
+                </div>
+
+                {/* Clear Filters */}
+                {(userSearchQuery || userFilterRole !== 'all' || userFilterStatus !== 'all') && (
+                  <button
+                    onClick={() => { setUserSearchQuery(''); setUserFilterRole('all'); setUserFilterStatus('all'); }}
+                    className="text-xs font-bold text-[#FACC15] hover:text-[#EAB308] bg-transparent border-none cursor-pointer whitespace-nowrap transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-        )}
+
+              {/* ── Users Table ── */}
+              <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+                {loadingAllUsers ? (
+                  <div className="p-12 text-center text-white/60">Loading users...</div>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="p-12 text-center flex flex-col items-center">
+                    <div className="w-14 h-14 bg-[#333] rounded-full flex items-center justify-center mb-4">
+                      <svg className="w-7 h-7 text-white/40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1">No users found</h3>
+                    <p className="text-white/50 text-sm">Try adjusting your search or filter criteria.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[1000px]">
+                      <thead>
+                        <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
+                          <th className="px-6 py-5 rounded-tl-3xl">USER</th>
+                          <th className="px-6 py-5">ROLE</th>
+                          <th className="px-6 py-5">STATUS</th>
+                          <th className="px-6 py-5">JOINED</th>
+                          <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-[14px] font-medium text-white">
+                        {filteredUsers.map(user => (
+                          <tr key={user.id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
+                            <td className="px-6 py-5">
+                              <div className="flex flex-col">
+                                <span className="font-bold">{user.name}</span>
+                                <span className="text-xs text-white/60">{user.email}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-5">
+                              <select
+                                value={user.role}
+                                onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                                disabled={isProcessing}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer outline-none bg-[#111] ${user.role === 'admin' ? 'text-red-500 border-red-500/20' : user.role === 'owner' ? 'text-[#1952c4] border-[#1952c4]/20' : 'text-[#c084fc] border-[#9333ea]/20'}`}
+                              >
+                                <option value="student">Student</option>
+                                <option value="owner">Owner</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-5">
+                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.account_status === 'active' ? 'bg-[#10b981]/20 text-[#10b981]' : user.account_status === 'paused' ? 'bg-amber-500/20 text-amber-500' : user.account_status === 'removed' ? 'bg-red-500/20 text-red-500' : 'bg-[#10b981]/20 text-[#10b981]'}`}>
+                                {user.account_status || 'active'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5 text-white/60 text-sm">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-5 flex gap-2">
+                              {(!user.account_status || user.account_status === 'active') ? (
+                                <>
+                                  <button onClick={() => handleUpdateStatus(user.id, 'paused')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg transition-colors border-none cursor-pointer">Suspend</button>
+                                  <button onClick={() => handleUpdateStatus(user.id, 'removed')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors border-none cursor-pointer">Ban</button>
+                                </>
+                              ) : (
+                                <button onClick={() => handleUpdateStatus(user.id, 'active')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-[#10b981]/20 text-[#10b981] hover:bg-[#10b981]/30 rounded-lg transition-colors border-none cursor-pointer">Activate</button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Footer with result count */}
+                {!loadingAllUsers && filteredUsers.length > 0 && (
+                  <div className="px-6 py-4 border-t border-[#333] flex justify-between items-center">
+                    <span className="text-xs font-semibold text-white/50">
+                      Showing {filteredUsers.length} of {allUsers.length} user{allUsers.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {activeTab === 'listings' && (
           <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
@@ -590,6 +904,436 @@ const AdminDashboard = () => {
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'bookings' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111]">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <svg className="w-6 h-6 text-[#FACC15]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Platform Bookings
+              </h2>
+              <div className="flex gap-3">
+                <select
+                  value={bookingFilterStatus}
+                  onChange={(e) => setBookingFilterStatus(e.target.value)}
+                  className="px-4 py-2 bg-[#1A1A1A] text-white text-sm font-semibold border border-[#333] rounded-xl outline-none focus:border-[#FACC15]/50"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+
+            {loadingBookings ? (
+              <div className="p-12 text-center text-white/60">Loading platform bookings...</div>
+            ) : allBookings.length === 0 ? (
+              <div className="p-12 text-center text-white/60 flex flex-col items-center">
+                <svg className="w-12 h-12 mb-4 text-[#333]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                No bookings found.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
+                      <th className="px-6 py-5 rounded-tl-3xl">BOOKING ID</th>
+                      <th className="px-6 py-5">LISTING</th>
+                      <th className="px-6 py-5">STUDENT (SEEKER)</th>
+                      <th className="px-6 py-5">OWNER</th>
+                      <th className="px-6 py-5">TOTAL AMOUNT</th>
+                      <th className="px-6 py-5">STATUS</th>
+                      <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#333]">
+                    {allBookings.filter(b => bookingFilterStatus === 'all' || b.status === bookingFilterStatus).map((booking) => (
+                      <tr key={booking.booking_id} className="hover:bg-[#222]/50 transition-colors">
+                        <td className="px-6 py-5 font-semibold text-white/80">#{booking.booking_id}</td>
+                        <td className="px-6 py-5">
+                          <div className="font-semibold text-white truncate max-w-[200px]">{booking.listing_title}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-white">{booking.seeker_name}</span>
+                            <span className="text-xs text-white/60">{booking.seeker_email}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-white">{booking.owner_name}</span>
+                            <span className="text-xs text-white/60">{booking.owner_email}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 font-bold text-white">
+                          ${booking.total_amount}
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${booking.status === 'approved' ? 'bg-[#10b981]/20 text-[#10b981]' : booking.status === 'pending' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'}`}>
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 flex gap-2">
+                          <select
+                            value={booking.status}
+                            onChange={(e) => handleUpdateBookingStatus(booking.booking_id, e.target.value)}
+                            disabled={isProcessing}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer outline-none bg-[#111] ${booking.status === 'approved' ? 'text-[#10b981] border-[#10b981]/20' : booking.status === 'pending' ? 'text-amber-500 border-amber-500/20' : 'text-red-500 border-red-500/20'}`}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'reviews' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111]">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                Review Moderation
+              </h2>
+              <div className="flex gap-3">
+                <select
+                  value={reviewFilterStatus}
+                  onChange={(e) => setReviewFilterStatus(e.target.value)}
+                  className="px-4 py-2 bg-[#1A1A1A] text-white text-sm font-semibold border border-[#333] rounded-xl outline-none focus:border-amber-500/50"
+                >
+                  <option value="all">All Reviews</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            {loadingReviews ? (
+              <div className="p-12 text-center text-white/60">Loading reviews...</div>
+            ) : allReviews.length === 0 ? (
+              <div className="p-12 text-center text-white/60 flex flex-col items-center">
+                <svg className="w-12 h-12 mb-4 text-[#333]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                No reviews found.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
+                      <th className="px-6 py-5 rounded-tl-3xl">REVIEW INFO</th>
+                      <th className="px-6 py-5">LISTING</th>
+                      <th className="px-6 py-5">RATING</th>
+                      <th className="px-6 py-5">COMMENT</th>
+                      <th className="px-6 py-5">STATUS</th>
+                      <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#333]">
+                    {allReviews.filter(r => reviewFilterStatus === 'all' || r.status === reviewFilterStatus).map((review) => (
+                      <tr key={review.review_id} className="hover:bg-[#222]/50 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-white">{review.reviewer_name}</span>
+                            <span className="text-xs text-white/60">{review.reviewer_email}</span>
+                            <span className="text-xs text-white/40 mt-1">{new Date(review.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="font-semibold text-white truncate max-w-[200px]" title={review.listing_title}>{review.listing_title}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex text-amber-400">
+                            {[...Array(5)].map((_, i) => (
+                              <svg key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-[#333]'}`} viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm text-white/80 max-w-xs break-words whitespace-pre-wrap">{review.comment}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${review.status === 'approved' ? 'bg-[#10b981]/20 text-[#10b981]' : review.status === 'pending' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'}`}>
+                            {review.status || 'approved'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex gap-2">
+                            <select
+                              value={review.status || 'approved'}
+                              onChange={(e) => handleUpdateReviewStatus(review.review_id, e.target.value)}
+                              disabled={isProcessing}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer outline-none bg-[#111] ${review.status === 'approved' ? 'text-[#10b981] border-[#10b981]/20' : review.status === 'pending' ? 'text-amber-500 border-amber-500/20' : 'text-red-500 border-red-500/20'}`}
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="approved">Approved</option>
+                              <option value="rejected">Rejected</option>
+                            </select>
+
+                            <button
+                              onClick={() => handleDeleteReview(review.review_id)}
+                              disabled={isProcessing}
+                              className="px-3 py-1.5 rounded-lg text-xs font-bold border border-red-500/20 text-red-500 hover:bg-red-500/10 cursor-pointer outline-none bg-[#111]"
+                              title="Delete Review"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'tickets' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111]">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <svg className="w-6 h-6 text-[#60a5fa]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                Support Tickets
+              </h2>
+              <div className="flex gap-3">
+                <select
+                  value={ticketFilterStatus}
+                  onChange={(e) => setTicketFilterStatus(e.target.value)}
+                  className="px-4 py-2 bg-[#1A1A1A] text-white text-sm font-semibold border border-[#333] rounded-xl outline-none focus:border-[#60a5fa]/50"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+            </div>
+
+            {loadingTickets ? (
+              <div className="p-12 text-center text-white/60">Loading support tickets...</div>
+            ) : allTickets.length === 0 ? (
+              <div className="p-12 text-center text-white/60 flex flex-col items-center">
+                <svg className="w-12 h-12 mb-4 text-[#333]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                No support tickets found.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
+                      <th className="px-6 py-5 rounded-tl-3xl">TICKET ID</th>
+                      <th className="px-6 py-5">USER INFO</th>
+                      <th className="px-6 py-5">SUBJECT / DESCRIPTION</th>
+                      <th className="px-6 py-5">STATUS</th>
+                      <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#333]">
+                    {allTickets.filter(t => ticketFilterStatus === 'all' || t.status === ticketFilterStatus).map((ticket) => (
+                      <tr key={ticket.ticket_id} className="hover:bg-[#222]/50 transition-colors">
+                        <td className="px-6 py-5 font-semibold text-white/80">#{ticket.ticket_id}</td>
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-white">{ticket.user_name} <span className="text-[#FACC15] text-[10px] ml-1 uppercase">({ticket.user_role})</span></span>
+                            <span className="text-xs text-white/60">{ticket.user_email}</span>
+                            <span className="text-xs text-white/40 mt-1">{new Date(ticket.created_at).toLocaleString()}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 max-w-md">
+                          <div className="font-bold text-white text-sm mb-1 break-words">{ticket.subject}</div>
+                          <div className="text-sm text-white/70 break-words whitespace-pre-wrap">{ticket.description}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${ticket.status === 'open' ? 'bg-amber-500/20 text-amber-500' :
+                              ticket.status === 'in_progress' ? 'bg-[#60a5fa]/20 text-[#60a5fa]' :
+                                ticket.status === 'resolved' ? 'bg-[#10b981]/20 text-[#10b981]' :
+                                  'bg-[#333] text-white/60'
+                            }`}>
+                            {ticket.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <select
+                            value={ticket.status}
+                            onChange={(e) => handleUpdateTicketStatus(ticket.ticket_id, e.target.value)}
+                            disabled={isProcessing}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer outline-none bg-[#111] ${ticket.status === 'open' ? 'text-amber-500 border-amber-500/20' :
+                                ticket.status === 'in_progress' ? 'text-[#60a5fa] border-[#60a5fa]/20' :
+                                  ticket.status === 'resolved' ? 'text-[#10b981] border-[#10b981]/20' :
+                                    'text-white/60 border-[#333]'
+                              }`}
+                          >
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'announcements' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] bg-[#111]">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <svg className="w-6 h-6 text-[#8b5cf6]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                Broadcast System Announcement
+              </h2>
+              <p className="text-white/60 text-sm mt-2">Send important alerts to all users directly into their notification inboxes.</p>
+            </div>
+
+            <div className="p-8">
+              <form onSubmit={handleBroadcastAnnouncement} className="max-w-3xl space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-white/80 mb-2">Target Audience</label>
+                  <select
+                    value={announcementAudience}
+                    onChange={(e) => setAnnouncementAudience(e.target.value)}
+                    className="w-full sm:w-64 bg-[#111] text-white border border-[#333] rounded-xl p-3 focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6]/50 transition-all outline-none"
+                  >
+                    <option value="all">All Users (Global)</option>
+                    <option value="student">Students Only</option>
+                    <option value="owner">Owners Only</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-white/80 mb-2">Announcement Title</label>
+                  <input
+                    type="text"
+                    value={announcementTitle}
+                    onChange={(e) => setAnnouncementTitle(e.target.value)}
+                    placeholder="e.g. Scheduled System Maintenance"
+                    className="w-full bg-[#111] text-white border border-[#333] rounded-xl p-3 focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6]/50 transition-all outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-white/80 mb-2">Message Content</label>
+                  <textarea
+                    value={announcementMessage}
+                    onChange={(e) => setAnnouncementMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    className="w-full bg-[#111] text-white border border-[#333] rounded-xl p-4 h-40 resize-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6]/50 transition-all outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-[#333] flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="px-8 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-lg shadow-[#8b5cf6]/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isProcessing ? 'Broadcasting...' : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                        Send Broadcast
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] bg-[#111]">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <svg className="w-6 h-6 text-[#10b981]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                Global Settings Panel
+              </h2>
+              <p className="text-white/60 text-sm mt-2">Manage dynamic variables like platform fees, terms of service, and system maintenance modes.</p>
+            </div>
+
+            <div className="p-8">
+              {loadingSettings ? (
+                <div className="text-white/60">Loading settings...</div>
+              ) : (
+                <form onSubmit={handleUpdateSettings} className="max-w-2xl space-y-8">
+
+                  {/* Platform Fee */}
+                  <div>
+                    <label className="block text-sm font-semibold text-white/80 mb-2">Platform Fee Percentage (%)</label>
+                    <p className="text-white/40 text-xs mb-3">The percentage fee charged on digital leases or transactions.</p>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0" max="100" step="0.1"
+                        value={platformSettings.platform_fee_percentage || ''}
+                        onChange={(e) => setPlatformSettings({ ...platformSettings, platform_fee_percentage: e.target.value })}
+                        className="w-full sm:w-64 bg-[#111] text-white border border-[#333] rounded-xl p-3 pl-4 pr-10 focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981]/50 transition-all outline-none"
+                        required
+                      />
+                      <span className="absolute left-[230px] sm:left-[230px] top-[14px] text-white/50 font-bold">%</span>
+                    </div>
+                  </div>
+
+                  {/* Terms of Service URL */}
+                  <div>
+                    <label className="block text-sm font-semibold text-white/80 mb-2">Terms of Service URL</label>
+                    <p className="text-white/40 text-xs mb-3">The link to the platform's terms of service document.</p>
+                    <input
+                      type="url"
+                      value={platformSettings.terms_of_service_url || ''}
+                      onChange={(e) => setPlatformSettings({ ...platformSettings, terms_of_service_url: e.target.value })}
+                      placeholder="https://example.com/terms"
+                      className="w-full bg-[#111] text-white border border-[#333] rounded-xl p-3 focus:ring-2 focus:ring-[#10b981]/20 focus:border-[#10b981]/50 transition-all outline-none"
+                      required
+                    />
+                  </div>
+
+                  {/* Maintenance Mode */}
+                  <div>
+                    <label className="block text-sm font-semibold text-white/80 mb-2">System Maintenance Mode</label>
+                    <p className="text-white/40 text-xs mb-3">If enabled, standard users will see a maintenance screen and won't be able to log in or use the platform.</p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        onClick={() => setPlatformSettings({ ...platformSettings, maintenance_mode: platformSettings.maintenance_mode === 'true' ? 'false' : 'true' })}
+                        className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors ${platformSettings.maintenance_mode === 'true' ? 'bg-red-500' : 'bg-[#333]'}`}
+                      >
+                        <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform ${platformSettings.maintenance_mode === 'true' ? 'translate-x-7' : 'translate-x-0'}`} />
+                      </div>
+                      <span className={`text-sm font-bold ${platformSettings.maintenance_mode === 'true' ? 'text-red-500' : 'text-white/40'}`}>
+                        {platformSettings.maintenance_mode === 'true' ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-[#333] flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isProcessing}
+                      className="px-8 py-3 bg-[#10b981] hover:bg-[#059669] text-white font-bold rounded-xl shadow-lg shadow-[#10b981]/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isProcessing ? 'Saving...' : 'Save Settings'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         )}
 

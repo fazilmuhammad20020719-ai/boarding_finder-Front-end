@@ -9,14 +9,24 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Password complexity checks (same rules as registration)
+  const passwordChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password),
+  };
+  const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
+
   const handleReset = (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords don't match");
       return;
     }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+    if (passwordStrength < 5) {
+      setError("Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.");
       return;
     }
     setError('');
@@ -68,8 +78,54 @@ const ResetPassword = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       className="w-full px-5 py-4 rounded-[14px] bg-[#111] border border-[#333] text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 focus:border-[#FACC15]/60 transition-all text-[15px]"
+                      maxLength={128}
                       required
                     />
+
+                    {/* Password Strength Meter */}
+                    {password.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= passwordStrength
+                                  ? passwordStrength <= 2
+                                    ? 'bg-red-500'
+                                    : passwordStrength <= 3
+                                      ? 'bg-orange-500'
+                                      : passwordStrength <= 4
+                                        ? 'bg-yellow-500'
+                                        : 'bg-emerald-500'
+                                  : 'bg-[#333]'
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <p className={`text-[11px] font-semibold tracking-wide ${passwordStrength <= 2 ? 'text-red-400' : passwordStrength <= 3 ? 'text-orange-400' : passwordStrength <= 4 ? 'text-yellow-400' : 'text-emerald-400'
+                          }`}>
+                          {passwordStrength <= 2 ? 'Weak' : passwordStrength <= 3 ? 'Fair' : passwordStrength <= 4 ? 'Good' : 'Strong'}
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                          {[
+                            { key: 'length', label: 'Min 8 characters' },
+                            { key: 'uppercase', label: 'Uppercase letter' },
+                            { key: 'lowercase', label: 'Lowercase letter' },
+                            { key: 'number', label: 'Number' },
+                            { key: 'special', label: 'Special character' },
+                          ].map(({ key, label }) => (
+                            <div key={key} className="flex items-center gap-1.5">
+                              <span className={`text-[11px] ${passwordChecks[key] ? 'text-emerald-400' : 'text-white/25'}`}>
+                                {passwordChecks[key] ? '✓' : '○'}
+                              </span>
+                              <span className={`text-[11px] ${passwordChecks[key] ? 'text-emerald-400/80' : 'text-white/25'}`}>
+                                {label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -82,8 +138,12 @@ const ResetPassword = () => {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
                       className="w-full px-5 py-4 rounded-[14px] bg-[#111] border border-[#333] text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 focus:border-[#FACC15]/60 transition-all text-[15px]"
+                      maxLength={128}
                       required
                     />
+                    {confirmPassword.length > 0 && password === confirmPassword && (
+                      <p className="text-emerald-400 text-xs mt-1.5 font-medium">✓ Passwords match</p>
+                    )}
                   </div>
 
                   {/* Submit Button */}

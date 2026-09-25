@@ -211,6 +211,13 @@ const Navbar = ({ likedCount = 0 }) => {
                           Maintenance Portal
                         </Link>
                         <Link
+                          to="/support"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
+                        >
+                          Support & Help
+                        </Link>
+                        <Link
                           to="/settings"
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
@@ -311,6 +318,13 @@ const Navbar = ({ likedCount = 0 }) => {
               className={getMobileLinkClass('contact')}
             >
               Contact us
+            </Link>
+            <Link
+              to="/support"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={getMobileLinkClass('support')}
+            >
+              Support & Help
             </Link>
             {!isAuthenticated && (
               <div className="flex gap-3 mt-4">

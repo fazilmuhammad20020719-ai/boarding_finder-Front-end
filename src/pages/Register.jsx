@@ -30,37 +30,81 @@ const RegisterPage = () => {
   // UI States
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const navigate = useNavigate();
   const { register } = useAuth();
 
+  // ── Validation helpers ──────────────────────────────────────
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const PHONE_REGEX = /^\+?[\d\s\-()]{7,20}$/;
+
+  const passwordChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password),
+  };
+  const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
+
+  const validateStep1 = () => {
+    const errs = {};
+    if (!name || name.trim().length < 2) errs.name = 'Name must be at least 2 characters.';
+    else if (name.trim().length > 100) errs.name = 'Name must not exceed 100 characters.';
+    if (!email) errs.email = 'Email is required.';
+    else if (!EMAIL_REGEX.test(email.trim())) errs.email = 'Please enter a valid email address.';
+    if (phone && phone.trim().length > 0 && !PHONE_REGEX.test(phone.trim())) errs.phone = 'Please enter a valid phone number.';
+    return errs;
+  };
+
+  const validateStep2 = () => {
+    const errs = {};
+    if (role === 'student') {
+      if (!university || university.trim().length < 2) errs.university = 'University must be at least 2 characters.';
+      else if (university.trim().length > 200) errs.university = 'University must not exceed 200 characters.';
+      if (!course || course.trim().length < 2) errs.course = 'Course must be at least 2 characters.';
+      else if (course.trim().length > 200) errs.course = 'Course must not exceed 200 characters.';
+      if (!studentId || studentId.trim().length < 2) errs.studentId = 'Student ID must be at least 2 characters.';
+      else if (studentId.trim().length > 50) errs.studentId = 'Student ID must not exceed 50 characters.';
+    }
+    if (role === 'owner') {
+      if (!propertyName || propertyName.trim().length < 2) errs.propertyName = 'Property name must be at least 2 characters.';
+      else if (propertyName.trim().length > 200) errs.propertyName = 'Property name must not exceed 200 characters.';
+      if (!permitNumber || permitNumber.trim().length < 2) errs.permitNumber = 'Permit number must be at least 2 characters.';
+      else if (permitNumber.trim().length > 50) errs.permitNumber = 'Permit number must not exceed 50 characters.';
+      if (!propertyAddress || propertyAddress.trim().length < 5) errs.propertyAddress = 'Address must be at least 5 characters.';
+      else if (propertyAddress.trim().length > 500) errs.propertyAddress = 'Address must not exceed 500 characters.';
+    }
+    if (!password) errs.password = 'Password is required.';
+    else if (passwordStrength < 5) errs.password = 'Password does not meet all complexity requirements.';
+    if (password !== confirmPassword) errs.confirmPassword = 'Passwords do not match.';
+    return errs;
+  };
+  // ── End validation helpers ──────────────────────────────────
+
   const handleNextOrRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
     if (step === 1) {
       if (!agreedToTerms) {
         setError('You must agree to the Terms of Service and Privacy Policy');
         return;
       }
-      if (name && email && phone) {
-        setStep(2);
-      } else {
-        setError('Please fill all fields');
+      const errs = validateStep1();
+      if (Object.keys(errs).length > 0) {
+        setFieldErrors(errs);
+        setError(Object.values(errs)[0]);
+        return;
       }
+      setStep(2);
     } else {
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        return;
-      }
-
-      // Validate role-specific fields
-      if (role === 'student' && (!university || !course || !studentId || !password)) {
-        setError('Please fill all fields');
-        return;
-      }
-      if (role === 'owner' && (!propertyName || !propertyType || !permitNumber || !propertyAddress || !password)) {
-        setError('Please fill all fields');
+      const errs = validateStep2();
+      if (Object.keys(errs).length > 0) {
+        setFieldErrors(errs);
+        setError(Object.values(errs)[0]);
         return;
       }
 
@@ -166,11 +210,10 @@ const RegisterPage = () => {
                           key={key}
                           type="button"
                           onClick={() => setRole(key)}
-                          className={`py-3 px-5 rounded-[12px] border font-semibold flex items-center justify-center text-[14px] transition-all duration-200 cursor-pointer ${
-                            role === key
+                          className={`py-3 px-5 rounded-[12px] border font-semibold flex items-center justify-center text-[14px] transition-all duration-200 cursor-pointer ${role === key
                               ? 'border-[#FACC15]/50 bg-[#FACC15]/10 text-[#FACC15]'
                               : 'border-[#333] bg-transparent text-white/40 hover:border-[#444] hover:text-white/60'
-                          }`}
+                            }`}
                         >
                           {label}
                         </button>
@@ -180,17 +223,20 @@ const RegisterPage = () => {
 
                   <div>
                     <label className={labelCls}>Full Name</label>
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Saman Perera" className={inputCls} required />
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Saman Perera" className={`${inputCls} ${fieldErrors.name ? '!border-red-500/60' : ''}`} maxLength={100} required />
+                    {fieldErrors.name && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.name}</p>}
                   </div>
 
                   <div>
                     <label className={labelCls}>Email Address</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="saman@mrt.ac.lk" className={inputCls} required />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="saman@mrt.ac.lk" className={`${inputCls} ${fieldErrors.email ? '!border-red-500/60' : ''}`} maxLength={254} required />
+                    {fieldErrors.email && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.email}</p>}
                   </div>
 
                   <div>
                     <label className={labelCls}>Phone Number</label>
-                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+94 77 123 4567" className={inputCls} required />
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+94 77 123 4567" className={`${inputCls} ${fieldErrors.phone ? '!border-red-500/60' : ''}`} maxLength={20} required />
+                    {fieldErrors.phone && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.phone}</p>}
                   </div>
                 </div>
               ) : (
@@ -199,22 +245,26 @@ const RegisterPage = () => {
                     <>
                       <div>
                         <label className={labelCls}>University</label>
-                        <input type="text" value={university} onChange={(e) => setUniversity(e.target.value)} placeholder="University of Moratuwa" className={inputCls} required />
+                        <input type="text" value={university} onChange={(e) => setUniversity(e.target.value)} placeholder="University of Moratuwa" className={`${inputCls} ${fieldErrors.university ? '!border-red-500/60' : ''}`} maxLength={200} required />
+                        {fieldErrors.university && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.university}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Course</label>
-                        <input type="text" value={course} onChange={(e) => setCourse(e.target.value)} placeholder="BSc Engineering" className={inputCls} required />
+                        <input type="text" value={course} onChange={(e) => setCourse(e.target.value)} placeholder="BSc Engineering" className={`${inputCls} ${fieldErrors.course ? '!border-red-500/60' : ''}`} maxLength={200} required />
+                        {fieldErrors.course && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.course}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Student ID</label>
-                        <input type="text" value={studentId} onChange={(e) => setStudentId(e.target.value)} placeholder="210123A" className={inputCls} required />
+                        <input type="text" value={studentId} onChange={(e) => setStudentId(e.target.value)} placeholder="210123A" className={`${inputCls} ${fieldErrors.studentId ? '!border-red-500/60' : ''}`} maxLength={50} required />
+                        {fieldErrors.studentId && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.studentId}</p>}
                       </div>
                     </>
                   ) : (
                     <>
                       <div>
                         <label className={labelCls}>Property Name</label>
-                        <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)} placeholder="e.g. Moratuwa Student Residency" className={inputCls} required />
+                        <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)} placeholder="e.g. Moratuwa Student Residency" className={`${inputCls} ${fieldErrors.propertyName ? '!border-red-500/60' : ''}`} maxLength={200} required />
+                        {fieldErrors.propertyName && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.propertyName}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Property Type</label>
@@ -241,22 +291,76 @@ const RegisterPage = () => {
                       </div>
                       <div>
                         <label className={labelCls}>Business Registration / TIN</label>
-                        <input type="text" value={permitNumber} onChange={(e) => setPermitNumber(e.target.value)} placeholder="e.g. BR-123456789" className={inputCls} required />
+                        <input type="text" value={permitNumber} onChange={(e) => setPermitNumber(e.target.value)} placeholder="e.g. BR-123456789" className={`${inputCls} ${fieldErrors.permitNumber ? '!border-red-500/60' : ''}`} maxLength={50} required />
+                        {fieldErrors.permitNumber && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.permitNumber}</p>}
                       </div>
                       <div>
                         <label className={labelCls}>Property Address</label>
-                        <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} placeholder="e.g. 123 Katubedda Road, Moratuwa" className={inputCls} required />
+                        <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} placeholder="e.g. 123 Katubedda Road, Moratuwa" className={`${inputCls} ${fieldErrors.propertyAddress ? '!border-red-500/60' : ''}`} maxLength={500} required />
+                        {fieldErrors.propertyAddress && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.propertyAddress}</p>}
                       </div>
                     </>
                   )}
 
                   <div>
                     <label className={labelCls}>Password</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={inputCls} required />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={`${inputCls} ${fieldErrors.password ? '!border-red-500/60' : ''}`} maxLength={128} required />
+                    {fieldErrors.password && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.password}</p>}
+
+                    {/* Password Strength Meter */}
+                    {password.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {/* Strength bar */}
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= passwordStrength
+                                  ? passwordStrength <= 2
+                                    ? 'bg-red-500'
+                                    : passwordStrength <= 3
+                                      ? 'bg-orange-500'
+                                      : passwordStrength <= 4
+                                        ? 'bg-yellow-500'
+                                        : 'bg-emerald-500'
+                                  : 'bg-[#333]'
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <p className={`text-[11px] font-semibold tracking-wide ${passwordStrength <= 2 ? 'text-red-400' : passwordStrength <= 3 ? 'text-orange-400' : passwordStrength <= 4 ? 'text-yellow-400' : 'text-emerald-400'
+                          }`}>
+                          {passwordStrength <= 2 ? 'Weak' : passwordStrength <= 3 ? 'Fair' : passwordStrength <= 4 ? 'Good' : 'Strong'}
+                        </p>
+                        {/* Requirement checklist */}
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                          {[
+                            { key: 'length', label: 'Min 8 characters' },
+                            { key: 'uppercase', label: 'Uppercase letter' },
+                            { key: 'lowercase', label: 'Lowercase letter' },
+                            { key: 'number', label: 'Number' },
+                            { key: 'special', label: 'Special character' },
+                          ].map(({ key, label }) => (
+                            <div key={key} className="flex items-center gap-1.5">
+                              <span className={`text-[11px] ${passwordChecks[key] ? 'text-emerald-400' : 'text-white/25'}`}>
+                                {passwordChecks[key] ? '✓' : '○'}
+                              </span>
+                              <span className={`text-[11px] ${passwordChecks[key] ? 'text-emerald-400/80' : 'text-white/25'}`}>
+                                {label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className={labelCls}>Confirm Password</label>
-                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className={inputCls} required />
+                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className={`${inputCls} ${fieldErrors.confirmPassword ? '!border-red-500/60' : ''}`} maxLength={128} required />
+                    {fieldErrors.confirmPassword && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.confirmPassword}</p>}
+                    {confirmPassword.length > 0 && password === confirmPassword && (
+                      <p className="text-emerald-400 text-xs mt-1.5 font-medium">✓ Passwords match</p>
+                    )}
                   </div>
                 </div>
               )}

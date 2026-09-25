@@ -47,6 +47,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import DatabaseViewer from './pages/DatabaseViewer';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
+import Support from './pages/Support';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -93,6 +94,7 @@ function App() {
       <Route path="/community-forum/:id" element={<ProtectedRoute><ForumPost /></ProtectedRoute>} />
       <Route path="/maintenance-portal" element={<ProtectedRoute><MaintenancePortal /></ProtectedRoute>} />
       <Route path="/digital-lease" element={<ProtectedRoute><DigitalLease /></ProtectedRoute>} />
+      <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
 
       {/* ─── Owner-only Routes ─────────────────── */}
       <Route path="/owner-dashboard" element={<ProtectedRoute role="owner"><OwnerDashboard /></ProtectedRoute>} />

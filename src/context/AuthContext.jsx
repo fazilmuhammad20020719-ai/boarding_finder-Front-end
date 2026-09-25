@@ -45,6 +45,18 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
+
+    // ── Session Expiration UX ──
+    const handleSessionExpired = () => {
+      setToken(null);
+      setUser(null);
+      alert("Your session has expired or is invalid. Please log in again.");
+    };
+
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () => {
+      window.removeEventListener("auth:session-expired", handleSessionExpired);
+    };
   }, []);
 
   const register = async (userData) => {
