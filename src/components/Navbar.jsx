@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getNotifications } from '../services/api';
+import LogoIcon from './Logo';
 
 
 const Navbar = ({ likedCount = 0 }) => {
@@ -105,13 +106,10 @@ const Navbar = ({ likedCount = 0 }) => {
         <div className="flex justify-between items-center h-20">
 
           {/* Logo */}
-          {location.pathname !== '/' ? (
-            <Link to="/" className="flex items-center gap-3">
-              <span className="font-bold text-[22px] text-white tracking-tight">BoardingFinder<span className="text-[#FACC15]">.</span></span>
-            </Link>
-          ) : (
-            <div />
-          )}
+          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <LogoIcon className="w-11 h-11" />
+            <span className="font-bold text-[22px] text-white tracking-tight">BoardingFinder<span className="text-[#FACC15]">.</span></span>
+          </Link>
 
           {/* Desktop Navigation Links */}
           {isAuthenticated && (

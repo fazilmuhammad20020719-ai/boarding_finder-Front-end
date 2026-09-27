@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import bgImage from '../assets/Image/Image.png';
+import bgImage from 'C:/Users/A.S.F Nuha/.gemini/antigravity-ide/brain/171a4f1b-a721-46c5-8056-e2f868ece8ba/simple_boarding_house_1790525944006.png';
 import Navbar from '../components/Navbar';
 import { getStats } from '../services/api';
 
