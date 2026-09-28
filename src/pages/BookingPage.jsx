@@ -298,7 +298,7 @@ const BookingPage = () => {
                     <h2 className="text-[17px] font-extrabold text-white mb-8 tracking-tight">Payment Method</h2>
 
                     <div className="space-y-4 mb-8">
-                      {['GCash', 'PayMaya', 'Bank Transfer', 'Cash on Move-in'].map(method => (
+                      {['Cash on Move-in'].map(method => (
                         <div
                           key={method}
                           onClick={() => setPaymentMethod(method)}

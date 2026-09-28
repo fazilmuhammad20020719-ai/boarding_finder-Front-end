@@ -92,12 +92,7 @@ const Navbar = ({ likedCount = 0 }) => {
               <Link to="/map" className={getLinkClass('map')}>
                 Map View
               </Link>
-              <Link to="/roommate-matcher" className={getLinkClass('roommate-matcher')}>
-                Find a Roommate
-              </Link>
-              <Link to="/community-forum" className={getLinkClass('community-forum')}>
-                Community Forum
-              </Link>
+
               <Link to="/about" className={getLinkClass('about')}>
                 About us
               </Link>
@@ -182,13 +177,7 @@ const Navbar = ({ likedCount = 0 }) => {
                         >
                           Saved Homes
                         </Link>
-                        <Link
-                          to="/roommate-matcher"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          Find a Roommate
-                        </Link>
+
                         <Link
                           to="/my-bookings"
                           onClick={() => setIsProfileDropdownOpen(false)}
@@ -305,13 +294,7 @@ const Navbar = ({ likedCount = 0 }) => {
             >
               About us
             </Link>
-            <Link
-              to="/community-forum"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={getMobileLinkClass('community-forum')}
-            >
-              Community Forum
-            </Link>
+
             <Link
               to="/contact"
               onClick={() => setIsMobileMenuOpen(false)}
