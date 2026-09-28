@@ -33,7 +33,7 @@
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2"
   },
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3"
   }
