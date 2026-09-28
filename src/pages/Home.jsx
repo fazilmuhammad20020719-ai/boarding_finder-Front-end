@@ -210,7 +210,7 @@ const HomePage = () => {
             {["Anuradhapura", "Colombo", "Nugegoda", "Peradeniya"].map((chip) => (
               <button
                 key={chip}
-                onClick={() => navigate('/search')}
+                onClick={() => navigate(`/search?q=${encodeURIComponent(chip)}`)}
                 className="px-3.5 py-1.5 bg-white/15 hover:bg-white/25 border border-white/20 rounded-full text-white text-xs font-semibold transition-all cursor-pointer"
               >
                 {chip}
@@ -256,7 +256,7 @@ const HomePage = () => {
             {UNIVERSITIES.map((uni) => (
               <button
                 key={uni.name}
-                onClick={() => navigate('/search')}
+                onClick={() => navigate(`/search?q=${encodeURIComponent(uni.name)}`)}
                 className="flex flex-col items-center gap-3 p-4 bg-[#1A1A1A] rounded-2xl border border-[#2a2a2a] shadow-sm hover:border-[#FACC15]/50 hover:-translate-y-1 transition-all duration-200 cursor-pointer group"
               >
                 <div
@@ -321,10 +321,10 @@ const HomePage = () => {
                       LKR {listing.price.toLocaleString()}/mo
                     </span>
                     <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
-                        ? 'bg-[#ea4335] text-white'
-                        : listing.gender === 'male'
-                          ? 'bg-[#4285f4] text-white'
-                          : 'bg-[#845ef7] text-white'
+                      ? 'bg-[#ea4335] text-white'
+                      : listing.gender === 'male'
+                        ? 'bg-[#4285f4] text-white'
+                        : 'bg-[#845ef7] text-white'
                       }`}>
                       {listing.gender}
                     </span>
