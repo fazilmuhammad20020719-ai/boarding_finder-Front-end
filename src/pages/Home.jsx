@@ -92,14 +92,7 @@ const mapListing = (dbListing) => {
   };
 };
 
-const UNIVERSITIES = [
-  { name: "UOC", listings: 12, icon: "🎓", color: "#1952c4" },
-  { name: "UOP", listings: 9, icon: "🏛️", color: "#7c3aed" },
-  { name: "UOM", listings: 11, icon: "⚙️", color: "#059669" },
-  { name: "UOK", listings: 14, icon: "📚", color: "#d97706" },
-  { name: "USJ", listings: 34, icon: "💡", color: "#2563eb" },
-  { name: "UOR", listings: 8, icon: "🏫", color: "#e11d48" }
-];
+
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -157,80 +150,113 @@ const HomePage = () => {
     }
   };
 
+  const heroImages = [
+    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=2000",
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000",
+    "https://images.unsplash.com/photo-1502672260266-1c1de2d96674?auto=format&fit=crop&q=80&w=2000"
+  ];
+
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+
+  useEffect(() => {
+    // Preload images to ensure smooth initial transitions
+    heroImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    const timer = setInterval(() => {
+      setCurrentBgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const prevBgIndex = (currentBgIndex - 1 + heroImages.length) % heroImages.length;
+
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
       <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={likedCount} activeTab="home" />
 
       {/* ===== HERO SECTION ===== */}
-      <section className="relative bg-gradient-to-br from-[#111] via-[#1A1A1A] to-black border-b border-[#333] text-white overflow-hidden">
-        {/* Background decorative blobs */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-[#FACC15]/5 blur-3xl" />
+      <section className="relative flex flex-col min-h-screen border-b border-[#333] text-white overflow-hidden">
+        {/* Background Slideshow */}
+        <div className="absolute inset-0 z-0">
+          {heroImages.map((img, index) => {
+            let zIndex = 0;
+            let opacity = 'opacity-0';
+
+            if (index === currentBgIndex) {
+              zIndex = 2;
+              opacity = 'opacity-100';
+            } else if (index === prevBgIndex) {
+              zIndex = 1;
+              opacity = 'opacity-100'; // Keep previous image fully opaque underneath
+            }
+
+            return (
+              <div
+                key={index}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${opacity}`}
+                style={{ backgroundImage: `url('${img}')`, zIndex }}
+              />
+            );
+          })}
+          {/* Subtle Dark Overlay */}
+          <div className="absolute inset-0 bg-black/60 z-10" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-20">
+        <div className="relative z-10 flex-grow flex flex-col justify-center items-center text-center max-w-7xl w-full mx-auto px-6 md:px-12 pt-32 sm:pt-40 pb-12">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
             <span className="text-xs font-semibold text-white/90">{stats ? `${stats.activeListings}+` : "0+"} verified listings available</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-white max-w-2xl mb-4">
-            Find Your Home<br />Near Campus
+          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-white mb-6">
+            Find Your Home<br />Near Rajarata University
           </h1>
-          <p className="text-white/75 text-base sm:text-lg max-w-lg mb-8 font-normal leading-relaxed">
-            Discover verified boarding houses, dormitories, and studio units close to top universities in Sri Lanka.
+          <p className="text-white/90 text-base sm:text-lg max-w-2xl mb-12 font-normal leading-relaxed">
+            Discover comfortable and convenient boarding houses near Rajarata University, Mihintale - making it easier for students to find a place that feels like home.
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex items-center gap-3 bg-[#1A1A1A] border border-[#333] rounded-2xl shadow-2xl p-2 max-w-2xl mb-6">
-            <svg className="w-5 h-5 text-white/50 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by university, location, or boarding name..."
-              className="flex-grow py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px]"
-            />
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center justify-center gap-4 w-full">
+            <div className="flex items-center gap-3 bg-[#1A1A1A] border border-[#333] rounded-2xl shadow-xl p-2 w-full md:w-[480px]">
+              <svg className="w-5 h-5 text-white/50 ml-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by university, location, or boarding name..."
+                className="flex-grow py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-[15px]"
+              />
+            </div>
             <button
               type="submit"
-              className="px-6 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl text-sm transition-all flex-shrink-0 cursor-pointer border-none"
+              className="px-8 py-4 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-2xl text-[15px] transition-all cursor-pointer border-none shadow-lg hover:scale-105 w-full md:w-auto"
             >
               Search Now
             </button>
           </form>
 
-          {/* Popular filters chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-white/60 text-xs font-semibold mr-1">Popular:</span>
-            {["Anuradhapura", "Colombo", "Nugegoda", "Peradeniya"].map((chip) => (
-              <button
-                key={chip}
-                onClick={() => navigate(`/search?q=${encodeURIComponent(chip)}`)}
-                className="px-3.5 py-1.5 bg-white/15 hover:bg-white/25 border border-white/20 rounded-full text-white text-xs font-semibold transition-all cursor-pointer"
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
+
         </div>
 
         {/* Stats Row */}
-        <div className="relative z-10 bg-white/10 backdrop-blur-sm border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
+        <div className="relative z-10 bg-white/10 backdrop-blur-sm border-t border-white/10 w-full">
+          <div className="mx-auto px-6 md:px-12 py-6 flex flex-wrap justify-center items-center gap-8 sm:gap-16">
             {[
               { value: stats ? `${stats.activeListings}+` : "0+", label: "Active listings" },
               { value: stats ? `${stats.partnerUniversities}` : "0", label: "Partner universities" },
               { value: stats ? `${stats.studentsPlaced}+` : "0+", label: "Students placed" },
               { value: stats ? `${stats.avgRating}★` : "0.0★", label: "Average rating" },
             ].map((stat) => (
-              <div key={stat.label} className="text-center">
+              <div key={stat.label} className="text-center min-w-[120px]">
                 <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-white/60 text-xs mt-1 font-normal">{stat.label}</div>
+                <div className="text-white/70 text-[13px] mt-1 font-semibold uppercase tracking-wide">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -240,41 +266,10 @@ const HomePage = () => {
       {/* ===== MAIN CONTENT ===== */}
       <main className="flex-grow">
 
-        {/* ===== BROWSE BY UNIVERSITY ===== */}
-        <section className="max-w-7xl mx-auto px-6 md:px-12 py-14">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">Browse by University</h2>
-              <p className="text-white/50 text-sm mt-1 font-normal">Find boarding houses near your campus</p>
-            </div>
-            <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1">
-              View all →
-            </Link>
-          </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-            {UNIVERSITIES.map((uni) => (
-              <button
-                key={uni.name}
-                onClick={() => navigate(`/search?q=${encodeURIComponent(uni.name)}`)}
-                className="flex flex-col items-center gap-3 p-4 bg-[#1A1A1A] rounded-2xl border border-[#2a2a2a] shadow-sm hover:border-[#FACC15]/50 hover:-translate-y-1 transition-all duration-200 cursor-pointer group"
-              >
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm bg-[#111]"
-                >
-                  {uni.icon}
-                </div>
-                <div className="text-center">
-                  <div className="text-[13px] font-bold text-white group-hover:text-[#FACC15] transition-colors leading-tight">{uni.name}</div>
-                  <div className="text-[11px] text-white/40 mt-0.5">{uni.listings} listings</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
 
         {/* ===== FEATURED LISTINGS ===== */}
-        <section className="max-w-7xl mx-auto px-6 md:px-12 pb-14">
+        <section className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-14">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-white tracking-tight">Featured Listings</h2>
@@ -484,16 +479,57 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* ===== CTA SECTION ===== */}
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+          <div className="bg-[#111] border border-[#333] rounded-[28px] p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-md relative overflow-hidden">
+            <div className="absolute right-0 top-0 bottom-0 w-[40%] opacity-10 pointer-events-none hidden md:block">
+              <svg className="w-full h-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="20" width="60" height="160" rx="10" stroke="#FACC15" strokeWidth="6" />
+                <rect x="120" y="40" width="60" height="120" rx="10" stroke="#FACC15" strokeWidth="6" />
+                <circle cx="50" cy="50" r="10" fill="#FACC15" />
+                <circle cx="50" cy="90" r="10" fill="#FACC15" />
+                <circle cx="50" cy="130" r="10" fill="#FACC15" />
+                <circle cx="150" cy="70" r="10" fill="#FACC15" />
+                <circle cx="150" cy="110" r="10" fill="#FACC15" />
+              </svg>
+            </div>
+
+            <div className="max-w-xl text-left relative z-10">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+                Own a boarding house?
+              </h2>
+              <p className="text-white/80 text-sm sm:text-base leading-relaxed font-normal">
+                List your property and connect with thousands of students looking for a place near campus.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4 flex-shrink-0 relative z-10">
+              <button
+                onClick={() => navigate('/register')}
+                className="px-6 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-all shadow-sm text-sm cursor-pointer border-none font-medium"
+              >
+                List Your Property
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="px-6 py-3 border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-all text-sm cursor-pointer bg-[#1A1A1A] font-medium"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+
       </main>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-black text-white pt-16 pb-8 border-t border-[#333] mt-auto">
+      <footer className="bg-[#F8F7F2] text-black pt-16 pb-8 border-t border-gray-300 mt-auto">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
 
             <div className="lg:col-span-2 flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white shadow-sm border border-white/10">
+                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black shadow-sm border border-black/10">
                   <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
                     <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2" />
                     <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2" />
@@ -505,44 +541,44 @@ const HomePage = () => {
                 </div>
                 <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>
               </div>
-              <p className="text-[#cbd5e1] text-sm leading-relaxed max-w-sm font-normal">
+              <p className="text-black text-sm leading-relaxed max-w-sm font-normal">
                 Find verified boarding houses near universities across Sri Lanka.
               </p>
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">For Students</h4>
-              <ul className="flex flex-col gap-3 text-[#cbd5e1] text-sm font-normal">
-                <li><Link to="/search" className="hover:text-white transition-colors">Search Listings</Link></li>
-                <li><Link to="/map" className="hover:text-white transition-colors">Map View</Link></li>
-                <li><Link to="/saved-homes" className="hover:text-white transition-colors">Saved Listings</Link></li>
-                <li><Link to="/home" className="hover:text-white transition-colors">Reviews</Link></li>
+              <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-4">For Students</h4>
+              <ul className="flex flex-col gap-3 text-black text-sm font-normal">
+                <li><Link to="/search" className="hover:text-gray-600 transition-colors">Search Listings</Link></li>
+                <li><Link to="/map" className="hover:text-gray-600 transition-colors">Map View</Link></li>
+                <li><Link to="/saved-homes" className="hover:text-gray-600 transition-colors">Saved Listings</Link></li>
+                <li><Link to="/home" className="hover:text-gray-600 transition-colors">Reviews</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">For Owners</h4>
-              <ul className="flex flex-col gap-3 text-[#cbd5e1] text-sm font-normal">
-                <li><Link to="/register" className="hover:text-white transition-colors">List Property</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">Owner Dashboard</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">Support</Link></li>
+              <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-4">For Owners</h4>
+              <ul className="flex flex-col gap-3 text-black text-sm font-normal">
+                <li><Link to="/register" className="hover:text-gray-600 transition-colors">List Property</Link></li>
+                <li><Link to="/register" className="hover:text-gray-600 transition-colors">Owner Dashboard</Link></li>
+                <li><Link to="/register" className="hover:text-gray-600 transition-colors">Pricing</Link></li>
+                <li><Link to="/register" className="hover:text-gray-600 transition-colors">Support</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Company</h4>
-              <ul className="flex flex-col gap-3 text-[#cbd5e1] text-sm font-normal">
-                <li><Link to="/" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link to="/" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link to="/" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-4">Company</h4>
+              <ul className="flex flex-col gap-3 text-black text-sm font-normal">
+                <li><Link to="/" className="hover:text-gray-600 transition-colors">About Us</Link></li>
+                <li><Link to="/" className="hover:text-gray-600 transition-colors">Blog</Link></li>
+                <li><Link to="/" className="hover:text-gray-600 transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/" className="hover:text-gray-600 transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-[#333] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/40 text-xs font-normal">
+          <div className="border-t border-gray-300 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-black text-xs font-normal">
               © 2026 BoardingFinder. All rights reserved.
             </p>
           </div>
