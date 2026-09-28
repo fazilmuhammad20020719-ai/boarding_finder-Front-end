@@ -1,0 +1,35 @@
+# Owner Features: Incomplete Sections & Roadmap
+
+## 📅 Booking & Availability Management
+
+- [ ] **Calendar Management** (`CalendarManagement.jsx`)
+      Currently relies on mock data. Needs a backend table/logic to block out dates, manage seasonal pricing, and sync availability with student booking requests.
+
+- [ ] **Manage Reservations** (`ManageReservations.jsx`)
+      Needs full backend integration to allow owners to filter, export, and manage their incoming student bookings dynamically.
+
+
+## 💰 Financials & Monetization
+
+- [ ] **Earnings Dashboard** (`Earnings.jsx`)
+      Currently uses mock charts. Needs a secure backend ledger to track real payouts, deduct platform fees (5%), and generate tax/income reports.
+
+- [ ] **Promote Property** (`PromoteProperty.jsx`)
+      Needs a backend table (`promoted_listings`) and payment gateway integration (e.g., Stripe) to allow owners to pay to boost their listings to the top of search results.
+
+
+## 📝 Leases & Property Operations
+
+- [ ] **Digital Leases** (`DigitalLease.jsx`)
+      Needs a secure backend to allow owners to upload lease templates, auto-fill student details, and request digital signatures.
+
+- [ ] **Maintenance Portal** (`MaintenancePortal.jsx`)
+      Needs the owner-side of the ticketing system so owners can receive maintenance requests from students, assign repairmen, and update repair statuses.
+
+
+## 🏠 Listing Operations
+
+- [ ] **Advanced Manage Listings** (`ManageListings.jsx`)
+      While basic CRUD exists, advanced features (like bulk pausing listings, duplicating listings, or viewing per-listing analytics) are currently mocked and need backend logic.
+
+      completed

@@ -69,7 +69,7 @@ const ManageUsers = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a]">
+    <div className="min-h-screen bg-black font-sans antialiased text-white">
       <Navbar />
 
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -78,36 +78,36 @@ const ManageUsers = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">User Management</h1>
-            <p className="text-[#64748b] mt-1 text-[15px]">Ban accounts, resolve disputes, and assist locked-out users.</p>
+            <p className="text-white/60 mt-1 text-[15px]">Ban accounts, resolve disputes, and assist locked-out users.</p>
           </div>
           <Link to="/admin-dashboard">
-            <button className="px-5 py-2.5 bg-[#1e293b] hover:bg-[#0f172a] text-white font-semibold rounded-xl shadow-sm transition-all text-sm">
+            <button className="px-5 py-2.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-semibold rounded-xl shadow-sm transition-all text-sm cursor-pointer">
               Admin Dashboard
             </button>
           </Link>
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white p-4 rounded-[20px] shadow-sm border border-[#e2e8f0]/60 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div className="bg-[#1A1A1A] p-4 rounded-[20px] shadow-sm border border-[#333] mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
           <div className="relative w-full sm:w-96">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="w-5 h-5 text-[#94a3b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
             <input
               type="text"
               placeholder="Search users by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#f0f4f9] border-none rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#111] border border-[#333] rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 focus:border-[#FACC15]/30 transition-all"
             />
           </div>
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-sm font-semibold text-[#64748b]">Filter:</span>
+            <span className="text-sm font-semibold text-white/60">Filter:</span>
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="bg-[#f0f4f9] border-none rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 cursor-pointer"
+              className="bg-[#111] border border-[#333] text-white rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30 cursor-pointer"
             >
               <option value="All">All Roles</option>
               <option value="Tenant">Tenants</option>
@@ -117,11 +117,11 @@ const ManageUsers = () => {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-[24px] shadow-sm border border-[#e2e8f0]/60 overflow-hidden">
+        <div className="bg-[#1A1A1A] rounded-[24px] shadow-sm border border-[#333] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#f8fafc] text-[#475569] text-xs uppercase tracking-wider border-b border-[#e2e8f0]/60">
+                <tr className="bg-[#111] text-white/60 text-xs uppercase tracking-wider border-b border-[#333]">
                   <th className="px-6 py-4 font-semibold">User</th>
                   <th className="px-6 py-4 font-semibold">Role</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
@@ -129,61 +129,61 @@ const ManageUsers = () => {
                   <th className="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e2e8f0]/60">
+              <tbody className="divide-y divide-[#333]">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-[#64748b]">
+                    <td colSpan="5" className="px-6 py-12 text-center text-white/60">
                       No users found matching your search.
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={user.id} className="hover:bg-[#222] transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full border border-[#e2e8f0]" />
+                          <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full border border-[#333]" />
                           <div>
-                            <p className="text-sm font-bold text-[#0f172a]">{user.name}</p>
-                            <p className="text-xs text-[#64748b]">{user.email}</p>
+                            <p className="text-sm font-bold text-white">{user.name}</p>
+                            <p className="text-xs text-white/60">{user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${
-                          user.role === 'Owner' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                          user.role === 'Owner' ? 'bg-purple-500/20 text-purple-400' : 'bg-[#1952c4]/20 text-[#60a5fa]'
                         }`}>
                           {user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          user.status === 'Active' ? 'bg-green-100 text-green-700' : 
-                          user.status === 'Banned' ? 'bg-red-100 text-red-700' :
-                          'bg-orange-100 text-orange-700'
+                          user.status === 'Active' ? 'bg-[#10b981]/20 text-[#10b981]' : 
+                          user.status === 'Banned' ? 'bg-red-500/20 text-red-500' :
+                          'bg-amber-500/20 text-amber-500'
                         }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${
-                            user.status === 'Active' ? 'bg-green-500' : 
+                            user.status === 'Active' ? 'bg-[#10b981]' : 
                             user.status === 'Banned' ? 'bg-red-500' :
-                            'bg-orange-500'
+                            'bg-amber-500'
                           }`}></span>
                           {user.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-[#64748b]">
+                      <td className="px-6 py-4 text-sm text-white/60">
                         {user.joined}
                       </td>
                       <td className="px-6 py-4 text-right space-x-2">
                         {user.status === 'Banned' ? (
                           <button 
                             onClick={() => handleAction(user.id, 'Active')}
-                            className="px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 font-semibold rounded-lg text-xs transition-colors"
+                            className="px-3 py-1.5 bg-[#10b981]/20 hover:bg-[#10b981]/30 text-[#10b981] font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer"
                           >
                             Unban
                           </button>
                         ) : (
                           <button 
                             onClick={() => handleAction(user.id, 'Banned')}
-                            className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-semibold rounded-lg text-xs transition-colors"
+                            className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer"
                           >
                             Ban
                           </button>
@@ -192,13 +192,13 @@ const ManageUsers = () => {
                         {user.status === 'Locked' && (
                           <button 
                             onClick={() => handleAction(user.id, 'Active')}
-                            className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold rounded-lg text-xs transition-colors"
+                            className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer"
                           >
                             Unlock
                           </button>
                         )}
                         
-                        <button className="px-3 py-1.5 bg-[#f0f4f9] hover:bg-[#e2e8f0] text-[#475569] font-semibold rounded-lg text-xs transition-colors">
+                        <button className="px-3 py-1.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer">
                           Details
                         </button>
                       </td>
@@ -209,13 +209,13 @@ const ManageUsers = () => {
             </table>
           </div>
           
-          <div className="px-6 py-4 border-t border-[#e2e8f0]/60 flex justify-between items-center text-sm">
-            <span className="text-[#64748b]">Showing {filteredUsers.length} users</span>
+          <div className="px-6 py-4 border-t border-[#333] flex justify-between items-center text-sm">
+            <span className="text-white/60">Showing {filteredUsers.length} users</span>
             <div className="flex gap-1">
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748b] transition-colors" disabled>&lt;</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1952c4] text-white font-semibold">1</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#0f172a] font-medium transition-colors">2</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748b] transition-colors">&gt;</button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#222] text-white/60 transition-colors border-none cursor-pointer bg-transparent" disabled>&lt;</button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FACC15] text-black font-semibold border-none cursor-pointer">1</button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#222] text-white font-medium transition-colors border-none cursor-pointer bg-transparent">2</button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#222] text-white/60 transition-colors border-none cursor-pointer bg-transparent">&gt;</button>
             </div>
           </div>
         </div>

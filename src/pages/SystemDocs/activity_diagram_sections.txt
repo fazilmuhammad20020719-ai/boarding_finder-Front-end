@@ -1,0 +1,36 @@
+# Activity Diagrams Roadmap
+
+This document outlines the core workflows of the BoardingFinder system that require Activity Diagrams for documentation.
+
+### 1. 🔐 User Authentication & Onboarding
+*   **User Registration & Verification Flow:** From a user signing up (as a Student or Owner) to submitting verification documents (University ID vs. Property Permit) and waiting for Admin approval.
+*   **Authentication & Session Management:** The login process, JWT token generation, role-based routing (Admin vs Owner vs Student), and password resets.
+
+### 2. 🏠 Property Listing & Search
+*   **Listing Creation Lifecycle (Owner):** The process of an Owner adding a new boarding house, uploading images, setting prices, and managing its availability status.
+*   **Student Search & Filtering:** The flow of a student searching for properties, applying filters (price, amenities, distance), using the map view, and saving favorites.
+
+### 3. 📅 Booking & Digital Leasing
+*   **The Booking Flow:** A student requesting to book a listing -> the Owner reviewing the request -> accepting/rejecting -> the student being notified.
+*   **Digital Lease Signing:** The transition of a booking into an active lease, requiring the student to review terms and provide a digital signature.
+
+### 4. 💳 Payments & Transactions (PayHere Integration)
+*   **Checkout & Webhook Flow:** The student initiating a payment (rent or security deposit) -> redirection to PayHere -> the backend webhook verifying the cryptographically signed success response -> updating the booking/ledger status.
+
+### 5. 🤝 Social & Community
+*   **Roommate Matcher System:** The swipe/match logic (swiping left/right), handling mutual connections, and initializing a private chat between matched students.
+*   **Community Forum Moderation:** Creating a post, users interacting (upvoting/commenting), and the logic for flagging/moderating abusive content.
+
+### 6. 🛡️ Admin & Support Operations
+*   **Support Ticketing System:** A user creating a ticket -> the ticket appearing in the Admin Dashboard -> the Admin updating statuses (Open/In Progress/Resolved).
+*   **Review Moderation & Broadcasts:** The flow of Admins auditing user reviews for spam, managing global system settings, and broadcasting announcements.
+
+### 7. ✉️ User Profile & Notifications
+*   **Password Reset Flow:** User clicks "Forgot Password" -> receives an email with a secure token -> clicks the link to enter a new password -> backend updates credentials.
+*   **Real-time Notifications:** Event triggered (e.g. new message, booking update) -> backend sends WebSocket/Push event -> frontend displays toast/updates notification badge.
+
+### 8. ⭐ Reviews & Ratings
+*   **Post-Lease Review Flow:** Lease ends -> system prompts student for a review -> student submits rating (1-5 stars) and text -> owner views review on their profile -> owner replies.
+
+### 9. 🚩 Reporting & Safety
+*   **Report a Listing/User:** User identifies suspicious property/behavior -> clicks "Report" -> provides evidence/reason -> ticket created in Admin Dashboard -> Admin suspends or clears the reported entity.

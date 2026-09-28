@@ -1,0 +1,44 @@
+# Student Features: Incomplete Sections & Roadmap
+
+## 🏠 Property & Search Tools
+
+- [ ] **Saved Homes** (`SavedHomes.jsx`)
+      Currently uses mock data. Needs a `saved_listings` backend table so students can bookmark and save their favorite properties.
+
+- [ ] **Compare Listings** (`CompareListings.jsx`)
+      Relies on mock data. Needs backend logic to fetch specific saved listings side-by-side.
+
+- [ ] **Map View** (`MapView.jsx`) & **Neighborhood Details** (`NeighborhoodDetails.jsx`)
+      Needs real map coordinates and dynamic neighborhood safety/amenity data from the backend.
+
+- [ ] **Virtual Tours** (`VirtualTour.jsx`)
+      Currently a static placeholder. Needs backend support to store and serve 360/video tour links.
+
+
+## 🤝 Community & Connections
+
+- [ ] **Roommate Matcher** (`RoommateMatcher.jsx`)
+      (As discussed!) Needs a `roommate_profiles` table and matching algorithm to connect students.
+
+- [ ] **Community Forum** (`CommunityForum.jsx`)
+      Needs a full backend system (tables for posts, comments, upvotes) for students to ask questions and discuss.
+
+
+## 📝 Leases & Finances
+
+- [ ] **Digital Leases** (`DigitalLease.jsx`)
+      Needs a secure backend to generate, store, and digitally sign lease agreements between owners and students.
+
+- [ ] **Payment History** (`PaymentHistory.jsx`)
+      Needs backend integration (like Stripe) and a ledger to securely process and track rent payments.
+
+
+## 🛠️ Utilities & Support
+
+- [ ] **Maintenance Portal** (`MaintenancePortal.jsx`)
+      Needs a ticketing backend so students can report broken appliances to the owner and track the repair status.
+
+- [ ] **Notifications** (`Notifications.jsx`)
+      Currently uses mock notifications. Needs a real-time or database-backed notification system to alert students about booking updates or new messages.
+
+      completed

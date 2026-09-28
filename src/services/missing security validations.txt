@@ -1,0 +1,29 @@
+# Security Rules NOT Currently Followed by the System
+
+The following is the filtered list of strict security and validation rules that the BoardingFinder system currently **does NOT have** or is **failing to enforce**. 
+
+## 1. User Input & Registration ❌
+- **No Password Complexity:** Passwords can currently be a single letter. We are missing rules to enforce length (min 8) and complexity (uppercase, lowercase, number, special character).
+- **No Format Validation:** Email and phone numbers are not strictly validated against regex patterns to ensure they are real/valid formats.
+- **No Length Limits:** There are no Min/Max character limits on names, titles, or descriptions, making the DB vulnerable to overly large payloads.
+
+## 2. Authentication Defenses ❌
+- **No Rate Limiting:** The login and OTP endpoints lack rate limits (e.g., max 5 attempts/15 mins). Attackers can brute-force passwords without being blocked.
+- **No Session Expiration UX:** When a JWT expires, the frontend breaks silently instead of catching the `401 Unauthorized` error and logging the user out safely.
+
+## 3. Data Integrity & Sanitization ❌
+- **No Bounds Checking:** Financial inputs (Rent, Security Deposit, Duration) do not have strict minimums (e.g., $>0$) or maximums. Negative rents could theoretically be submitted.
+- **No HTML Sanitization:** User descriptions and forum posts are not sanitized with tools like `DOMPurify` before being saved, leaving the platform vulnerable to Stored XSS (Cross-Site Scripting) attacks if that data is rendered.
+
+## 4. File Upload Vulnerabilities ❌
+- **No Magic Byte Validation:** The system accepts files based purely on the `.jpg` extension. It does not check the file's internal signature (Magic Bytes), meaning a hacker could upload a `.php` script disguised as a `.jpg` to execute code on the server.
+- **No Filename Regeneration:** Uploaded files keep their original names. This leaves the system open to Directory Traversal attacks (e.g., naming a file `../../../etc/passwd`). We must rename all uploads to UUIDs.
+- **No Strict Size Limits:** Missing strict backend limits (e.g., 5MB max) to prevent server storage exhaustion.
+
+## 5. API & Database Logic ❌
+- **Duplicate Logic Missing:** The system fails to check if a student has already booked a listing before allowing them to book it again.
+- **No CSRF Protection:** Missing Cross-Site Request Forgery (CSRF) tokens for state-mutating requests (POST, PUT, DELETE).
+- **Search Query Risks:** Missing backend logic to strip SQL wildcard characters (`%`, `_`) from search inputs to prevent DoS attacks via intentionally slow database queries.
+
+
+completed   

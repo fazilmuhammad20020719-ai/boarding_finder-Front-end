@@ -1,0 +1,35 @@
+# Known Bugs & Structural Issues Report
+
+Based on a deep dive into the backend and frontend code, here are the critical bugs and structural issues that need to be addressed in the main user workflows:
+
+## 🚨 Critical Functional Bugs
+
+1. **Duplicate Booking Spam (Student Workflow)**
+   - **File**: `backend/controllers/bookings/createBooking.js`
+   - **Issue**: There is absolutely no validation to check if a student has already submitted a booking request for a specific listing. A user can spam the "Book Now" button and create dozens of duplicate pending requests, cluttering the owner's dashboard and the database.
+
+2. **Inconsistent File Upload Paths (Cross-Platform Issue)**
+   - **Files**: `AdminDashboard.jsx`, `OwnerListingForm.jsx`, `backend/routes/upload.js`
+   - **Issue**: The system has a deeply fragmented way of handling file uploads. Some uploads (like listing photos) go to Google Drive, while others (like Identity Verification docs) are saved locally and use complex string manipulations to fix backslashes (`\`) and broken paths. This will completely break in a production environment (like Heroku or AWS) where local storage is ephemeral.
+
+3. **Missing JWT Expiration Handling (Security/UX Issue)**
+   - **File**: `frontend/src/services/api.js`
+   - **Issue**: If a user's login session (JWT) expires while they are using the app, the frontend does not gracefully catch `401 Unauthorized` errors globally. Instead of redirecting them to the login page, network requests will just silently fail or crash the page.
+
+4. **Fake Review Exploitation (Spam Issue)**
+   - **File**: `backend/controllers/reviews.js` (or related)
+   - **Issue**: There is currently no database constraint or API validation ensuring that a student actually *stayed* at or successfully *booked* a property before leaving a review. Anyone can leave fake reviews on any property.
+
+## 🏗️ Structural & Missing Implementations
+
+5. **Password Reset is a Dead End**
+   - **Files**: `ForgotPassword.jsx`, `ResetPassword.jsx`
+   - **Issue**: The UI exists for users to reset their passwords, but there is no backend API to actually send a reset email or validate a reset token. Users who forget their passwords are permanently locked out of their accounts.
+
+6. **Search & Map are Disconnected from Reality**
+   - **Files**: `Search.jsx`, `MapView.jsx`
+   - **Issue**: The Search page still heavily relies on mock data or lacks proper filtering logic (like filtering by the new `approval_status`). Approved listings might not show up correctly on the map because geolocation (lat/lng) isn't being queried dynamically in the search endpoint.
+
+7. **Missing Cascading Deletes**
+   - **File**: `backend/database.sql`
+   - **Issue**: If an Owner's account is banned and deleted by the Admin, their `listings` might be deleted (due to `ON DELETE CASCADE`), but it's unclear if the associated `bookings`, `reviews`, and `messages` will properly cascade, potentially leaving orphaned data that crashes analytics queries.

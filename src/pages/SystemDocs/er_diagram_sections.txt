@@ -1,0 +1,45 @@
+# ER Diagrams Roadmap
+
+This document outlines the core Entity-Relationship (ER) models required for the BoardingFinder system, categorized by module.
+
+### 1. 🔐 User Authentication & Onboarding
+*   **Users:** Stores core account details (email, password hash, role).
+*   **VerificationDocuments:** Links to `Users` to store University IDs or Property Permits, along with approval status.
+
+### 2. 🏠 Property Listing & Search
+*   **Properties:** Details of the boarding house (title, price, location, owner_id).
+*   **Amenities:** Features associated with a property (Wi-Fi, AC, etc.).
+*   **PropertyImages:** URLs of uploaded photos linked to `Properties`.
+*   **Favorites:** A junction table linking `Users` (Students) to their saved `Properties`.
+
+### 3. 📅 Booking & Digital Leasing
+*   **Bookings:** Links a `Student`, a `Property`, and an `Owner`, with dates and status (Pending, Approved, Rejected).
+*   **Leases:** Extends approved bookings to store the digital signature, lease terms, and active lease status.
+
+### 4. 💳 Payments & Transactions (PayHere Integration)
+*   **Payments:** Records payment attempts (amount, PayHere order_id, status, cryptohash). Links to `Bookings` or `Leases`.
+*   **Invoices/Ledger:** Tracks recurring monthly rent payments and security deposits.
+
+### 5. 🤝 Social & Community
+*   **RoommateProfiles:** Extends `Users` with personal preferences, habits, and bio.
+*   **Swipes/Matches:** Records left/right swipes between two profiles, and flags mutual matches.
+*   **ChatRooms & Messages:** Facilitates private messaging between matched students.
+*   **ForumPosts & Comments:** Stores community questions/posts, upvotes, and threaded replies.
+
+### 6. 🛡️ Admin & Support Operations
+*   **SupportTickets:** Links a `User` to an issue description, assigned admin, and resolution status.
+*   **Broadcasts:** Stores system-wide announcements and their target audiences.
+*   **GlobalSettings:** Key-value pairs for system configurations managed by admins.
+
+### 7. ✉️ User Profile & Notifications
+*   **UserProfiles:** Stores profile pictures, phone numbers, and address details.
+*   **PasswordResetTokens:** Short-lived secure tokens linked to a `User` for account recovery.
+*   **Notifications:** Real-time event records (Push/In-App) linked to a `User`, with read/unread status.
+
+### 8. ⭐ Reviews & Ratings
+*   **Reviews:** Links a `Student` to a `Property`, storing a 1-5 star rating and text description.
+*   **OwnerReplies:** A response linked to a specific `Review` by the property owner.
+
+### 9. 🚩 Reporting & Safety
+*   **Reports:** Links a complaining `User` to a reported `Property` or `User`, storing the reason and evidence.
+*   **Penalties:** Records suspensions, warnings, or bans applied by an Admin to a `User` or `Property`.

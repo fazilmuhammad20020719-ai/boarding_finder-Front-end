@@ -38,7 +38,7 @@ const ReviewPage = () => {
   // Star SVG component
   const StarIcon = ({ filled, onMouseEnter, onMouseLeave, onClick }) => (
     <svg 
-      className={`w-10 h-10 sm:w-12 sm:h-12 cursor-pointer transition-all ${filled ? 'text-[#f59e0b]' : 'text-slate-200'}`}
+      className={`w-10 h-10 sm:w-12 sm:h-12 cursor-pointer transition-all ${filled ? 'text-[#FACC15]' : 'text-white/20'}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
@@ -51,7 +51,7 @@ const ReviewPage = () => {
 
   const SmallStar = ({ filled, onClick }) => (
     <svg 
-      className={`w-6 h-6 cursor-pointer transition-colors ${filled ? 'text-[#f59e0b]' : 'text-slate-200'}`}
+      className={`w-6 h-6 cursor-pointer transition-colors ${filled ? 'text-[#FACC15]' : 'text-white/20'}`}
       onClick={onClick}
       fill="currentColor" 
       viewBox="0 0 20 20"
@@ -61,24 +61,24 @@ const ReviewPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f4f7f9] font-sans antialiased text-[#0f172a] pb-20">
+    <div className="min-h-screen bg-black font-sans antialiased text-white pb-20">
       <Navbar isLoggedIn={true} onLogout={handleLogout} activeTab="" />
 
       <main className="max-w-3xl mx-auto px-6 md:px-8 py-12">
         
         <button 
           onClick={() => navigate('/my-bookings')}
-          className="flex items-center gap-2 text-slate-500 hover:text-[#1952c4] transition-colors font-semibold text-sm bg-transparent border-none cursor-pointer mb-6"
+          className="flex items-center gap-2 text-white/50 hover:text-[#FACC15] transition-colors font-semibold text-sm bg-transparent border-none cursor-pointer mb-6"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Back to Bookings
         </button>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-[#e2e8f0]/60 overflow-hidden">
+        <div className="bg-[#1A1A1A] rounded-3xl shadow-sm border border-[#333] overflow-hidden">
           
           {/* Header Summary */}
-          <div className="bg-[#1952c4] p-8 text-white flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
-            <div className="w-24 h-24 rounded-2xl bg-white/20 border border-white/30 p-1 flex-shrink-0">
+          <div className="bg-[#111] p-8 text-white flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+            <div className="w-24 h-24 rounded-2xl bg-black/50 border border-[#333] p-1 flex-shrink-0">
               <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200" alt="Property" className="w-full h-full object-cover rounded-xl" />
             </div>
             <div>
@@ -93,9 +93,9 @@ const ReviewPage = () => {
             <form onSubmit={handleSubmit}>
               
               {/* Overall Rating */}
-              <div className="flex flex-col items-center justify-center py-8 border-b border-[#e2e8f0]/60">
-                <h2 className="text-xl font-bold text-[#0f172a] mb-2">How was your stay overall?</h2>
-                <p className="text-slate-500 text-sm mb-6">Click a star to rate</p>
+              <div className="flex flex-col items-center justify-center py-8 border-b border-[#333]">
+                <h2 className="text-xl font-bold text-white mb-2">How was your stay overall?</h2>
+                <p className="text-white/50 text-sm mb-6">Click a star to rate</p>
                 <div className="flex gap-2 sm:gap-4">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <StarIcon 
@@ -110,8 +110,8 @@ const ReviewPage = () => {
               </div>
 
               {/* Specific Categories */}
-              <div className="py-8 border-b border-[#e2e8f0]/60">
-                <h3 className="font-bold text-[#0f172a] mb-6">Rate specific aspects (optional)</h3>
+              <div className="py-8 border-b border-[#333]">
+                <h3 className="font-bold text-white mb-6">Rate specific aspects (optional)</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
                   {[
@@ -121,7 +121,7 @@ const ReviewPage = () => {
                     { key: 'value', label: 'Value for Money' }
                   ].map((category) => (
                     <div key={category.key} className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-slate-700">{category.label}</span>
+                      <span className="text-sm font-semibold text-white/80">{category.label}</span>
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <SmallStar 
@@ -138,17 +138,17 @@ const ReviewPage = () => {
 
               {/* Written Review */}
               <div className="py-8">
-                <h3 className="font-bold text-[#0f172a] mb-2">Write your review</h3>
-                <p className="text-slate-500 text-sm mb-4">Share your experience with future students. What did you like? What could be improved?</p>
+                <h3 className="font-bold text-white mb-2">Write your review</h3>
+                <p className="text-white/50 text-sm mb-4">Share your experience with future students. What did you like? What could be improved?</p>
                 
                 <textarea 
                   rows="5"
                   placeholder="The room was very spacious and the owner was friendly..."
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1952c4]/20 transition-all bg-slate-50 focus:bg-white resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#333] focus:outline-none focus:ring-2 focus:ring-[#FACC15]/20 transition-all bg-[#111] focus:bg-black text-white resize-none"
                 ></textarea>
-                <div className="text-right text-xs font-semibold text-slate-400 mt-2">
+                <div className="text-right text-xs font-semibold text-white/40 mt-2">
                   {reviewText.length} characters
                 </div>
               </div>
@@ -158,7 +158,7 @@ const ReviewPage = () => {
                 <button 
                   type="button"
                   onClick={() => navigate('/my-bookings')}
-                  className="px-6 py-3 bg-white text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border border-[#e2e8f0]"
+                  className="px-6 py-3 bg-[#111] text-white/60 font-bold rounded-xl hover:bg-[#222] hover:text-white transition-colors cursor-pointer border border-[#333]"
                 >
                   Cancel
                 </button>
@@ -167,8 +167,8 @@ const ReviewPage = () => {
                   disabled={rating === 0}
                   className={`px-8 py-3 font-bold rounded-xl transition-colors border-none shadow-sm flex items-center gap-2 ${
                     rating === 0 
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                      : 'bg-[#1952c4] hover:bg-[#1546a8] text-white cursor-pointer'
+                      ? 'bg-[#333] text-white/30 cursor-not-allowed' 
+                      : 'bg-[#FACC15] hover:bg-[#EAB308] text-black cursor-pointer'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>

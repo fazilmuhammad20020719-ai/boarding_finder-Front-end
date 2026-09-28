@@ -1,0 +1,102 @@
+================================================================================
+  BOARDINGFINDER — DARK THEME UPDATE CHECKLIST
+  Theme: bg-black | Card: #1A1A1A | Accent: #FACC15 | Border: #2a2a2a / #333
+================================================================================
+
+LEGEND:
+  [✅] Already updated to new dark theme
+  [❌] Needs theme update
+  [⚙️ ] Admin/internal tool — lower priority
+  [🔒] Auth-flow page — high priority
+
+--------------------------------------------------------------------------------
+  AUTH FLOW PAGES (High Priority)
+--------------------------------------------------------------------------------
+  [✅] login.jsx                   — Dark theme done
+  [✅] Register.jsx                — Dark theme done
+  [✅] VerifyAccount.jsx           — Dark theme done
+  [✅] IdentityVerification.jsx    — Dark theme done
+  [✅] ForgotPassword.jsx          — Dark theme done
+  [✅] ResetPassword.jsx           — Dark theme done
+  [✅] PendingApproval.jsx         — Dark theme done
+
+--------------------------------------------------------------------------------
+  PUBLIC / LANDING PAGES (High Priority)
+--------------------------------------------------------------------------------
+  [✅] Landing.jsx                 — Dark theme done
+  [✅] Home.jsx                    — Dark theme done
+  [✅] Search.jsx                  — Dark theme done
+  [✅] PropertyDetails.jsx         — Dark theme done
+  [✅] AboutUs.jsx                 — Dark theme done
+  [✅] ContactUs.jsx               — Dark theme done
+  [✅] FAQ.jsx                     — Dark theme done
+  [✅] TermsPrivacy.jsx            — Dark theme done
+  [✅] NotFound.jsx                — Dark theme done
+  [✅] Unauthorized.jsx            — Dark theme done
+
+--------------------------------------------------------------------------------
+  STUDENT PAGES (Medium Priority)
+--------------------------------------------------------------------------------
+  [✅] MyBookings.jsx              — Dark theme done
+  [✅] SavedHomes.jsx              — Dark theme done
+  [✅] Profile.jsx                 — Dark theme done
+  [✅] Settings.jsx                — Dark theme done
+  [✅] Notifications.jsx           — Dark theme done
+  [✅] Messages.jsx                — Dark theme done
+  [✅] RoommateMatcher.jsx         — Dark theme done
+  [✅] CompareListings.jsx         — Dark theme done
+  [✅] ReviewPage.jsx              — Dark theme done
+  [✅] BookingPage.jsx             — Dark theme done
+  [✅] BookingConfirmation.jsx     — Dark theme done
+  [✅] MapView.jsx                 — Dark theme done
+  [✅] NeighborhoodDetails.jsx     — Dark theme done
+  [✅] VirtualTour.jsx             — Dark theme done
+  [✅] DigitalLease.jsx            — Dark theme done
+  [✅] CommunityForum.jsx          — Dark theme done
+  [✅] ForumPost.jsx               — Dark theme done
+
+--------------------------------------------------------------------------------
+  OWNER PAGES (Medium Priority)
+--------------------------------------------------------------------------------
+  [✅] OwnerDashboard.jsx          — Dark theme done
+  [✅] OwnerListingForm.jsx        — Dark theme done
+  [✅] MyListings.jsx              — Dark theme done
+  [✅] ManageListings.jsx          — Dark theme done
+  [✅] ManageReservations.jsx      — Dark theme done
+  [✅] CalendarManagement.jsx      — Dark theme done
+  [✅] Earnings.jsx                — Dark theme done
+  [✅] PaymentHistory.jsx          — Dark theme done
+  [✅] MaintenancePortal.jsx       — Dark theme done
+  [✅] PromoteProperty.jsx         — Dark theme done
+
+--------------------------------------------------------------------------------
+  ADMIN PAGES (Lower Priority)
+--------------------------------------------------------------------------------
+  [✅] AdminDashboard.jsx           — Dark theme done
+  [✅] ManageUsers.jsx              — Dark theme done
+  [✅] DatabaseViewer.jsx           — Dark theme done
+
+--------------------------------------------------------------------------------
+  COMPONENTS (Shared)
+--------------------------------------------------------------------------------
+  [✅] Navbar.jsx                  — Dark theme done
+  [✅] Footer.jsx                  — Dark theme done
+  [✅] ReportModal.jsx             — Dark theme done
+  [--] ProtectedRoute.jsx          — No UI, skip
+
+--------------------------------------------------------------------------------
+  SUMMARY
+--------------------------------------------------------------------------------
+  Total files:       48 pages + 4 components = 52 items
+  Already done:      52 (Landing, Auth, Student, Owner, Admin, Components)
+  Remaining:         0 items
+
+  Suggested order:
+    1. ForgotPassword, ResetPassword, PendingApproval  (auth flow)
+    2. Home, Search, PropertyDetails                   (core user journey)
+    3. Profile, Settings, Notifications, Messages      (user account)
+    4. OwnerDashboard, OwnerListingForm, MyListings    (owner flow)
+    5. Remaining student & public pages
+    6. Admin pages last
+
+================================================================================

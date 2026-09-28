@@ -39,7 +39,7 @@ const VirtualTour = () => {
           <div>
             <h1 className="text-xl font-bold tracking-wide">Sunset Apartment - Unit A</h1>
             <p className="text-white/60 text-sm flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-[#FACC15] animate-pulse"></span>
               Live 360° Tour
             </p>
           </div>
@@ -76,9 +76,9 @@ const VirtualTour = () => {
         {/* Mock Hotspot */}
         <div className="absolute top-1/3 left-1/4 group">
           <div className="w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-bounce">
-            <div className="w-3 h-3 bg-[#1952c4] rounded-full"></div>
+            <div className="w-3 h-3 bg-[#FACC15] rounded-full"></div>
           </div>
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-white text-[#0f172a] text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
             View Details
           </div>
         </div>
@@ -98,7 +98,7 @@ const VirtualTour = () => {
               onClick={() => setActiveRoom(room)}
               className={`relative flex-shrink-0 w-32 h-24 rounded-xl overflow-hidden transition-all duration-300 ${
                 activeRoom.id === room.id 
-                  ? 'ring-2 ring-white ring-offset-2 ring-offset-black scale-105' 
+                  ? 'ring-2 ring-[#FACC15] ring-offset-2 ring-offset-black scale-105' 
                   : 'opacity-60 hover:opacity-100'
               }`}
             >
