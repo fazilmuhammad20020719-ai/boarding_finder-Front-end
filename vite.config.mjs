@@ -6,4 +6,13 @@ export default defineConfig({
   plugins: [
     react(),
   ],
+  build: {
+    chunkSizeWarningLimit: 3000,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'INEFFECTIVE_DYNAMIC_IMPORT') return
+        warn(warning)
+      }
+    }
+  }
 })
