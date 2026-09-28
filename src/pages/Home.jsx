@@ -213,10 +213,10 @@ const HomePage = () => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-white mb-6">
-            Find Your Home<br />Near Rajarata University
+            Find Your Home<br />Near your universities
           </h1>
           <p className="text-white/90 text-base sm:text-lg max-w-2xl mb-12 font-normal leading-relaxed">
-            Discover comfortable and convenient boarding houses near Rajarata University, Mihintale - making it easier for students to find a place that feels like home.
+            Discover comfortable, verified boarding houses near universities across the country. Find a place that truly feels like your home away from home.
           </p>
 
           {/* Search Bar */}

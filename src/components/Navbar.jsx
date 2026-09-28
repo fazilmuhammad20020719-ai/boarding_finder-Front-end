@@ -77,6 +77,7 @@ const Navbar = ({ likedCount = 0 }) => {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
+            <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md" />
             <span className="font-bold text-[22px] text-white tracking-tight">BoardingFinder<span className="text-[#FACC15]">.</span></span>
           </Link>
 
