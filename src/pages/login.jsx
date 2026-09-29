@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 
 const LoginPage = () => {
-  const [role, setRole] = useState('student'); // 'student', 'owner', 'admin'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,25 +42,7 @@ const LoginPage = () => {
     }
   };
 
-  const roleConfig = {
-    student: {
-      title: 'Welcome back',
-      subtitle: 'Sign in to your account to continue',
-      btnLabel: 'Sign In as Student',
-    },
-    owner: {
-      title: 'Owner Portal',
-      subtitle: 'Manage your listings and boarding houses',
-      btnLabel: 'Sign In as Property Owner',
-    },
-    admin: {
-      title: 'Admin Portal',
-      subtitle: 'Access the administrative control center',
-      btnLabel: 'Sign In as Administrator',
-    },
-  };
-
-  const current = roleConfig[role];
+  // Removed roleConfig
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans antialiased">
@@ -76,15 +57,15 @@ const LoginPage = () => {
             <div className="inline-flex items-center gap-2 bg-[#1A1A1A] border border-[#333] rounded-full px-4 py-1.5 mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FACC15]" />
               <span className="text-xs font-semibold text-white/70 tracking-widest uppercase">
-                {role} login
+                Account login
               </span>
             </div>
 
             <h2 className="text-[32px] font-bold text-white tracking-tight">
-              {current.title}
+              Welcome back
             </h2>
             <p className="text-white/50 text-[15px] mt-2 font-normal">
-              {current.subtitle}
+              Sign in to your account to continue
             </p>
           </div>
 
@@ -171,7 +152,7 @@ const LoginPage = () => {
                     Signing In...
                   </>
                 ) : (
-                  current.btnLabel
+                  'Sign In'
                 )}
               </button>
             </form>
