@@ -175,33 +175,6 @@ const LoginPage = () => {
                 )}
               </button>
             </form>
-
-            {/* ===== ROLE SWITCHER ===== */}
-            <div className="mt-5 pt-5 border-t border-[#2a2a2a]">
-              <p className="text-[11px] font-semibold text-white/30 tracking-widest uppercase text-center mb-3">
-                Switch Role
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { key: 'student', label: 'Student' },
-                  { key: 'owner', label: 'Owner' },
-                  { key: 'admin', label: 'Admin' },
-                ].map(({ key, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => { setRole(key); setError(''); }}
-                    className={`py-2.5 px-3 rounded-[12px] flex items-center justify-center text-xs font-semibold transition-all cursor-pointer border ${
-                      role === key
-                        ? 'bg-[#FACC15]/10 border-[#FACC15]/50 text-[#FACC15]'
-                        : 'bg-transparent border-[#333] text-white/40 hover:border-[#444] hover:text-white/60'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* ===== REGISTRATION FOOTER ===== */}

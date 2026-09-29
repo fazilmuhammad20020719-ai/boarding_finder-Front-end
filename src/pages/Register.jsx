@@ -17,10 +17,7 @@ const RegisterPage = () => {
   const [studentId, setStudentId] = useState('');
 
   // Step 2 Fields (Property Owner)
-  const [propertyName, setPropertyName] = useState('');
-  const [propertyType, setPropertyType] = useState('dormitory');
   const [permitNumber, setPermitNumber] = useState('');
-  const [propertyAddress, setPropertyAddress] = useState('');
 
   // Common Fields
   const [password, setPassword] = useState('');
@@ -61,20 +58,15 @@ const RegisterPage = () => {
   const validateStep2 = () => {
     const errs = {};
     if (role === 'student') {
-      if (!university || university.trim().length < 2) errs.university = 'University must be at least 2 characters.';
-      else if (university.trim().length > 200) errs.university = 'University must not exceed 200 characters.';
+      if (!university) errs.university = 'Please select a university.';
       if (!course || course.trim().length < 2) errs.course = 'Course must be at least 2 characters.';
       else if (course.trim().length > 200) errs.course = 'Course must not exceed 200 characters.';
       if (!studentId || studentId.trim().length < 2) errs.studentId = 'Student ID must be at least 2 characters.';
       else if (studentId.trim().length > 50) errs.studentId = 'Student ID must not exceed 50 characters.';
     }
     if (role === 'owner') {
-      if (!propertyName || propertyName.trim().length < 2) errs.propertyName = 'Property name must be at least 2 characters.';
-      else if (propertyName.trim().length > 200) errs.propertyName = 'Property name must not exceed 200 characters.';
       if (!permitNumber || permitNumber.trim().length < 2) errs.permitNumber = 'Permit number must be at least 2 characters.';
       else if (permitNumber.trim().length > 50) errs.permitNumber = 'Permit number must not exceed 50 characters.';
-      if (!propertyAddress || propertyAddress.trim().length < 5) errs.propertyAddress = 'Address must be at least 5 characters.';
-      else if (propertyAddress.trim().length > 500) errs.propertyAddress = 'Address must not exceed 500 characters.';
     }
     if (!password) errs.password = 'Password is required.';
     else if (passwordStrength < 5) errs.password = 'Password does not meet all complexity requirements.';
@@ -114,7 +106,7 @@ const RegisterPage = () => {
         const payload = {
           name, email, phone, password, role,
           ...(role === 'student' && { university, course, studentId }),
-          ...(role === 'owner' && { propertyName, propertyType, permitNumber, propertyAddress }),
+          ...(role === 'owner' && { permitNumber }),
         };
 
         await register(payload);
@@ -210,11 +202,10 @@ const RegisterPage = () => {
                           key={key}
                           type="button"
                           onClick={() => setRole(key)}
-                          className={`py-3 px-5 rounded-[12px] border font-semibold flex items-center justify-center text-[14px] transition-all duration-200 cursor-pointer ${
-                            role === key
-                              ? 'border-[#FACC15]/50 bg-[#FACC15]/10 text-[#FACC15]'
-                              : 'border-[#333] bg-transparent text-white/40 hover:border-[#444] hover:text-white/60'
-                          }`}
+                          className={`py-3 px-5 rounded-[12px] border font-semibold flex items-center justify-center text-[14px] transition-all duration-200 cursor-pointer ${role === key
+                            ? 'border-[#FACC15]/50 bg-[#FACC15]/10 text-[#FACC15]'
+                            : 'border-[#333] bg-transparent text-white/40 hover:border-[#444] hover:text-white/60'
+                            }`}
                         >
                           {label}
                         </button>
@@ -246,7 +237,65 @@ const RegisterPage = () => {
                     <>
                       <div>
                         <label className={labelCls}>University</label>
-                        <input type="text" value={university} onChange={(e) => setUniversity(e.target.value)} placeholder="University of Moratuwa" className={`${inputCls} ${fieldErrors.university ? '!border-red-500/60' : ''}`} maxLength={200} required />
+                        <div className="relative">
+                          <select
+                            value={university}
+                            onChange={(e) => setUniversity(e.target.value)}
+                            className={`${inputCls} appearance-none pr-10`}
+                            style={{ colorScheme: 'dark' }}
+                            required
+                          >
+                            <option value="">-- Select University --</option>
+                            <optgroup label="National Universities">
+                              <option value="University of Colombo">University of Colombo</option>
+                              <option value="University of Peradeniya">University of Peradeniya</option>
+                              <option value="University of Sri Jayewardenepura">University of Sri Jayewardenepura</option>
+                              <option value="University of Kelaniya">University of Kelaniya</option>
+                              <option value="University of Moratuwa">University of Moratuwa</option>
+                              <option value="University of Jaffna">University of Jaffna</option>
+                              <option value="University of Ruhuna">University of Ruhuna</option>
+                              <option value="Eastern University, Sri Lanka">Eastern University, Sri Lanka</option>
+                              <option value="South Eastern University of Sri Lanka">South Eastern University of Sri Lanka</option>
+                              <option value="Rajarata University of Sri Lanka">Rajarata University of Sri Lanka</option>
+                              <option value="Sabaragamuwa University of Sri Lanka">Sabaragamuwa University of Sri Lanka</option>
+                              <option value="Wayamba University of Sri Lanka">Wayamba University of Sri Lanka</option>
+                              <option value="Uva Wellassa University">Uva Wellassa University</option>
+                              <option value="University of the Visual & Performing Arts">University of the Visual & Performing Arts</option>
+                              <option value="Open University of Sri Lanka">Open University of Sri Lanka</option>
+                              <option value="University of Vavuniya">University of Vavuniya</option>
+                              <option value="Trincomalee Campus (Eastern University)">Trincomalee Campus (Eastern University)</option>
+                            </optgroup>
+                            <optgroup label="Technical & Specialized">
+                              <option value="Sri Lanka Institute of Information Technology (SLIIT)">Sri Lanka Institute of Information Technology (SLIIT)</option>
+                              <option value="National Institute of Business Management (NIBM)">National Institute of Business Management (NIBM)</option>
+                              <option value="Institute of Technology, University of Moratuwa (ITUM)">Institute of Technology, University of Moratuwa (ITUM)</option>
+                              <option value="Sri Lanka Technological Campus (SLTC)">Sri Lanka Technological Campus (SLTC)</option>
+                              <option value="Informatics Institute of Technology (IIT)">Informatics Institute of Technology (IIT)</option>
+                              <option value="CINEC Campus">CINEC Campus</option>
+                              <option value="NSBM Green University">NSBM Green University</option>
+                              <option value="Kotelawala Defence University (KDU)">Kotelawala Defence University (KDU)</option>
+                              <option value="Aquinas University College">Aquinas University College</option>
+                              <option value="Buddhist and Pali University of Sri Lanka">Buddhist and Pali University of Sri Lanka</option>
+                              <option value="Gampaha Wickramarachchi University of Indigenous Medicine">Gampaha Wickramarachchi University of Indigenous Medicine</option>
+                              <option value="Sri Lanka Institute of Advanced Technological Education (SLIATE)">Sri Lanka Institute of Advanced Technological Education (SLIATE)</option>
+                              <option value="University of Vocational Technology (UNIVOTEC)">University of Vocational Technology (UNIVOTEC)</option>
+                            </optgroup>
+                            <optgroup label="Medical & Health">
+                              <option value="Postgraduate Institute of Medicine (PGIM)">Postgraduate Institute of Medicine (PGIM)</option>
+                              <option value="Faculty of Medicine, University of Colombo">Faculty of Medicine, University of Colombo</option>
+                              <option value="Faculty of Medicine, University of Kelaniya">Faculty of Medicine, University of Kelaniya</option>
+                              <option value="Faculty of Medicine, University of Peradeniya">Faculty of Medicine, University of Peradeniya</option>
+                              <option value="Faculty of Medicine, University of Jaffna">Faculty of Medicine, University of Jaffna</option>
+                              <option value="Faculty of Medicine, University of Ruhuna">Faculty of Medicine, University of Ruhuna</option>
+                              <option value="Faculty of Allied Health Sciences, University of Sri Jayewardenepura">Faculty of Allied Health Sciences, University of Sri Jayewardenepura</option>
+                            </optgroup>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
+                            <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
+                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                          </div>
+                        </div>
                         {fieldErrors.university && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.university}</p>}
                       </div>
                       <div>
@@ -263,42 +312,9 @@ const RegisterPage = () => {
                   ) : (
                     <>
                       <div>
-                        <label className={labelCls}>Property Name</label>
-                        <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)} placeholder="e.g. Moratuwa Student Residency" className={`${inputCls} ${fieldErrors.propertyName ? '!border-red-500/60' : ''}`} maxLength={200} required />
-                        {fieldErrors.propertyName && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.propertyName}</p>}
-                      </div>
-                      <div>
-                        <label className={labelCls}>Property Type</label>
-                        <div className="relative">
-                          <select
-                            value={propertyType}
-                            onChange={(e) => setPropertyType(e.target.value)}
-                            className={`${inputCls} appearance-none pr-10`}
-                            style={{ colorScheme: 'dark' }}
-                            required
-                          >
-                            <option value="dormitory">Dormitory</option>
-                            <option value="apartment">Apartment</option>
-                            <option value="bedspace">Bedspace</option>
-                            <option value="room_for_rent">Room for Rent</option>
-                            <option value="house">Single House</option>
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
-                            <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
-                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
                         <label className={labelCls}>Business Registration / TIN</label>
                         <input type="text" value={permitNumber} onChange={(e) => setPermitNumber(e.target.value)} placeholder="e.g. BR-123456789" className={`${inputCls} ${fieldErrors.permitNumber ? '!border-red-500/60' : ''}`} maxLength={50} required />
                         {fieldErrors.permitNumber && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.permitNumber}</p>}
-                      </div>
-                      <div>
-                        <label className={labelCls}>Property Address</label>
-                        <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} placeholder="e.g. 123 Katubedda Road, Moratuwa" className={`${inputCls} ${fieldErrors.propertyAddress ? '!border-red-500/60' : ''}`} maxLength={500} required />
-                        {fieldErrors.propertyAddress && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.propertyAddress}</p>}
                       </div>
                     </>
                   )}
@@ -316,23 +332,21 @@ const RegisterPage = () => {
                           {[1, 2, 3, 4, 5].map((i) => (
                             <div
                               key={i}
-                              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                                i <= passwordStrength
-                                  ? passwordStrength <= 2
-                                    ? 'bg-red-500'
-                                    : passwordStrength <= 3
+                              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= passwordStrength
+                                ? passwordStrength <= 2
+                                  ? 'bg-red-500'
+                                  : passwordStrength <= 3
                                     ? 'bg-orange-500'
                                     : passwordStrength <= 4
-                                    ? 'bg-yellow-500'
-                                    : 'bg-emerald-500'
-                                  : 'bg-[#333]'
-                              }`}
+                                      ? 'bg-yellow-500'
+                                      : 'bg-emerald-500'
+                                : 'bg-[#333]'
+                                }`}
                             />
                           ))}
                         </div>
-                        <p className={`text-[11px] font-semibold tracking-wide ${
-                          passwordStrength <= 2 ? 'text-red-400' : passwordStrength <= 3 ? 'text-orange-400' : passwordStrength <= 4 ? 'text-yellow-400' : 'text-emerald-400'
-                        }`}>
+                        <p className={`text-[11px] font-semibold tracking-wide ${passwordStrength <= 2 ? 'text-red-400' : passwordStrength <= 3 ? 'text-orange-400' : passwordStrength <= 4 ? 'text-yellow-400' : 'text-emerald-400'
+                          }`}>
                           {passwordStrength <= 2 ? 'Weak' : passwordStrength <= 3 ? 'Fair' : passwordStrength <= 4 ? 'Good' : 'Strong'}
                         </p>
                         {/* Requirement checklist */}
