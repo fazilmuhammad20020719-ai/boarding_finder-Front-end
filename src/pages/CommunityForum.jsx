@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { Link, useNavigate } from 'react-router-dom';
-import { getForumPosts, createForumPost } from '../services/api';
+import { getForumPosts, createForumPost, getAccessToken } from '../services/api';
 
 const CATEGORIES = ["All Topics", "General Discussion", "Neighborhood Advice", "Local Recommendations", "Moving Tips"];
 
@@ -33,7 +33,7 @@ const CommunityForum = () => {
   const handleCreatePost = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
       if (!token) {
         alert("Please log in to create a post");
         navigate("/login");

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, duplicateListing, getListingAnalytics } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, duplicateListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
+import { subscribe } from '../services/realtime';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -62,17 +63,7 @@ const OwnerDashboard = () => {
     if (activeTab !== 'listings') return;
     const fetchListings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const response = await fetch(`${API_URL}/listings/owner/mine`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('Failed to fetch listings');
-        const data = await response.json();
+        const data = await getMyListings();
         const parsedListings = (data.listings || []).map(listing => {
           let rawImages = listing.image_urls || listing.images;
           let parsedImages = [];
@@ -124,14 +115,7 @@ const OwnerDashboard = () => {
     const fetchBookings = async () => {
       setBookingsLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        if (!token) return navigate('/login');
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const response = await fetch(`${API_URL}/bookings/owner-bookings`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('Failed to fetch bookings');
-        const data = await response.json();
+        const data = await getOwnerBookings();
         setOwnerBookings(data.bookings || []);
       } catch (err) {
         console.error(err);
@@ -257,18 +241,7 @@ const OwnerDashboard = () => {
 
   const handleUpdateBookingStatus = async (bookingId, status) => {
     try {
-      const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const res = await fetch(`${API_URL}/bookings/${bookingId}/status`, {
-        method: "PUT",
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': 'boarding-finder-csrf-protection'
-        },
-        body: JSON.stringify({ status })
-      });
-      if (!res.ok) throw new Error("Failed to update status");
+      await updateBookingStatus(bookingId, status);
 
       setOwnerBookings(prev => prev.map(b =>
         b.booking_id === bookingId ? { ...b, status } : b
@@ -356,16 +329,26 @@ const OwnerDashboard = () => {
   useEffect(() => {
     if (activeTab === 'messages') {
       fetchConversations();
-      const interval = setInterval(fetchConversations, 5000);
-      return () => clearInterval(interval);
+      const off = subscribe('message', fetchConversations);
+      const interval = setInterval(fetchConversations, 30000); // fallback if the socket drops
+      return () => {
+        clearInterval(interval);
+        off();
+      };
     }
   }, [activeTab, user]);
 
   useEffect(() => {
     if (activeTab === 'messages' && activeChatId) {
       fetchMessages(activeChatId);
-      const interval = setInterval(() => fetchMessages(activeChatId), 5000);
-      return () => clearInterval(interval);
+      const off = subscribe('message', (event) => {
+        if (event.conversation_id === activeChatId) fetchMessages(activeChatId);
+      });
+      const interval = setInterval(() => fetchMessages(activeChatId), 30000);
+      return () => {
+        clearInterval(interval);
+        off();
+      };
     }
   }, [activeChatId, activeTab, user]);
 

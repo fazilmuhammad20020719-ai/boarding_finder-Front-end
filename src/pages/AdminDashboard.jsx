@@ -8,12 +8,52 @@ import {
   getAllAdminBookings, updateBookingStatusAdmin,
   getAllAdminReviews, updateReviewStatusAdmin, deleteReviewAdmin,
   getAllAdminTickets, updateTicketStatusAdmin, broadcastAnnouncement,
-  getPlatformSettings, updatePlatformSettings
+  getPlatformSettings, updatePlatformSettings, fetchVerificationDoc
 } from '../services/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-// We need to resolve image urls for verification docs.
-const BASE_URL = API_URL.replace('/api', '');
+// Identity documents are private: fetch them with the admin's token and
+// display them through a short-lived blob URL.
+const VerificationDocPreview = ({ userId, index }) => {
+  const [doc, setDoc] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let objectUrl;
+    fetchVerificationDoc(userId, index)
+      .then((result) => {
+        objectUrl = result.url;
+        setDoc(result);
+      })
+      .catch((err) => setError(err.message));
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [userId, index]);
+
+  return (
+    <div className="border border-[#333] rounded-xl overflow-hidden bg-[#111] flex flex-col">
+      <div className="bg-[#222] py-2 px-4 text-xs font-bold text-white/60 uppercase tracking-wider">
+        Document {index + 1}
+      </div>
+      <div className="p-4 flex-grow flex items-center justify-center min-h-[300px]">
+        {error ? (
+          <span className="text-red-400 text-sm">{error}</span>
+        ) : !doc ? (
+          <span className="text-white/40 text-sm">Loading...</span>
+        ) : doc.isPdf ? (
+          <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 text-[#FACC15] hover:underline">
+            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span className="font-semibold">View Document</span>
+          </a>
+        ) : (
+          <a href={doc.url} target="_blank" rel="noopener noreferrer">
+            <img src={doc.url} alt={`Doc ${index + 1}`} className="max-w-full max-h-[400px] object-contain rounded shadow-sm hover:opacity-90 transition-opacity" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -425,46 +465,9 @@ const AdminDashboard = () => {
             <div className="md:col-span-2 bg-[#1A1A1A] border border-[#333] p-5 rounded-2xl shadow-sm">
               <h4 className="font-bold text-white mb-4 border-b border-[#333] pb-2">Submitted Documents</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {selectedUser.verification_docs?.map((doc, idx) => {
-                  let fileUrl = doc;
-                  let isPdf = doc.toLowerCase().endsWith('.pdf');
-
-                  if (doc.includes('drive.google.com/uc?id=') && !isPdf) {
-                    fileUrl = doc.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
-                  } else if (doc.includes('drive.google.com/open?id=') && !isPdf) {
-                    const fileId = doc.split('id=')[1];
-                    fileUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-                  } else if (!doc.startsWith('http')) {
-                    // Fallback for legacy local files
-                    const normalizedDoc = doc.replace(/\\/g, '/');
-                    const cleanUrl = normalizedDoc.startsWith('/') ? normalizedDoc.substring(1) : normalizedDoc;
-                    fileUrl = `${BASE_URL}/${cleanUrl}`;
-                  }
-
-                  if (doc.includes('drive.google.com/file/d/')) {
-                    isPdf = true;
-                  }
-
-                  return (
-                    <div key={idx} className="border border-[#333] rounded-xl overflow-hidden bg-[#111] flex flex-col">
-                      <div className="bg-[#222] py-2 px-4 text-xs font-bold text-white/60 uppercase tracking-wider">
-                        Document {idx + 1}
-                      </div>
-                      <div className="p-4 flex-grow flex items-center justify-center min-h-[300px]">
-                        {isPdf ? (
-                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-3 text-[#FACC15] hover:underline">
-                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <span className="font-semibold">View Document</span>
-                          </a>
-                        ) : (
-                          <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                            <img src={fileUrl} alt={`Doc ${idx + 1}`} className="max-w-full max-h-[400px] object-contain rounded shadow-sm hover:opacity-90 transition-opacity" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {selectedUser.verification_docs?.map((_, idx) => (
+                  <VerificationDocPreview key={`${selectedUser.id}-${idx}`} userId={selectedUser.id} index={idx} />
+                ))}
                 {(!selectedUser.verification_docs || selectedUser.verification_docs.length === 0) && (
                   <div className="col-span-2 text-center text-white/40 py-8 italic">No documents uploaded.</div>
                 )}

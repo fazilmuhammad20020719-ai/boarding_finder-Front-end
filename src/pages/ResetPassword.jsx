@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { resetPassword } from '../services/api';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
 
   // Password complexity checks (same rules as registration)
   const passwordChecks = {
@@ -19,8 +23,12 @@ const ResetPassword = () => {
   };
   const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
 
-  const handleReset = (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
+    if (!token) {
+      setError("This reset link is invalid. Please request a new one.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords don't match");
       return;
@@ -30,7 +38,15 @@ const ResetPassword = () => {
       return;
     }
     setError('');
-    setSubmitted(true);
+    setSaving(true);
+    try {
+      await resetPassword(token, password);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || 'Failed to reset password');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -151,9 +167,10 @@ const ResetPassword = () => {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full py-4 mt-6 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-[14px] transition-colors text-[15px] tracking-wide shadow-sm"
+                    disabled={saving}
+                    className="w-full disabled:opacity-60 py-4 mt-6 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-[14px] transition-colors text-[15px] tracking-wide shadow-sm"
                   >
-                    Reset Password
+                    {saving ? 'Saving...' : 'Reset Password'}
                   </button>
                 </form>
               </>

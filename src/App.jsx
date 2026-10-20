@@ -37,6 +37,7 @@ import FAQ from './pages/FAQ';
 import TermsPrivacy from './pages/TermsPrivacy';
 import CompareListings from './pages/CompareListings';
 import PaymentHistory from './pages/PaymentHistory';
+import PaymentResult from './pages/PaymentResult';
 import Earnings from './pages/Earnings';
 import ManageReservations from './pages/ManageReservations';
 import ManageListings from './pages/ManageListings';
@@ -91,6 +92,8 @@ function App() {
       <Route path="/write-review" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
       <Route path="/compare" element={<ProtectedRoute><CompareListings /></ProtectedRoute>} />
       <Route path="/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
+      <Route path="/payment/success" element={<ProtectedRoute><PaymentResult /></ProtectedRoute>} />
+      <Route path="/payment/cancel" element={<ProtectedRoute><PaymentResult cancelled /></ProtectedRoute>} />
       <Route path="/virtual-tour/:id" element={<ProtectedRoute><VirtualTour /></ProtectedRoute>} />
       <Route path="/neighborhood/:id" element={<ProtectedRoute><NeighborhoodDetails /></ProtectedRoute>} />
       <Route path="/roommate-matcher" element={<ProtectedRoute><RoommateMatcher /></ProtectedRoute>} />
@@ -109,12 +112,12 @@ function App() {
       <Route path="/promote" element={<ProtectedRoute role="owner"><PromoteProperty /></ProtectedRoute>} />
       <Route path="/earnings" element={<ProtectedRoute role="owner"><Earnings /></ProtectedRoute>} />
       <Route path="/manage-reservations" element={<ProtectedRoute role="owner"><ManageReservations /></ProtectedRoute>} />
-      <Route path="/manage-listings" element={<ProtectedRoute role="owner"><ManageListings /></ProtectedRoute>} />
 
       {/* ─── Admin-only Routes ─────────────────── */}
       <Route path="/admin-dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/manage-users" element={<ProtectedRoute role="admin"><ManageUsers /></ProtectedRoute>} />
-      <Route path="/db" element={<DatabaseViewer />} />
+      <Route path="/manage-listings" element={<ProtectedRoute role="admin"><ManageListings /></ProtectedRoute>} />
+      <Route path="/db" element={<ProtectedRoute role="admin"><DatabaseViewer /></ProtectedRoute>} />
 
       {/* ─── 404 Catch-all ─────────────────────── */}
       <Route path="*" element={<NotFound />} />

@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { addReview } from '../services/api';
 
 const ReviewPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  // Booking details are passed from My Bookings; listing_id query param is a fallback
+  const booking = location.state || {};
+  const listingId = booking.listingId || searchParams.get('listing_id');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
@@ -21,14 +29,30 @@ const ReviewPage = () => {
     navigate('/');
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (!listingId) navigate('/my-bookings', { replace: true });
+  }, [listingId, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0) {
-      alert("Please provide an overall rating");
+      setError("Please provide an overall rating");
       return;
     }
-    // Mock submission - navigate back to bookings
-    navigate('/my-bookings');
+    if (!reviewText.trim()) {
+      setError("Please write a short review");
+      return;
+    }
+    setSubmitting(true);
+    setError('');
+    try {
+      await addReview(listingId, { rating, comment: reviewText.trim(), categories });
+      navigate('/my-bookings', { state: { reviewSubmitted: true } });
+    } catch (err) {
+      setError(err.message || 'Failed to submit review');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCategoryRating = (category, value) => {
@@ -79,12 +103,14 @@ const ReviewPage = () => {
           {/* Header Summary */}
           <div className="bg-[#111] p-8 text-white flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
             <div className="w-24 h-24 rounded-2xl bg-black/50 border border-[#333] p-1 flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200" alt="Property" className="w-full h-full object-cover rounded-xl" />
+              <img src={booking.image || "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200"} alt="Property" className="w-full h-full object-cover rounded-xl" />
             </div>
             <div>
               <div className="text-xs font-bold text-white/80 uppercase tracking-wider mb-1">Write a Review for</div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">BlueSky Residences</h1>
-              <p className="text-white/80 font-medium">Stayed: Jan 2025 - Jun 2025 (6 Months)</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">{booking.propertyName || 'Your Stay'}</h1>
+              {booking.moveInDate && (
+                <p className="text-white/80 font-medium">Moved in: {booking.moveInDate}{booking.durationMonths ? ` (${booking.durationMonths} Months)` : ''}</p>
+              )}
             </div>
           </div>
 
@@ -153,6 +179,10 @@ const ReviewPage = () => {
                 </div>
               </div>
 
+              {error && (
+                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium">{error}</div>
+              )}
+
               {/* Action Buttons */}
               <div className="pt-4 flex justify-end gap-4">
                 <button 
@@ -164,15 +194,15 @@ const ReviewPage = () => {
                 </button>
                 <button 
                   type="submit"
-                  disabled={rating === 0}
+                  disabled={rating === 0 || submitting}
                   className={`px-8 py-3 font-bold rounded-xl transition-colors border-none shadow-sm flex items-center gap-2 ${
-                    rating === 0 
+                    rating === 0 || submitting 
                       ? 'bg-[#333] text-white/30 cursor-not-allowed' 
                       : 'bg-[#FACC15] hover:bg-[#EAB308] text-black cursor-pointer'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                  Submit Review
+                  {submitting ? 'Submitting...' : 'Submit Review'}
                 </button>
               </div>
 

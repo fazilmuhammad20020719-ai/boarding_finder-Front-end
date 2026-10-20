@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '../services/api';
+import { subscribe } from '../services/realtime';
 
 const getIconForType = (type) => {
   switch (type) {
@@ -60,6 +61,8 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
+    // New notifications are pushed in real time
+    return subscribe('notification', fetchNotifications);
   }, []);
 
   const fetchNotifications = async () => {

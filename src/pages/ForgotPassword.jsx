@@ -1,17 +1,40 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { requestPasswordReset } from '../services/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const [resendNote, setResendNote] = useState('');
   const navigate = useNavigate();
 
-  const handleReset = (e) => {
+  const sendLink = async () => {
+    setSending(true);
+    setError('');
+    try {
+      await requestPasswordReset(email);
+      return true;
+    } catch (err) {
+      setError(err.message || 'Failed to send reset link');
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleReset = async (e) => {
     e.preventDefault();
-    if (email) {
+    if (email && await sendLink()) {
       setSubmitted(true);
     }
+  };
+
+  const handleResend = async () => {
+    setResendNote('');
+    if (await sendLink()) setResendNote('A new link is on its way.');
   };
 
   return (
@@ -57,12 +80,17 @@ const ForgotPassword = () => {
                     />
                   </div>
 
+                  {error && (
+                    <p className="mt-4 text-sm text-red-400">{error}</p>
+                  )}
+
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full py-4 mt-6 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-[14px] transition-colors text-[15px] tracking-wide shadow-sm"
+                    disabled={sending}
+                    className="w-full disabled:opacity-60 py-4 mt-6 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-[14px] transition-colors text-[15px] tracking-wide shadow-sm"
                   >
-                    Send Reset Link
+                    {sending ? 'Sending...' : 'Send Reset Link'}
                   </button>
                 </form>
 
@@ -100,7 +128,7 @@ const ForgotPassword = () => {
                   Check your email
                 </h2>
                 <p className="text-white/50 text-[15px] leading-relaxed mb-6 font-normal text-center">
-                  We've sent a password reset link to <br />
+                  If an account exists, we've sent a password reset link to <br />
                   <span className="font-bold text-[#FACC15]">{email}</span>
                 </p>
 
@@ -120,10 +148,14 @@ const ForgotPassword = () => {
                 </Link>
 
                 {/* Resend Link */}
+                {(resendNote || error) && (
+                  <p className={`text-sm text-center mb-2 ${error ? 'text-red-400' : 'text-[#10b981]'}`}>{error || resendNote}</p>
+                )}
                 <button
                   type="button"
-                  onClick={() => alert(`Password reset link resent to ${email}`)}
-                  className="text-[15px] font-semibold text-[#FACC15] hover:text-[#EAB308] hover:underline self-center bg-transparent border-0 cursor-pointer transition-colors"
+                  onClick={handleResend}
+                  disabled={sending}
+                  className="disabled:opacity-60 text-[15px] font-semibold text-[#FACC15] hover:text-[#EAB308] hover:underline self-center bg-transparent border-0 cursor-pointer transition-colors"
                 >
                   Resend email
                 </button>

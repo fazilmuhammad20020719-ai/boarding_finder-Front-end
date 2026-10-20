@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getAllListings, getSavedListings } from '../services/api';
+import { getAllListings, getSavedListings, getAccessToken } from '../services/api';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -51,7 +51,7 @@ const MapViewPage = () => {
       try {
         const [allListings, savedItems] = await Promise.all([
           getAllListings(),
-          localStorage.getItem("token") ? getSavedListings() : Promise.resolve([])
+          getAccessToken() ? getSavedListings() : Promise.resolve([])
         ]);
 
         const savedIds = savedItems.map(item => item.listing_id);

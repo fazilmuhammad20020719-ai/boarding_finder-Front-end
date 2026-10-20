@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getSavedListings, removeSavedListing } from '../services/api';
+import { getSavedListings, removeSavedListing, getAccessToken } from '../services/api';
 
 const CheckIcon = () => (
   <svg className="w-6 h-6 text-[#10b981] mx-auto" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -23,7 +23,7 @@ const CompareListings = () => {
   useEffect(() => {
     const fetchSavedForComparison = async () => {
       try {
-        if (!localStorage.getItem("token")) {
+        if (!getAccessToken()) {
           setIsLoading(false);
           return;
         }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import ReportModal from '../components/ReportModal';
 import { useAuth } from '../context/AuthContext';
-import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin, checkSavedStatus, addSavedListing, removeSavedListing } from '../services/api';
+import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin, checkSavedStatus, addSavedListing, removeSavedListing, sendMessage } from '../services/api';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -24,6 +25,9 @@ const PropertyDetails = () => {
   const [activeDuration, setActiveDuration] = useState('6');
   const [moveInDate, setMoveInDate] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [inquiryText, setInquiryText] = useState('');
+  const [inquiryStatus, setInquiryStatus] = useState('');
   const [bookingStatus, setBookingStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const [existingBooking, setExistingBooking] = useState(null); // { booking_id, status } if user already booked
@@ -232,6 +236,21 @@ const PropertyDetails = () => {
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
     navigate('/');
+  };
+
+  // Start (or continue) a real conversation with the owner via the messaging system
+  const handleSendInquiry = async () => {
+    if (!inquiryText.trim()) return;
+    setInquiryStatus('sending');
+    try {
+      await sendMessage({ listing_id: listing.id, receiver_id: listing.ownerId, text: inquiryText.trim() });
+      setInquiryText('');
+      setInquiryStatus('');
+      setIsModalOpen(false);
+      navigate('/messages');
+    } catch (err) {
+      setInquiryStatus(err.message || 'Failed to send inquiry');
+    }
   };
 
   const handleBookNow = () => {
@@ -787,6 +806,18 @@ const PropertyDetails = () => {
                     >
                       Send Inquiry
                     </button>
+                    <button
+                      onClick={() => navigate(`/virtual-tour/${listing.id}`)}
+                      className="w-full py-3.5 bg-[#111] border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
+                    >
+                      Take Virtual Tour
+                    </button>
+                    <button
+                      onClick={() => setIsReportOpen(true)}
+                      className="w-full py-2 bg-transparent text-white/40 hover:text-red-400 text-xs font-semibold transition-colors cursor-pointer border-none"
+                    >
+                      Report this listing
+                    </button>
                   </div>
                 </>
               )}
@@ -798,6 +829,14 @@ const PropertyDetails = () => {
           </div>
         </div>
       </main>
+
+      <ReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        targetType="Listing"
+        targetId={listing.id}
+        targetName={listing.name}
+      />
 
       {/* ===== SEND INQUIRY MODAL ===== */}
       {isModalOpen && (
@@ -813,11 +852,17 @@ const PropertyDetails = () => {
             <textarea
               rows="4"
               placeholder="Type your message to the owner..."
+              value={inquiryText}
+              onChange={(e) => setInquiryText(e.target.value)}
               className="w-full px-4 py-4 rounded-xl bg-[#111] border border-[#333] text-white focus:outline-none focus:ring-1 focus:ring-[#FACC15] focus:border-[#FACC15] text-[14px] resize-none mb-4 font-medium"
             ></textarea>
 
-            <button onClick={() => { alert('Inquiry sent!'); setIsModalOpen(false); }} className="w-full py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none mb-4">
-              Send
+            {inquiryStatus && inquiryStatus !== 'sending' && (
+              <p className="text-sm text-red-400 mb-3">{inquiryStatus}</p>
+            )}
+
+            <button onClick={handleSendInquiry} disabled={!inquiryText.trim() || inquiryStatus === 'sending'} className="w-full py-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors shadow-sm cursor-pointer border-none mb-4 disabled:opacity-50">
+              {inquiryStatus === 'sending' ? 'Sending...' : 'Send'}
             </button>
 
             <p className="text-center text-[10px] text-white/40 font-medium">

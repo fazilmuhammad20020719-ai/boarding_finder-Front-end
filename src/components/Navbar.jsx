@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getNotifications } from '../services/api';
+import { subscribe } from '../services/realtime';
 
 
 const Navbar = ({ likedCount = 0 }) => {
@@ -38,8 +39,15 @@ const Navbar = ({ likedCount = 0 }) => {
       };
 
       fetchCounts();
-      const interval = setInterval(fetchCounts, 15000);
-      return () => clearInterval(interval);
+      // Push updates arrive instantly; slow polling is only a fallback
+      const offMessage = subscribe('message', fetchCounts);
+      const offNotification = subscribe('notification', fetchCounts);
+      const interval = setInterval(fetchCounts, 60000);
+      return () => {
+        clearInterval(interval);
+        offMessage();
+        offNotification();
+      };
     }
   }, [isAuthenticated]);
 

@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { registerUser, loginUser, getMe, updateProfile } from "../services/api";
+import {
+  registerUser, loginUser, logoutUser, getMe, updateProfile,
+  setAccessToken, refreshSession,
+} from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -13,7 +16,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const isAuthenticated = !!user;
@@ -28,15 +31,17 @@ export const AuthProvider = ({ children }) => {
   // On mount, check if we have a saved token and fetch user data
   useEffect(() => {
     const checkAuth = async () => {
-      const savedToken = localStorage.getItem("token");
-      if (savedToken) {
+      // Older builds kept a long-lived JWT in localStorage — remove it.
+      localStorage.removeItem("token");
+      // Restore the session from the HTTP-only refresh cookie (if any)
+      const restoredToken = await refreshSession();
+      if (restoredToken) {
         try {
           const data = await getMe();
           setUser(data.user);
-          setToken(savedToken);
+          setToken(restoredToken);
         } catch (err) {
-          // Token is invalid/expired — clear it
-          localStorage.removeItem("token");
+          setAccessToken(null);
           setToken(null);
           setUser(null);
         }
@@ -61,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const data = await registerUser(userData);
-    localStorage.setItem("token", data.token);
+    setAccessToken(data.token);
     setToken(data.token);
     setUser(data.user);
     return data;
@@ -69,14 +74,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const data = await loginUser(credentials);
-    localStorage.setItem("token", data.token);
+    setAccessToken(data.token);
     setToken(data.token);
     setUser(data.user);
     return data;
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    logoutUser(); // revoke the refresh cookie server-side
+    setAccessToken(null);
     setToken(null);
     setUser(null);
   };

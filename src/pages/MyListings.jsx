@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { deleteListing } from '../services/api';
+import { deleteListing, getMyListings } from '../services/api';
 
 const MyListings = () => {
   const navigate = useNavigate();
@@ -12,24 +12,7 @@ const MyListings = () => {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const response = await fetch(`${API_URL}/listings/owner/mine`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch listings');
-        }
-
-        const data = await response.json();
+        const data = await getMyListings();
         
         const parsedListings = (data.listings || []).map(listing => {
           let rawImages = listing.image_urls || listing.images;

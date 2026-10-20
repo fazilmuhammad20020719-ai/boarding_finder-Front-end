@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getAllListings, getSavedListings, addSavedListing, removeSavedListing } from '../services/api';
+import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getAccessToken } from '../services/api';
 
 // Remove MOCK_LISTINGS and map from API instead
 const mapListing = (dbListing) => {
@@ -106,7 +106,7 @@ const SearchPage = () => {
       try {
         const [listingsData, savedData] = await Promise.all([
           getAllListings(),
-          localStorage.getItem("token") ? getSavedListings().catch(() => []) : Promise.resolve([])
+          getAccessToken() ? getSavedListings().catch(() => []) : Promise.resolve([])
         ]);
 
         if (listingsData.listings) {
@@ -456,7 +456,7 @@ const SearchPage = () => {
                           type="button"
                           onClick={async (e) => {
                             e.stopPropagation();
-                            if (!localStorage.getItem("token")) {
+                            if (!getAccessToken()) {
                               alert("Please login to save properties.");
                               return;
                             }

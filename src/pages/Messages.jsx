@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getMessages, sendMessage, markMessagesAsRead } from '../services/api';
+import { subscribe } from '../services/realtime';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -60,15 +61,25 @@ const Messages = () => {
 
   useEffect(() => {
     fetchConversations();
-    const interval = setInterval(fetchConversations, 5000);
-    return () => clearInterval(interval);
+    const off = subscribe('message', fetchConversations);
+    const interval = setInterval(fetchConversations, 30000); // fallback if the socket drops
+    return () => {
+      clearInterval(interval);
+      off();
+    };
   }, [user]);
 
   useEffect(() => {
     if (activeChatId) {
       fetchMessages(activeChatId);
-      const interval = setInterval(() => fetchMessages(activeChatId), 5000);
-      return () => clearInterval(interval);
+      const off = subscribe('message', (event) => {
+        if (event.conversation_id === activeChatId) fetchMessages(activeChatId);
+      });
+      const interval = setInterval(() => fetchMessages(activeChatId), 30000);
+      return () => {
+        clearInterval(interval);
+        off();
+      };
     }
   }, [activeChatId, user]);
 

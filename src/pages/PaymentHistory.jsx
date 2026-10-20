@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getPaymentHistory, processPayment, getMyBookings } from '../services/api';
+import { getPaymentHistory, getMyBookings, startBookingCheckout, redirectToPayHere } from '../services/api';
 
 const PaymentHistory = () => {
   const navigate = useNavigate();
@@ -16,8 +16,8 @@ const PaymentHistory = () => {
     booking_id: '',
     amount: '',
     payment_type: 'Monthly Rent',
-    method: 'Visa ending in •••• 4242'
   });
+  const [paymentError, setPaymentError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchHistory = async () => {
@@ -35,8 +35,8 @@ const PaymentHistory = () => {
   const fetchBookings = async () => {
     try {
       const res = await getMyBookings();
-      // Filter for approved bookings
-      const approved = res.bookings.filter(b => b.status === 'approved' || b.status === 'pending');
+      // Payments are only accepted once the owner has approved the booking
+      const approved = res.bookings.filter(b => b.status === 'approved' || b.status === 'completed');
       setActiveBookings(approved);
       if (approved.length > 0) {
         setPaymentForm(prev => ({ ...prev, booking_id: approved[0].booking_id }));
@@ -59,15 +59,12 @@ const PaymentHistory = () => {
     }
 
     setIsProcessing(true);
+    setPaymentError('');
     try {
-      await processPayment(paymentForm);
-      alert("Payment processed successfully!");
-      setIsModalOpen(false);
-      fetchHistory(); // Refresh history
-      setPaymentForm(prev => ({ ...prev, amount: '' })); // Reset amount
+      const checkout = await startBookingCheckout(paymentForm);
+      redirectToPayHere(checkout); // leaves the page; PayHere returns to /payment/success
     } catch (err) {
-      alert(err.message || "Failed to process payment");
-    } finally {
+      setPaymentError(err.message || "Failed to start payment");
       setIsProcessing(false);
     }
   };
@@ -233,18 +230,17 @@ const PaymentHistory = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-white/80 mb-1">Payment Method</label>
-                <select
-                  className="w-full p-3 border border-[#333] bg-[#111] text-white rounded-xl focus:ring-2 focus:ring-[#FACC15]/20 outline-none"
-                  value={paymentForm.method}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, method: e.target.value })}
-                >
-                  <option>Visa ending in •••• 4242</option>
-                  <option>Mastercard ending in •••• 8812</option>
-                  <option>Bank Transfer</option>
-                </select>
-              </div>
+              <p className="text-xs text-white/50">
+                You'll be redirected to PayHere to pay securely by card, eZ Cash, mCash or bank transfer.
+              </p>
+
+              {activeBookings.length === 0 && (
+                <p className="text-sm text-amber-400">You have no approved bookings to pay for yet.</p>
+              )}
+
+              {paymentError && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{paymentError}</div>
+              )}
 
               <div className="pt-4 border-t border-[#333] flex gap-3">
                 <button
@@ -259,7 +255,7 @@ const PaymentHistory = () => {
                   disabled={isProcessing}
                   className="flex-1 py-3 bg-[#FACC15] hover:bg-[#EAB308] disabled:opacity-70 text-black font-bold rounded-xl shadow-sm transition-colors border-none cursor-pointer flex justify-center items-center gap-2"
                 >
-                  {isProcessing ? 'Processing...' : 'Pay Now'}
+                  {isProcessing ? 'Redirecting...' : 'Pay with PayHere'}
                 </button>
               </div>
             </form>

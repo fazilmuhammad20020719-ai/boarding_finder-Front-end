@@ -1,64 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
+import { getUsersPage, updateUserStatusAdmin } from '../services/api';
 
-const MOCK_USERS = [
-  {
-    id: "USR-001",
-    name: "Alex Johnson",
-    email: "alex.j@example.com",
-    role: "Tenant",
-    status: "Active",
-    joined: "Jan 12, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Alex+Johnson&background=ebf3ff&color=1952c4"
-  },
-  {
-    id: "USR-002",
-    name: "Maria Garcia",
-    email: "m.garcia@example.com",
-    role: "Owner",
-    status: "Active",
-    joined: "Feb 05, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Maria+Garcia&background=e8f7ec&color=10b981"
-  },
-  {
-    id: "USR-003",
-    name: "James Smith",
-    email: "james.s@example.com",
-    role: "Tenant",
-    status: "Banned",
-    joined: "Mar 20, 2026",
-    avatar: "https://ui-avatars.com/api/?name=James+Smith&background=fee2e2&color=ef4444"
-  },
-  {
-    id: "USR-004",
-    name: "Linda Lee",
-    email: "linda.l@example.com",
-    role: "Owner",
-    status: "Locked",
-    joined: "Apr 10, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Linda+Lee&background=fef3c7&color=d97706"
-  },
-  {
-    id: "USR-005",
-    name: "Robert Brown",
-    email: "rbrown@example.com",
-    role: "Tenant",
-    status: "Active",
-    joined: "May 01, 2026",
-    avatar: "https://ui-avatars.com/api/?name=Robert+Brown&background=f3e8ff&color=9333ea"
-  }
-];
+const PAGE_SIZE = 50;
+import { useAuth } from '../context/AuthContext';
+
+// UI label ↔ backend account_status
+const STATUS_TO_UI = { active: 'Active', paused: 'Locked', removed: 'Banned' };
+const UI_TO_STATUS = { Active: 'active', Locked: 'paused', Banned: 'removed' };
+const ROLE_TO_UI = { student: 'Tenant', owner: 'Owner', admin: 'Admin' };
+
+const toUiUser = (u) => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  role: ROLE_TO_UI[u.role] || u.role,
+  status: STATUS_TO_UI[u.account_status] || 'Active',
+  verification: u.verification_status,
+  joined: new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=1A1A1A&color=FACC15`,
+});
 
 const ManageUsers = () => {
-  const [users, setUsers] = useState(MOCK_USERS);
+  const { user: currentUser } = useAuth();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('All');
 
-  const handleAction = (id, newStatus) => {
-    setUsers(prev => 
-      prev.map(user => user.id === id ? { ...user, status: newStatus } : user)
-    );
+  const [pagination, setPagination] = useState({ total: 0, hasMore: false });
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadPage = async (offset) => {
+    const data = await getUsersPage({ limit: PAGE_SIZE, offset });
+    const page = (data.users || []).map(toUiUser);
+    setUsers(prev => offset === 0 ? page : [...prev, ...page]);
+    setPagination(data.pagination || { total: page.length, hasMore: false });
+  };
+
+  useEffect(() => {
+    loadPage(0)
+      .catch((err) => setError(err.message || 'Failed to load users'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    try {
+      await loadPage(users.length);
+    } catch (err) {
+      alert(err.message || 'Failed to load more users');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleAction = async (id, newStatus) => {
+    if (newStatus === 'Banned' && !window.confirm('Ban this user? They will be unable to log in.')) return;
+    setBusyId(id);
+    try {
+      await updateUserStatusAdmin(id, UI_TO_STATUS[newStatus]);
+      setUsers(prev =>
+        prev.map(user => user.id === id ? { ...user, status: newStatus } : user)
+      );
+    } catch (err) {
+      alert(err.message || 'Failed to update user status');
+    } finally {
+      setBusyId(null);
+    }
   };
 
   const filteredUsers = users.filter(user => {
@@ -112,6 +125,7 @@ const ManageUsers = () => {
               <option value="All">All Roles</option>
               <option value="Tenant">Tenants</option>
               <option value="Owner">Owners</option>
+              <option value="Admin">Admins</option>
             </select>
           </div>
         </div>
@@ -130,15 +144,16 @@ const ManageUsers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#333]">
-                {filteredUsers.length === 0 ? (
+                {loading || error || filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-white/60">
-                      No users found matching your search.
+                    <td colSpan="5" className={`px-6 py-12 text-center ${error ? 'text-red-400' : 'text-white/60'}`}>
+                      {loading ? 'Loading users...' : error || 'No users found matching your search.'}
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-[#222] transition-colors">
+                    <React.Fragment key={user.id}>
+                    <tr className="hover:bg-[#222] transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full border border-[#333]" />
@@ -150,7 +165,8 @@ const ManageUsers = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${
-                          user.role === 'Owner' ? 'bg-purple-500/20 text-purple-400' : 'bg-[#1952c4]/20 text-[#60a5fa]'
+                          user.role === 'Owner' ? 'bg-purple-500/20 text-purple-400' :
+                          user.role === 'Admin' ? 'bg-red-500/20 text-red-400' : 'bg-[#1952c4]/20 text-[#60a5fa]'
                         }`}>
                           {user.role}
                         </span>
@@ -173,36 +189,62 @@ const ManageUsers = () => {
                         {user.joined}
                       </td>
                       <td className="px-6 py-4 text-right space-x-2">
-                        {user.status === 'Banned' ? (
+                        {user.id !== currentUser?.id && (user.status === 'Banned' ? (
                           <button 
                             onClick={() => handleAction(user.id, 'Active')}
-                            className="px-3 py-1.5 bg-[#10b981]/20 hover:bg-[#10b981]/30 text-[#10b981] font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer"
+                            disabled={busyId === user.id}
+                            className="px-3 py-1.5 bg-[#10b981]/20 hover:bg-[#10b981]/30 text-[#10b981] font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer disabled:opacity-50"
                           >
                             Unban
                           </button>
                         ) : (
                           <button 
                             onClick={() => handleAction(user.id, 'Banned')}
-                            className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer"
+                            disabled={busyId === user.id}
+                            className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer disabled:opacity-50"
                           >
                             Ban
                           </button>
-                        )}
+                        ))}
 
-                        {user.status === 'Locked' && (
+                        {user.id !== currentUser?.id && user.status === 'Locked' && (
                           <button 
                             onClick={() => handleAction(user.id, 'Active')}
-                            className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer"
+                            disabled={busyId === user.id}
+                            className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer disabled:opacity-50"
                           >
                             Unlock
                           </button>
                         )}
+
+                        {user.id !== currentUser?.id && user.status === 'Active' && (
+                          <button 
+                            onClick={() => handleAction(user.id, 'Locked')}
+                            disabled={busyId === user.id}
+                            className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 font-semibold rounded-lg text-xs transition-colors border-none cursor-pointer disabled:opacity-50"
+                          >
+                            Lock
+                          </button>
+                        )}
                         
-                        <button className="px-3 py-1.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer">
-                          Details
+                        <button
+                          onClick={() => setExpandedId(expandedId === user.id ? null : user.id)}
+                          className="px-3 py-1.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer"
+                        >
+                          {expandedId === user.id ? 'Hide' : 'Details'}
                         </button>
                       </td>
                     </tr>
+                    {expandedId === user.id && (
+                      <tr className="bg-[#111]">
+                        <td colSpan="5" className="px-6 py-4 text-sm text-white/70">
+                          <span className="mr-6"><span className="text-white/40">User ID:</span> {user.id}</span>
+                          <span className="mr-6"><span className="text-white/40">Verification:</span> {user.verification || 'n/a'}</span>
+                          <Link to="/admin-dashboard" className="text-[#FACC15] hover:underline">Review in Admin Dashboard →</Link>
+                        </td>
+                      </tr>
+                    )}
+                    </React.Fragment>
                   ))
                 )}
               </tbody>
@@ -210,13 +252,16 @@ const ManageUsers = () => {
           </div>
           
           <div className="px-6 py-4 border-t border-[#333] flex justify-between items-center text-sm">
-            <span className="text-white/60">Showing {filteredUsers.length} users</span>
-            <div className="flex gap-1">
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#222] text-white/60 transition-colors border-none cursor-pointer bg-transparent" disabled>&lt;</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FACC15] text-black font-semibold border-none cursor-pointer">1</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#222] text-white font-medium transition-colors border-none cursor-pointer bg-transparent">2</button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#222] text-white/60 transition-colors border-none cursor-pointer bg-transparent">&gt;</button>
-            </div>
+            <span className="text-white/60">Showing {filteredUsers.length} of {pagination.total} users</span>
+            {pagination.hasMore && (
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-4 py-2 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-black font-semibold border-none cursor-pointer disabled:opacity-50"
+              >
+                {loadingMore ? 'Loading...' : 'Load more'}
+              </button>
+            )}
           </div>
         </div>
 

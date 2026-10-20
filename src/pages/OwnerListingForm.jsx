@@ -59,6 +59,9 @@ const OwnerListingForm = () => {
     // Photos
     photos: [],      // preview URLs for display
     photoFiles: [],   // actual File objects for upload
+
+    // Optional 360°/video tour link (YouTube, Vimeo, Matterport, Kuula, Momento360)
+    virtualTourUrl: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -106,6 +109,7 @@ const OwnerListingForm = () => {
             minimumStay: '6',
             photos: listing.image_urls || [],
             photoFiles: [], 
+            virtualTourUrl: listing.virtual_tour_url || '',
           });
         } catch (err) {
           console.error("Failed to fetch listing:", err);
@@ -261,7 +265,8 @@ const OwnerListingForm = () => {
           latitude: formData.latitude,
           longitude: formData.longitude,
           amenities: JSON.stringify(formData.amenities),
-          image_urls: [...formData.photos.filter(p => p.startsWith('https://')), ...imageUrls]
+          image_urls: [...formData.photos.filter(p => p.startsWith('https://')), ...imageUrls],
+          virtual_tour_url: formData.virtualTourUrl.trim(),
         };
 
         if (isEditMode) {
@@ -797,6 +802,18 @@ const OwnerListingForm = () => {
                   <option value="6">6 Months</option>
                   <option value="12">12 Months</option>
                 </select>
+              </div>
+
+              <div className="mt-8">
+                <label className="block text-sm font-bold text-white/80 mb-2">Virtual Tour Link <span className="text-white/40 font-normal">(optional)</span></label>
+                <input
+                  type="url"
+                  value={formData.virtualTourUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, virtualTourUrl: e.target.value }))}
+                  placeholder="https://www.youtube.com/watch?v=... or a Matterport / Kuula link"
+                  className="w-full px-4 py-3 bg-[#111] border border-[#333] rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/30"
+                />
+                <p className="text-xs text-white/40 mt-1">Supports YouTube, Vimeo, Matterport, Kuula and Momento360.</p>
               </div>
 
               <div className="mt-8">

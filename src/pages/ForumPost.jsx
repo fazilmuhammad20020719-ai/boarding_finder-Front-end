@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useParams, Link } from 'react-router-dom';
-import { getForumPostById, toggleForumUpvote, addForumComment } from '../services/api';
+import { getForumPostById, toggleForumUpvote, addForumComment, getAccessToken } from '../services/api';
 
 const ForumPost = () => {
     const { id } = useParams();
@@ -27,7 +27,7 @@ const ForumPost = () => {
     };
 
     const handleUpvote = async () => {
-        const token = localStorage.getItem("token");
+        const token = getAccessToken();
         if (!token) {
             alert("Please log in to upvote");
             return;
@@ -50,7 +50,7 @@ const ForumPost = () => {
         e.preventDefault();
         if (!newComment.trim()) return;
 
-        const token = localStorage.getItem("token");
+        const token = getAccessToken();
         if (!token) {
             alert("Please log in to comment");
             return;

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
+import { getMyListings, getPromotionPlans, getPaymentConfig, startPromotionCheckout, redirectToPayHere } from '../services/api';
 
 const PROMOTE_PLANS = [
   {
     id: 'basic',
     name: 'Basic Boost',
-    price: 9.99,
     duration: '3 Days',
     features: ['Highlight tag on listing', 'Appears higher in standard searches'],
     color: 'bg-[#111] border-[#333] hover:border-blue-500',
@@ -15,7 +15,6 @@ const PROMOTE_PLANS = [
   {
     id: 'premium',
     name: 'Premium Placement',
-    price: 19.99,
     duration: '7 Days',
     features: ['Top 3 results guaranteed', 'Premium "Featured" ribbon', 'Included in weekly newsletter'],
     color: 'bg-[#111] border-[#333] hover:border-[#FACC15]',
@@ -24,7 +23,6 @@ const PROMOTE_PLANS = [
   {
     id: 'ultimate',
     name: 'Ultimate Spotlight',
-    price: 39.99,
     duration: '14 Days',
     features: ['#1 Result on Homepage', 'Push notification to matched seekers', 'Gold "Sponsored" ribbon', 'Dedicated social media shoutout'],
     color: 'bg-[#111] border-[#333] hover:border-amber-500',
@@ -33,44 +31,60 @@ const PROMOTE_PLANS = [
 ];
 
 const PromoteProperty = () => {
-  const [selectedProperty, setSelectedProperty] = useState('Sunset Apartment - Unit A');
+  const [listings, setListings] = useState([]);
+  const [selectedListingId, setSelectedListingId] = useState('');
+  const [plans, setPlans] = useState(PROMOTE_PLANS);
+  const [currency, setCurrency] = useState('LKR');
   const [selectedPlan, setSelectedPlan] = useState(PROMOTE_PLANS[1]); // Default to Premium
+  const [paymentsEnabled, setPaymentsEnabled] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const handlePayment = (e) => {
+  useEffect(() => {
+    getMyListings()
+      .then((data) => {
+        const mine = data.listings || [];
+        setListings(mine);
+        if (mine.length > 0) setSelectedListingId(String(mine[0].listing_id));
+      })
+      .catch((err) => setError(err.message || 'Failed to load your listings'));
+
+    // Prices come from the server so they cannot be tampered with client-side
+    getPromotionPlans()
+      .then((data) => {
+        setCurrency(data.currency);
+        const merged = PROMOTE_PLANS.map((plan) => {
+          const server = data.plans.find((p) => p.id === plan.id);
+          return server ? { ...plan, price: server.price, duration: `${server.days} Days` } : plan;
+        });
+        setPlans(merged);
+        setSelectedPlan((prev) => merged.find((p) => p.id === prev.id) || merged[0]);
+      })
+      .catch(() => {});
+
+    getPaymentConfig()
+      .then((cfg) => setPaymentsEnabled(cfg.enabled))
+      .catch(() => setPaymentsEnabled(false));
+  }, []);
+
+  const formatPrice = (price) => price == null ? '—' : `${currency} ${Number(price).toLocaleString()}`;
+
+  const handlePayment = async (e) => {
     e.preventDefault();
+    if (!selectedListingId) {
+      setError('Please select a listing to promote.');
+      return;
+    }
     setIsProcessing(true);
-    // Simulate payment processing
-    setTimeout(() => {
+    setError('');
+    try {
+      const checkout = await startPromotionCheckout({ listing_id: Number(selectedListingId), plan_id: selectedPlan.id });
+      redirectToPayHere(checkout); // leaves the page
+    } catch (err) {
+      setError(err.message || 'Failed to start payment');
       setIsProcessing(false);
-      setIsSuccess(true);
-    }, 2500);
+    }
   };
-
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen bg-black font-sans antialiased flex flex-col items-center justify-center p-6">
-        <div className="bg-[#1A1A1A] rounded-[24px] shadow-xl border border-[#333] p-12 max-w-md w-full text-center flex flex-col items-center animate-fade-in-down">
-           <div className="w-20 h-20 bg-[#10b981]/20 text-[#10b981] rounded-full flex items-center justify-center mb-6 shadow-sm">
-             <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-               <polyline points="20 6 9 17 4 12" />
-             </svg>
-           </div>
-           <h2 className="text-3xl font-black text-white mb-3">Boost Activated!</h2>
-           <p className="text-white/60 mb-8">
-             Your payment of <strong>${selectedPlan.price}</strong> was successful. <br/>
-             <span className="font-bold text-white">{selectedProperty}</span> is now enjoying <span className="font-bold text-[#FACC15]">{selectedPlan.name}</span> benefits for the next {selectedPlan.duration}.
-           </p>
-           <Link to="/owner-dashboard" className="w-full">
-             <button className="w-full py-4 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl shadow-sm transition-colors text-sm border-none cursor-pointer">
-               Return to Dashboard
-             </button>
-           </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black font-sans antialiased text-white">
@@ -99,13 +113,14 @@ const PromoteProperty = () => {
             <div className="bg-[#1A1A1A] rounded-[24px] shadow-sm border border-[#333] p-6">
               <label className="block text-xs font-bold text-white/60 tracking-wider mb-3 uppercase">Select Property to Boost</label>
               <select 
-                value={selectedProperty}
-                onChange={(e) => setSelectedProperty(e.target.value)}
+                value={selectedListingId}
+                onChange={(e) => setSelectedListingId(e.target.value)}
                 className="w-full px-4 py-3 bg-[#111] border border-[#333] rounded-xl text-[15px] font-bold text-white focus:ring-2 focus:ring-[#FACC15]/20 outline-none cursor-pointer shadow-inner"
               >
-                <option>Sunset Apartment - Unit A</option>
-                <option>Oceanview Studio</option>
-                <option>Downtown Loft</option>
+                {listings.length === 0 && <option value="">No listings yet — add one first</option>}
+                {listings.map((l) => (
+                  <option key={l.listing_id} value={l.listing_id}>{l.title}</option>
+                ))}
               </select>
             </div>
 
@@ -113,7 +128,7 @@ const PromoteProperty = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white mb-2">Choose a Boost Package</h3>
               
-              {PROMOTE_PLANS.map(plan => (
+              {plans.map(plan => (
                 <div 
                   key={plan.id}
                   onClick={() => setSelectedPlan(plan)}
@@ -131,7 +146,7 @@ const PromoteProperty = () => {
                       <p className="text-sm font-semibold text-white/60">Duration: {plan.duration}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-white">${plan.price}</span>
+                      <span className="text-2xl font-black text-white">{formatPrice(plan.price)}</span>
                     </div>
                   </div>
                   
@@ -158,7 +173,7 @@ const PromoteProperty = () => {
             </div>
           </div>
 
-          {/* Right Side: Checkout Mockup */}
+          {/* Right Side: Checkout */}
           <div className="w-full lg:w-2/5">
             <div className="bg-[#1A1A1A] rounded-[24px] shadow-sm border border-[#333] p-6 md:p-8 sticky top-8">
                <h3 className="text-xl font-bold text-white mb-6">Payment Details</h3>
@@ -175,60 +190,28 @@ const PromoteProperty = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-base font-bold text-white">Total Amount:</span>
-                    <span className="text-2xl font-black text-[#FACC15]">${selectedPlan.price}</span>
+                    <span className="text-2xl font-black text-[#FACC15]">{formatPrice(selectedPlan.price)}</span>
                   </div>
                </div>
 
-               {/* Mock Card Form */}
+               {/* Card details are entered on PayHere's secure hosted page, never here */}
                <form onSubmit={handlePayment} className="space-y-4">
-                  <div>
-                    <label className="block text-[11px] font-bold text-white/60 tracking-wider mb-1.5 uppercase">Cardholder Name</label>
-                    <input 
-                      type="text" 
-                      required
-                      defaultValue="Roberto Cruz"
-                      className="w-full px-4 py-3 bg-[#111] border border-[#333] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FACC15]/40"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-[11px] font-bold text-white/60 tracking-wider mb-1.5 uppercase">Card Number</label>
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="•••• •••• •••• 4242"
-                        className="w-full pl-10 pr-4 py-3 bg-[#111] border border-[#333] rounded-xl text-sm font-mono text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/40"
-                      />
-                      <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                  <p className="text-sm text-white/60">
+                    You'll be redirected to PayHere to pay securely by card, eZ Cash, mCash or bank transfer.
+                  </p>
+                  {!paymentsEnabled && (
+                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm">
+                      Online payments are not configured yet. Please contact support.
                     </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <label className="block text-[11px] font-bold text-white/60 tracking-wider mb-1.5 uppercase">Expiry</label>
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="MM/YY"
-                        className="w-full px-4 py-3 bg-[#111] border border-[#333] rounded-xl text-sm font-mono text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/40"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-[11px] font-bold text-white/60 tracking-wider mb-1.5 uppercase">CVC</label>
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="123"
-                        className="w-full px-4 py-3 bg-[#111] border border-[#333] rounded-xl text-sm font-mono text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FACC15]/40"
-                      />
-                    </div>
-                  </div>
+                  )}
+                  {error && (
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>
+                  )}
 
                   <div className="pt-4">
                     <button 
                       type="submit"
-                      disabled={isProcessing}
+                      disabled={isProcessing || !paymentsEnabled || !selectedListingId}
                       className="w-full py-4 bg-[#FACC15] hover:bg-[#EAB308] disabled:bg-slate-700 disabled:text-white/40 disabled:cursor-not-allowed text-black font-bold rounded-xl shadow-md transition-all text-sm flex items-center justify-center gap-2 border-none"
                     >
                       {isProcessing ? (
@@ -237,15 +220,15 @@ const PromoteProperty = () => {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          Processing...
+                          Redirecting to PayHere...
                         </>
                       ) : (
-                        `Pay LKR ${selectedPlan.price}`
+                        `Pay ${formatPrice(selectedPlan.price)}`
                       )}
                     </button>
                     <div className="mt-4 flex items-center justify-center gap-1.5 text-white/40">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                      <span className="text-[10px] uppercase font-bold tracking-wider">Secure 256-bit SSL Encryption</span>
+                      <span className="text-[10px] uppercase font-bold tracking-wider">Secured by PayHere</span>
                     </div>
                   </div>
                </form>

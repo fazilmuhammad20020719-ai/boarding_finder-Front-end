@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getMyListings, getCalendarBlocks, addCalendarBlock, removeCalendarBlock } from '../services/api';
+import { getMyListings, getCalendarBlocks, addCalendarBlock, removeCalendarBlock, getIcalLink, importIcal } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const CalendarManagement = () => {
   const [properties, setProperties] = useState([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
-  const [syncStatus, setSyncStatus] = useState('Not Connected');
   const [blocks, setBlocks] = useState([]);
+  const [exportUrl, setExportUrl] = useState('');
+  const [importUrl, setImportUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const selectedProperty = properties.find(p => String(p.listing_id) === String(selectedPropertyId));
+  const lastSynced = selectedProperty?.ical_synced_at
+    ? `Last synced ${new Date(selectedProperty.ical_synced_at).toLocaleString()}`
+    : 'Not connected';
 
   const navigate = useNavigate();
   const { logout, user } = useAuth();
@@ -29,8 +38,13 @@ const CalendarManagement = () => {
   useEffect(() => {
     if (selectedPropertyId) {
       fetchBlocks(selectedPropertyId);
+      setSyncMessage('');
+      getIcalLink(selectedPropertyId)
+        .then((data) => setExportUrl(data.url))
+        .catch(() => setExportUrl(''));
     } else {
       setBlocks([]);
+      setExportUrl('');
     }
   }, [selectedPropertyId]);
 
@@ -39,10 +53,52 @@ const CalendarManagement = () => {
       const data = await getMyListings();
       setProperties(data.listings || []);
       if (data.listings && data.listings.length > 0) {
-        setSelectedPropertyId(data.listings[0].listing_id);
+        setSelectedPropertyId(prev => prev || data.listings[0].listing_id);
       }
     } catch (err) {
       console.error("Failed to fetch properties", err);
+    }
+  };
+
+  const handleCopyExport = async () => {
+    if (!exportUrl) return false;
+    try {
+      await navigator.clipboard.writeText(exportUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Google Calendar subscribes to our export feed via "From URL"
+  const handleConnectGoogle = async () => {
+    await handleCopyExport();
+    window.open('https://calendar.google.com/calendar/u/0/r/settings/addbyurl', '_blank', 'noopener,noreferrer');
+    setSyncMessage('Export link copied — paste it into Google Calendar\'s "From URL" box.');
+  };
+
+  // Airbnb shares availability through its own iCal export link
+  const handleConnectAirbnb = () => {
+    setSyncMessage('In Airbnb, open Calendar → Availability → Connect calendars, copy the Airbnb link, then paste it into "Import Calendar" below. Paste our export link into Airbnb too.');
+    document.getElementById('ical-import-input')?.focus();
+  };
+
+  const handleImport = async () => {
+    if (!selectedPropertyId || !importUrl.trim()) return;
+    setImporting(true);
+    setSyncMessage('');
+    try {
+      const result = await importIcal(selectedPropertyId, importUrl.trim());
+      setSyncMessage(result.message);
+      setImportUrl('');
+      fetchBlocks(selectedPropertyId);
+      fetchProperties();
+    } catch (err) {
+      setSyncMessage(err.message || 'Failed to import calendar');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -346,10 +402,10 @@ const CalendarManagement = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-white">Google Calendar</p>
-                    <p className="text-[11px] text-white/60 font-medium mt-0.5">{syncStatus}</p>
+                    <p className="text-[11px] text-white/60 font-medium mt-0.5">Subscribe via export link</p>
                   </div>
                 </div>
-                <button className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer" onClick={() => alert("Calendar sync coming soon!")}>
+                <button className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer" onClick={handleConnectGoogle} disabled={!exportUrl}>
                   Connect
                 </button>
               </div>
@@ -362,10 +418,10 @@ const CalendarManagement = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-white">Airbnb</p>
-                    <p className="text-[11px] text-white/60 font-medium mt-0.5">Not Connected</p>
+                    <p className="text-[11px] text-white/60 font-medium mt-0.5">{lastSynced}</p>
                   </div>
                 </div>
-                <button className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer" onClick={() => alert("Calendar sync coming soon!")}>
+                <button className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer" onClick={handleConnectAirbnb}>
                   Connect
                 </button>
               </div>
@@ -386,10 +442,10 @@ const CalendarManagement = () => {
                     <input
                       type="text"
                       readOnly
-                      value={`https://api.boardingfinder.com/ical/export/${selectedPropertyId || 'default'}.ics`}
+                      value={exportUrl || 'Select a property to generate your export link'}
                       className="w-full px-3 py-2.5 bg-transparent text-xs text-white outline-none"
                     />
-                    <button className="px-3 text-[#FACC15] font-bold text-xs bg-[#333]/50 hover:bg-[#333] transition-colors border-l border-[#333] cursor-pointer">Copy</button>
+                    <button onClick={handleCopyExport} disabled={!exportUrl} className="px-3 text-[#FACC15] font-bold text-xs bg-[#333]/50 hover:bg-[#333] transition-colors border-l border-[#333] cursor-pointer">{copied ? 'Copied!' : 'Copy'}</button>
                   </div>
                   <p className="text-[10px] text-white/40 mt-1.5">Paste this link into other platforms (e.g. Booking.com) to block out dates booked here.</p>
                 </div>
@@ -401,14 +457,20 @@ const CalendarManagement = () => {
                   </label>
                   <div className="flex bg-[#111] border border-[#333] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-[#FACC15]/20 transition-shadow">
                     <input
+                      id="ical-import-input"
                       type="text"
+                      value={importUrl}
+                      onChange={(e) => setImportUrl(e.target.value)}
                       placeholder="Paste iCal URL here..."
                       className="w-full px-3 py-2.5 bg-transparent text-xs text-white outline-none placeholder-white/40"
                     />
-                    <button className="px-3 text-black font-bold text-xs bg-[#FACC15] hover:bg-[#EAB308] transition-colors cursor-pointer border-none" onClick={() => alert("iCal import coming soon!")}>Import</button>
+                    <button className="px-3 text-black font-bold text-xs bg-[#FACC15] hover:bg-[#EAB308] transition-colors cursor-pointer border-none" onClick={handleImport} disabled={importing || !importUrl.trim() || !selectedPropertyId}>{importing ? 'Importing...' : 'Import'}</button>
                   </div>
-                  <p className="text-[10px] text-white/40 mt-1.5">Dates blocked on external platforms will automatically be blocked here.</p>
+                  <p className="text-[10px] text-white/40 mt-1.5">Dates blocked on external platforms will be blocked here. Re-import to refresh.</p>
                 </div>
+                {syncMessage && (
+                  <p className="text-xs text-[#FACC15] bg-[#FACC15]/5 border border-[#FACC15]/20 rounded-xl p-3">{syncMessage}</p>
+                )}
               </div>
 
             </div>

@@ -57,3 +57,108 @@ Once bookings are working, you should build out these remaining modules:
 I recommend we start with **Step 1: Frontend-Backend Integration for Listings** (fetching and displaying real properties on the home/search pages) or **Step 2: Building the Bookings system**. 
 
 Let me know which one you'd like to tackle first!
+
+
+================================================================================
+DEEP CODE AUDIT — INCOMPLETE SECTIONS (2026-10-20)
+================================================================================
+
+After scanning the entire codebase (frontend + backend), 11 incomplete/unfinished
+sections were identified. Categorized by severity below.
+
+─── 🔴 CRITICAL (No Backend / Uses MOCK Data) ─────────────────────────────────
+
+1. FORGOT PASSWORD / RESET PASSWORD — No Backend API
+   Files: ForgotPassword.jsx, ResetPassword.jsx
+   Backend: routes/auth.js — NO routes for /api/auth/forgot-password or /api/auth/reset-password
+   Issue: Frontend forms exist but no API call is ever made. Password reset is
+          completely non-functional. Forms just toggle local state.
+   Fix: Create forgotPassword and resetPassword controllers + routes + email token.
+
+2. MANAGE USERS PAGE — Hardcoded MOCK Data
+   File: ManageUsers.jsx (Lines 5-51)
+   Issue: Uses MOCK_USERS hardcoded array instead of calling getAllUsers() API.
+          Ban/Lock/Activate actions are LOCAL-ONLY — nothing sent to server.
+   Fix: Replace MOCK_USERS with getAllUsers() call, wire handleAction() to
+        updateUserStatusAdmin() API.
+
+3. MANAGE LISTINGS PAGE — Hardcoded MOCK Data
+   File: ManageListings.jsx (Lines 5-50)
+   Issue: Uses MOCK_LISTINGS hardcoded array. Approve/Reject actions are
+          LOCAL-ONLY — nothing persisted to the server.
+   Fix: Replace MOCK_LISTINGS with getAllAdminListings() API call, wire
+        handleAction() to updateListingStatusAdmin().
+
+─── 🟡 MAJOR (Frontend-Only / Simulated Logic) ────────────────────────────────
+
+4. CONTACT US FORM — Simulated Submission
+   File: ContactUs.jsx (Lines 17-25)
+   Issue: handleSubmit uses setTimeout() to fake success. No API call, no
+          backend route, no email. "Live Chat Support" button does nothing.
+   Fix: Create /api/contact backend endpoint or integrate Nodemailer.
+
+5. PROMOTE PROPERTY — Simulated Payment
+   File: PromoteProperty.jsx (Lines 41-49)
+   Issue: Payment is setTimeout() — no real payment gateway. Property list
+          is hardcoded dropdown, not fetched from owner's listings.
+   Fix: Integrate real payment gateway (Stripe/PayHere), load owner listings.
+
+6. REVIEW PAGE — Mock Submission
+   File: ReviewPage.jsx (Lines 24-32)
+   Issue: handleSubmit doesn't call any API — just navigates to /my-bookings.
+          Review data (rating, text, categories) is NEVER sent to the server.
+          Note: addReview() exists in api.js but is NOT used here.
+   Fix: Call addReview(listingId, reviewData) in submit handler.
+
+7. REPORT MODAL — Frontend-Only
+   File: ReportModal.jsx (Lines 28-38)
+   Issue: Comment says "In a real application, submit the report to an API here."
+          Report data is NEVER sent to the server. No backend route for reports.
+   Fix: Create /api/reports backend endpoint, call it from handleSubmit.
+
+8. VIRTUAL TOUR — Static Mock (Not Connected to Listings)
+   File: VirtualTour.jsx
+   Issue: Shows hardcoded Unsplash images. Title hardcoded as "Sunset Apartment
+          - Unit A". Not connected to any listing data. 360° tour is simulated.
+   Fix: Fetch listing data by ID from route params, display actual photos.
+
+─── 🟢 MINOR (Placeholder Buttons / UX Issues) ────────────────────────────────
+
+9. CALENDAR MANAGEMENT — "Coming Soon" Buttons
+   File: CalendarManagement.jsx (Lines 352, 368, 408)
+   Issue: Three buttons show alert("Calendar sync coming soon!") and
+          alert("iCal import coming soon!"). Placeholder features.
+   Fix: Implement calendar sync/iCal import or remove buttons.
+
+10. PROPERTY DETAILS — Inquiry Button is Fake
+    File: PropertyDetails.jsx (Line 819)
+    Issue: "Send Inquiry" button does alert('Inquiry sent!') — no message sent.
+           Should use existing messaging system.
+    Fix: Wire to sendMessage() API to create a real conversation with owner.
+
+11. DATABASE VIEWER — No Auth Protection
+    File: App.jsx (Line 117)
+    Issue: Route /db renders <DatabaseViewer /> WITHOUT <ProtectedRoute> wrapper.
+           ANYONE can access the database viewer without login or admin check.
+           SECURITY VULNERABILITY.
+    Fix: Wrap with <ProtectedRoute role="admin">.
+
+─── SUMMARY ────────────────────────────────────────────────────────────────────
+
+  Severity    | Count | Description
+  ------------|-------|--------------------------------------------------
+  🔴 Critical |   3   | No backend / uses MOCK data instead of real API
+  🟡 Major    |   5   | Frontend-only with simulated actions
+  🟢 Minor    |   3   | Placeholder buttons / UX issues
+  TOTAL       |  11   | Incomplete sections found
+
+RECOMMENDED FIX ORDER:
+  1. ManageUsers & ManageListings — swap MOCK data for real API calls (quick win)
+  2. Forgot/Reset Password — critical user flow, needs backend routes
+  3. DatabaseViewer — security vulnerability, needs auth protection
+  4. ReviewPage — wire to existing addReview() API
+  5. PropertyDetails inquiry — wire to existing sendMessage() API
+  6. ContactUs & ReportModal — create new backend endpoints
+  7. PromoteProperty — payment gateway integration
+  8. VirtualTour — connect to listing data
+  9. CalendarManagement — implement or remove coming soon buttons

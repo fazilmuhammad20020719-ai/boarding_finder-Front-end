@@ -1,66 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { getPagedAdminListings, updateListingStatusAdmin } from '../services/api';
 
-const MOCK_LISTINGS = [
-  {
-    id: "LST-5091",
-    title: "Luxury Loft in City Center",
-    owner: "Elena Rodriguez",
-    address: "123 Main St, Apt 4B, Cityville",
-    price: 1500,
-    type: "Apartment",
-    status: "Pending",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    submittedAt: "2 hours ago"
-  },
-  {
-    id: "LST-5092",
-    title: "Cozy Student Room Near Campus",
-    owner: "Mark Johnson",
-    address: "45 College Ave, Room 12",
-    price: 450,
-    type: "Private Room",
-    status: "Pending",
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    submittedAt: "5 hours ago"
-  },
-  {
-    id: "LST-5093",
-    title: "Spacious Family Home with Garden",
-    owner: "Sarah Williams",
-    address: "789 Oak Lane, Suburbia",
-    price: 2200,
-    type: "House",
-    status: "Approved",
-    image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    submittedAt: "2 days ago"
-  },
-  {
-    id: "LST-5094",
-    title: "Budget Shared Room",
-    owner: "David Chen",
-    address: "101 Budget St, Apt 2",
-    price: 200,
-    type: "Shared Room",
-    status: "Rejected",
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    submittedAt: "3 days ago"
+const PAGE_SIZE = 50;
+
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+
+// image_urls may arrive as an array, a JSON string, or a Postgres array literal
+const firstImage = (raw) => {
+  if (Array.isArray(raw)) return raw[0];
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed[0];
+    } catch {
+      return raw.replace(/^[{[]|[}\]]$/g, '').split(',')[0].trim().replace(/^["']|["']$/g, '');
+    }
   }
-];
+  return null;
+};
+
+const timeAgo = (date) => {
+  const minutes = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+  if (minutes < 60) return `${Math.max(minutes, 1)} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+};
+
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+const toUiListing = (l) => ({
+  id: l.listing_id,
+  title: l.title,
+  owner: l.owner_name,
+  address: l.location,
+  price: Number(l.price),
+  type: l.university ? `Near ${l.university}` : 'Boarding',
+  status: capitalize(l.approval_status || 'pending'),
+  image: firstImage(l.image_urls) || FALLBACK_IMAGE,
+  submittedAt: timeAgo(l.created_at),
+});
 
 const ManageListings = () => {
   const [activeTab, setActiveTab] = useState('Pending');
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const navigate = useNavigate();
 
   const tabs = ['Pending', 'Approved', 'Rejected'];
 
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadPage = async (offset) => {
+    const data = await getPagedAdminListings({ limit: PAGE_SIZE, offset });
+    const page = (data.listings || []).map(toUiListing);
+    setListings(prev => offset === 0 ? page : [...prev, ...page]);
+    setHasMore(Boolean(data.pagination?.hasMore));
+  };
+
+  useEffect(() => {
+    loadPage(0)
+      .catch((err) => setError(err.message || 'Failed to load listings'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    try {
+      await loadPage(listings.length);
+    } catch (err) {
+      alert(err.message || 'Failed to load more listings');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   const filteredListings = listings.filter(listing => listing.status === activeTab);
 
-  const handleAction = (id, newStatus) => {
-    setListings(prev => 
-      prev.map(listing => listing.id === id ? { ...listing, status: newStatus } : listing)
-    );
+  const handleAction = async (id, newStatus) => {
+    setBusyId(id);
+    try {
+      await updateListingStatusAdmin(id, newStatus.toLowerCase());
+      setListings(prev => 
+        prev.map(listing => listing.id === id ? { ...listing, status: newStatus } : listing)
+      );
+    } catch (err) {
+      alert(err.message || 'Failed to update listing status');
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
@@ -104,7 +138,11 @@ const ManageListings = () => {
 
         {/* Listings Grid */}
         <div className="space-y-6">
-          {filteredListings.length === 0 ? (
+          {loading || error ? (
+            <div className={`bg-[#1A1A1A] rounded-[24px] p-12 text-center border border-[#333] ${error ? 'text-red-400' : 'text-white/60'}`}>
+              {loading ? 'Loading listings...' : error}
+            </div>
+          ) : filteredListings.length === 0 ? (
             <div className="bg-[#1A1A1A] rounded-[24px] p-12 text-center border border-[#333] shadow-sm">
               <div className="w-16 h-16 bg-[#111] text-white/40 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
@@ -156,12 +194,14 @@ const ManageListings = () => {
                       <>
                         <button 
                           onClick={() => handleAction(listing.id, 'Approved')}
+                          disabled={busyId === listing.id}
                           className="px-6 py-2 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl shadow-sm transition-colors text-sm cursor-pointer border-none"
                         >
                           Approve Listing
                         </button>
                         <button 
                           onClick={() => handleAction(listing.id, 'Rejected')}
+                          disabled={busyId === listing.id}
                           className="px-6 py-2 bg-[#111] border border-[#333] hover:bg-red-500/20 hover:text-red-500 hover:border-red-500 text-white/80 font-semibold rounded-xl shadow-sm transition-colors text-sm cursor-pointer"
                         >
                           Reject
@@ -171,18 +211,30 @@ const ManageListings = () => {
                     {(activeTab === 'Approved' || activeTab === 'Rejected') && (
                       <button 
                         onClick={() => handleAction(listing.id, 'Pending')}
+                          disabled={busyId === listing.id}
                         className="px-6 py-2 bg-[#111] border border-[#333] hover:bg-[#222] text-white/80 font-semibold rounded-xl shadow-sm transition-colors text-sm cursor-pointer"
                       >
                         Revert to Pending
                       </button>
                     )}
-                    <button className="px-6 py-2 ml-auto bg-[#FACC15]/20 hover:bg-[#FACC15]/30 text-[#FACC15] font-semibold rounded-xl transition-colors text-sm cursor-pointer border-none">
+                    <button onClick={() => navigate(`/property/${listing.id}`)} className="px-6 py-2 ml-auto bg-[#FACC15]/20 hover:bg-[#FACC15]/30 text-[#FACC15] font-semibold rounded-xl transition-colors text-sm cursor-pointer border-none">
                       Review Full Details
                     </button>
                   </div>
                 </div>
               </div>
             ))
+          )}
+          {hasMore && !loading && (
+            <div className="text-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-6 py-2.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-black font-semibold border-none cursor-pointer disabled:opacity-50"
+              >
+                {loadingMore ? 'Loading...' : 'Load more listings'}
+              </button>
+            </div>
           )}
         </div>
 

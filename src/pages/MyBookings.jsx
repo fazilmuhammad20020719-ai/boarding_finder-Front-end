@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getMyBookings } from '../services/api';
+import { getMyBookings, updateBookingStatus } from '../services/api';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -81,6 +81,16 @@ const MyBookings = () => {
     };
     fetchBookings();
   }, []);
+
+  const handleCancel = async (bookingId) => {
+    if (!window.confirm('Cancel this booking request?')) return;
+    try {
+      await updateBookingStatus(bookingId, 'cancelled');
+      setBookings(prev => prev.map(b => b.rawId === bookingId ? { ...b, status: 'cancelled' } : b));
+    } catch (err) {
+      alert(err.message || 'Failed to cancel booking');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('userLoggedIn');
@@ -261,13 +271,21 @@ const MyBookings = () => {
 
                       <div className="flex gap-3">
                         {booking.status === 'pending' && (
-                          <button className="px-4 py-2 bg-transparent border border-[#333] hover:border-red-500/50 hover:bg-red-500/10 text-red-500 font-bold rounded-lg transition-colors cursor-pointer text-xs">
+                          <button onClick={() => handleCancel(booking.rawId)} className="px-4 py-2 bg-transparent border border-[#333] hover:border-red-500/50 hover:bg-red-500/10 text-red-500 font-bold rounded-lg transition-colors cursor-pointer text-xs">
                             Cancel Request
                           </button>
                         )}
-                        {booking.status === 'completed' && (
+                        {(booking.status === 'completed' || booking.status === 'active') && (
                           <button
-                            onClick={() => navigate('/write-review')}
+                            onClick={() => navigate(`/write-review?listing_id=${booking.propertyId}`, {
+                              state: {
+                                listingId: booking.propertyId,
+                                propertyName: booking.propertyName,
+                                image: booking.image,
+                                moveInDate: booking.moveInDate,
+                                durationMonths: booking.durationMonths,
+                              },
+                            })}
                             className="px-4 py-2 bg-transparent border border-[#333] hover:border-[#FACC15]/50 hover:bg-[#FACC15]/10 text-[#FACC15] font-bold rounded-lg transition-colors cursor-pointer text-xs"
                           >
                             Leave Review

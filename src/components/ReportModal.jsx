@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { submitReport } from '../services/api';
 
-const ReportModal = ({ isOpen, onClose, targetType = 'Listing', targetName = 'this item' }) => {
+const ReportModal = ({ isOpen, onClose, targetType = 'Listing', targetId, targetName = 'this item' }) => {
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
@@ -19,22 +22,30 @@ const ReportModal = ({ isOpen, onClose, targetType = 'Listing', targetName = 'th
       // Reset state after closing animation
       setTimeout(() => {
         setSubmitted(false);
+        setError('');
         setReason('');
         setDetails('');
       }, 300);
     }, 200); // match transition duration
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!reason) return;
-    
-    // In a real application, submit the report to an API here.
-    
-    setSubmitted(true);
-    setTimeout(() => {
-      handleClose();
-    }, 2500);
+
+    setSubmitting(true);
+    setError('');
+    try {
+      await submitReport({ targetType, targetId, targetName, reason, details });
+      setSubmitted(true);
+      setTimeout(() => {
+        handleClose();
+      }, 2500);
+    } catch (err) {
+      setError(err.message || 'Failed to submit report');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!isOpen && !isAnimating) return null;
@@ -131,6 +142,10 @@ const ReportModal = ({ isOpen, onClose, targetType = 'Listing', targetName = 'th
                 ></textarea>
               </div>
 
+              {error && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>
+              )}
+
               {/* Footer Actions */}
               <div className="flex gap-3 pt-2">
                 <button
@@ -142,10 +157,10 @@ const ReportModal = ({ isOpen, onClose, targetType = 'Listing', targetName = 'th
                 </button>
                 <button
                   type="submit"
-                  disabled={!reason}
+                  disabled={!reason || submitting}
                   className="w-2/3 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-900/50 disabled:text-white/40 disabled:cursor-not-allowed text-white font-bold rounded-[12px] transition-colors text-sm shadow-sm cursor-pointer border-none"
                 >
-                  Submit Report
+                  {submitting ? 'Submitting...' : 'Submit Report'}
                 </button>
               </div>
             </form>

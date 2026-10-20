@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getDbTables, getDbTable, deleteDbRecord, exportDb } from '../services/api';
 
 const DatabaseViewer = () => {
   const [tables, setTables] = useState([]);
@@ -7,15 +8,11 @@ const DatabaseViewer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
   // Fetch tables on component mount
   useEffect(() => {
     const fetchTables = async () => {
       try {
-        const response = await fetch(`${API_URL}/db/tables`);
-        if (!response.ok) throw new Error('Failed to fetch tables');
-        const result = await response.json();
+        const result = await getDbTables();
         setTables(result.tables);
         if (result.tables.length > 0) {
           fetchTableData(result.tables[0]);
@@ -25,16 +22,14 @@ const DatabaseViewer = () => {
       }
     };
     fetchTables();
-  }, [API_URL]);
+  }, []);
 
   const fetchTableData = async (tableName) => {
     setLoading(true);
     setSelectedTable(tableName);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/db/tables/${tableName}`);
-      if (!response.ok) throw new Error('Failed to fetch table data');
-      const result = await response.json();
+      const result = await getDbTable(tableName);
       setTableData(result);
     } catch (err) {
       setError(err.message);
@@ -47,10 +42,7 @@ const DatabaseViewer = () => {
   const handleDeleteRecord = async (tableName, pkName, pkValue) => {
     if (!window.confirm(`Are you sure you want to permanently delete this record from ${tableName}? This action cannot be undone.`)) return;
     try {
-      const response = await fetch(`${API_URL}/db/tables/${tableName}/${pkName}/${pkValue}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete record');
+      await deleteDbRecord(tableName, pkName, pkValue);
       // Refresh the table data to reflect the deletion
       fetchTableData(tableName);
     } catch (err) {
@@ -58,9 +50,19 @@ const DatabaseViewer = () => {
     }
   };
 
-  const handleExport = (withData) => {
-    const url = `${API_URL}/db/export?withData=${withData}`;
-    window.open(url, '_blank');
+  const handleExport = async (withData) => {
+    try {
+      const data = await exportDb(withData);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `database_export${withData ? '_with_data' : '_schema_only'}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(`Error exporting database: ${err.message}`);
+    }
   };
 
   return (

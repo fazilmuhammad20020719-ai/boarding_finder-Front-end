@@ -1,39 +1,125 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+// ─── Session / access token ──────────────────
+// The short-lived access token lives only in memory (not localStorage), so an
+// XSS payload cannot read a long-lived credential. The refresh token is an
+// HTTP-only cookie the browser sends to /api/auth/refresh.
+let accessToken = null;
+let refreshPromise = null;
+
+export const getAccessToken = () => accessToken;
+export const setAccessToken = (token) => {
+  accessToken = token || null;
+};
+
 /**
- * Generic fetch wrapper with error handling.
+ * Exchange the refresh cookie for a new access token.
+ * Concurrent callers share a single in-flight refresh.
+ * @returns {Promise<string|null>}
  */
-async function request(endpoint, options = {}) {
-  const url = `${API_URL}${endpoint}`;
+export function refreshSession() {
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${API_URL}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "X-CSRF-Token": "boarding-finder-csrf-protection" },
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        setAccessToken(response.ok ? data.token : null);
+        return accessToken;
+      })
+      .catch(() => {
+        setAccessToken(null);
+        return null;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
 
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-Token": "boarding-finder-csrf-protection",
-      ...options.headers,
-    },
-    ...options,
+/**
+ * Low-level authenticated fetch. Retries once after refreshing the session on 401.
+ * Pass `raw: true` to get the Response back instead of parsed JSON.
+ */
+async function authFetch(endpoint, options = {}, { raw = false, retry = true } = {}) {
+  const isFormData = options.body instanceof FormData;
+  const headers = {
+    // Do NOT set Content-Type for FormData — the browser sets the multipart boundary
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    "X-CSRF-Token": "boarding-finder-csrf-protection",
+    ...options.headers,
   };
-
-  // Attach token if available
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const hadToken = !!accessToken;
+  if (hadToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
   }
 
-  const response = await fetch(url, config);
-  const data = await response.json().catch(() => ({})); // gracefully handle empty/non-json responses
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
 
-  if (!response.ok) {
-    // ── Session Expiration UX ──
-    if (response.status === 401) {
-      localStorage.removeItem("token");
+  if (response.status === 401 && retry && !endpoint.startsWith("/auth/login")) {
+    const newToken = await refreshSession();
+    if (newToken) {
+      return authFetch(endpoint, options, { raw, retry: false });
+    }
+    // ── Session Expiration UX ── (only if the user was actually signed in)
+    if (hadToken) {
       window.dispatchEvent(new Event("auth:session-expired"));
     }
-    throw new Error(data.error || data.message || "Something went wrong");
   }
 
+  if (raw) {
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || data.message || "Something went wrong");
+    }
+    return response;
+  }
+
+  const data = await response.json().catch(() => ({})); // gracefully handle empty/non-json responses
+  if (!response.ok) {
+    throw new Error(data.error || data.message || "Something went wrong");
+  }
   return data;
+}
+
+/**
+ * Generic JSON request wrapper with error handling.
+ */
+async function request(endpoint, options = {}) {
+  return authFetch(endpoint, options);
+}
+
+/**
+ * Fetch every page of a paginated list endpoint (server caps each page).
+ * Used by screens that genuinely need the whole collection (maps, dashboards).
+ */
+async function fetchAllPages(endpoint, key, pageSize = 200) {
+  const sep = endpoint.includes("?") ? "&" : "?";
+  let offset = 0;
+  let items = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const data = await request(`${endpoint}${sep}limit=${pageSize}&offset=${offset}`, { method: "GET" });
+    items = items.concat(data[key] || []);
+    if (!data.pagination?.hasMore) return { [key]: items, pagination: data.pagination };
+    offset += pageSize;
+  }
+}
+
+/** Fetch a single page: returns { [key]: rows, pagination: { total, hasMore, ... } } */
+async function fetchPage(endpoint, { limit = 50, offset = 0 } = {}) {
+  return request(`${endpoint}?limit=${limit}&offset=${offset}`, { method: "GET" });
+}
+
+export async function logoutUser() {
+  return request("/auth/logout", { method: "POST" }).catch(() => ({}));
 }
 
 // ─── Auth API Methods ────────────────────────
@@ -49,6 +135,20 @@ export async function loginUser(credentials) {
   return request("/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
+  });
+}
+
+export async function requestPasswordReset(email) {
+  return request("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token, password) {
+  return request("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
   });
 }
 
@@ -68,7 +168,7 @@ export async function createListing(listingData) {
 }
 
 export async function getAllListings() {
-  return request("/listings", { method: "GET" });
+  return fetchAllPages("/listings", "listings");
 }
 
 export async function getListingById(id) {
@@ -135,29 +235,7 @@ export async function uploadListingPhotos(files) {
     formData.append("photos", file);
   });
 
-  const url = `${API_URL}/listings/upload`;
-
-  const token = localStorage.getItem("token");
-  const headers = {
-    "X-CSRF-Token": "boarding-finder-csrf-protection",
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  // Do NOT set Content-Type — browser will set it with the correct multipart boundary
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: formData,
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || "Photo upload failed");
-  }
-
-  return data;
+  return request("/listings/upload", { method: "POST", body: formData });
 }
 
 // ─── Neighborhood API Methods ──────────────────
@@ -250,26 +328,7 @@ export async function uploadVerificationDocs(files) {
     formData.append("documents", file);
   });
 
-  const url = `${API_URL}/auth/upload-verification-docs`;
-  const token = localStorage.getItem("token");
-  const headers = {
-    "X-CSRF-Token": "boarding-finder-csrf-protection",
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: formData,
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || "Document upload failed");
-  }
-  return data;
+  return request("/auth/upload-verification-docs", { method: "POST", body: formData });
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -292,7 +351,11 @@ export async function getVerificationStats() {
 }
 
 export async function getAllUsers() {
-  return request("/admin/users", { method: "GET" });
+  return fetchAllPages("/admin/users", "users");
+}
+
+export async function getUsersPage(page) {
+  return fetchPage("/admin/users", page);
 }
 
 export async function updateUserStatusAdmin(userId, status) {
@@ -310,7 +373,11 @@ export async function updateUserRoleAdmin(userId, role) {
 }
 
 export async function getAllAdminListings() {
-  return request("/admin/listings", { method: "GET" });
+  return fetchAllPages("/admin/listings", "listings");
+}
+
+export async function getPagedAdminListings(page) {
+  return fetchPage("/admin/listings", page);
 }
 
 export async function getPlatformAnalytics() {
@@ -325,7 +392,11 @@ export async function updateListingStatusAdmin(listingId, status) {
 }
 
 export async function getAllAdminBookings() {
-  return request("/admin/bookings", { method: "GET" });
+  return fetchAllPages("/admin/bookings", "bookings");
+}
+
+export async function getPagedAdminBookings(page) {
+  return fetchPage("/admin/bookings", page);
 }
 
 export async function updateBookingStatusAdmin(bookingId, status) {
@@ -336,7 +407,11 @@ export async function updateBookingStatusAdmin(bookingId, status) {
 }
 
 export async function getAllAdminReviews() {
-  return request("/admin/reviews", { method: "GET" });
+  return fetchAllPages("/admin/reviews", "reviews");
+}
+
+export async function getPagedAdminReviews(page) {
+  return fetchPage("/admin/reviews", page);
 }
 
 export async function updateReviewStatusAdmin(reviewId, status) {
@@ -356,7 +431,11 @@ export async function deleteReviewAdmin(reviewId) {
 // Admin Tickets API Methods - HMR force reload
 // ─────────────────────────────────────────────────────────────────
 export async function getAllAdminTickets() {
-  return request("/admin/tickets", { method: "GET" });
+  return fetchAllPages("/admin/tickets", "tickets");
+}
+
+export async function getPagedAdminTickets(page) {
+  return fetchPage("/admin/tickets", page);
 }
 
 export async function updateTicketStatusAdmin(ticketId, status) {
@@ -567,13 +646,49 @@ export const signLease = async (leaseId, signature) => {
 
 // ─── PAYMENTS ─────────────────────────────────────────────────────────────
 
-export const processPayment = async (paymentDetails) => {
-  const data = await request(`/payments/pay`, {
-    method: 'POST',
-    body: JSON.stringify(paymentDetails),
+export const getPaymentConfig = async () => {
+  return request("/payments/config", { method: "GET" });
+};
+
+export const getPromotionPlans = async () => {
+  return request("/payments/promotion-plans", { method: "GET" });
+};
+
+export const startBookingCheckout = async ({ booking_id, amount, payment_type }) => {
+  return request("/payments/checkout/booking", {
+    method: "POST",
+    body: JSON.stringify({ booking_id, amount, payment_type }),
   });
-  if (data.error) throw new Error(data.error);
-  return data;
+};
+
+export const startPromotionCheckout = async ({ listing_id, plan_id }) => {
+  return request("/payments/checkout/promotion", {
+    method: "POST",
+    body: JSON.stringify({ listing_id, plan_id }),
+  });
+};
+
+export const getPaymentOrder = async (orderId) => {
+  return request(`/payments/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+};
+
+/**
+ * Redirect the browser to the PayHere hosted checkout by submitting the
+ * signed form fields returned from one of the checkout endpoints.
+ */
+export const redirectToPayHere = ({ action, fields }) => {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = action;
+  Object.entries(fields).forEach(([name, value]) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
 };
 
 export const getPaymentHistory = async () => {
@@ -640,6 +755,17 @@ export const deleteNotification = async (id) => {
 
 // ─── Calendar API Methods ─────────────────────
 
+export const getIcalLink = async (listingId) => {
+  return request(`/calendar/${listingId}/ical-link`, { method: "GET" });
+};
+
+export const importIcal = async (listingId, url) => {
+  return request(`/calendar/${listingId}/ical-import`, {
+    method: "POST",
+    body: JSON.stringify({ url }),
+  });
+};
+
 export const getCalendarBlocks = async (listingId) => {
   return request(`/calendar/${listingId}`, { method: "GET" });
 };
@@ -660,4 +786,53 @@ export const removeCalendarBlock = async (listingId, blockId) => {
 
 export const getMyListings = async () => {
   return request("/listings/owner/mine", { method: "GET" });
+};
+
+// ─── Verification Documents (private) ────────
+
+/**
+ * Fetch a user's private verification document with the auth token.
+ * Returns a blob object URL (caller must revoke it) and whether it is a PDF.
+ */
+export async function fetchVerificationDoc(userId, index) {
+  const response = await authFetch(`/admin/users/${userId}/verification-docs/${index}`, { method: "GET" }, { raw: true });
+  const blob = await response.blob();
+  return { url: URL.createObjectURL(blob), isPdf: blob.type === "application/pdf" };
+}
+
+// ─── Database Viewer (Admin) ─────────────────
+
+export const getDbTables = async () => {
+  return request("/db/tables", { method: "GET" });
+};
+
+export const getDbTable = async (tableName) => {
+  return request(`/db/tables/${encodeURIComponent(tableName)}`, { method: "GET" });
+};
+
+export const deleteDbRecord = async (tableName, pkName, pkValue) => {
+  return request(
+    `/db/tables/${encodeURIComponent(tableName)}/${encodeURIComponent(pkName)}/${encodeURIComponent(pkValue)}`,
+    { method: "DELETE" }
+  );
+};
+
+export const exportDb = async (withData) => {
+  return request(`/db/export?withData=${withData}`, { method: "GET" });
+};
+
+// ─── Contact & Reports ───────────────────────
+
+export const sendContactMessage = async (data) => {
+  return request("/tickets/contact", {
+    method: "POST",
+    body: JSON.stringify(data), // { name, email, subject, message }
+  });
+};
+
+export const submitReport = async (data) => {
+  return request("/tickets/report", {
+    method: "POST",
+    body: JSON.stringify(data), // { targetType, targetId, targetName, reason, details }
+  });
 };
