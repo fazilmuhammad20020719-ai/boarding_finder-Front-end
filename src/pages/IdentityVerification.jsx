@@ -150,11 +150,10 @@ const IdentityVerification = () => {
                   <button
                     type="submit"
                     disabled={isUploading || !nicFile || !secondFile}
-                    className={`w-full py-4 font-bold rounded-[14px] flex items-center justify-center gap-2 transition-colors text-[15px] tracking-wide shadow-sm mt-2 ${
-                      isUploading || !nicFile || !secondFile
+                    className={`w-full py-4 font-bold rounded-[14px] flex items-center justify-center gap-2 transition-colors text-[15px] tracking-wide shadow-sm mt-2 ${isUploading || !nicFile || !secondFile
                         ? 'bg-[#FACC15]/30 text-black/40 cursor-not-allowed'
                         : 'bg-[#FACC15] hover:bg-[#EAB308] text-black cursor-pointer'
-                    }`}
+                      }`}
                   >
                     {isUploading ? (
                       <>
