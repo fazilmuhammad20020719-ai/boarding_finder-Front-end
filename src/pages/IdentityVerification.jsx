@@ -121,9 +121,19 @@ const IdentityVerification = () => {
                 </h2>
                 <p className="text-white/50 text-[14px] leading-relaxed mb-7 font-normal text-center">
                   {isOwner
-                    ? 'Please upload your NIC (National Identity Card) and Business Registration (BR) document to verify property ownership.'
+                    ? 'Please upload your NIC (National Identity Card) and Business Registration (BR) document / GS Registration doc to verify property ownership.'
                     : 'Please upload your NIC (National Identity Card) and Student ID card to verify your student status.'}
                 </p>
+
+                {/* Previous rejection (reason written by the admin) */}
+                {user?.verification_status === 'rejected' && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-4 rounded-[12px] text-sm mb-5 font-medium">
+                    <div className="font-bold text-red-400 mb-1">Your previous documents were not accepted</div>
+                    {user.verification_note
+                      ? <>Reason: {user.verification_note}</>
+                      : 'Please upload clear, valid copies of both documents.'}
+                  </div>
+                )}
 
                 {/* Error Banner */}
                 {error && (
@@ -141,7 +151,7 @@ const IdentityVerification = () => {
                   />
 
                   <FileUploadBox
-                    label={isOwner ? 'Business Registration (BR) Document' : 'Student ID Card'}
+                    label={isOwner ? 'Business Registration (BR) document / GS Registration doc' : 'Student ID Card'}
                     preview={secondPreview}
                     onChange={(e) => handleFileChange(e, 'second')}
                     inputId="second-upload"
@@ -151,8 +161,8 @@ const IdentityVerification = () => {
                     type="submit"
                     disabled={isUploading || !nicFile || !secondFile}
                     className={`w-full py-4 font-bold rounded-[14px] flex items-center justify-center gap-2 transition-colors text-[15px] tracking-wide shadow-sm mt-2 ${isUploading || !nicFile || !secondFile
-                        ? 'bg-[#FACC15]/30 text-black/40 cursor-not-allowed'
-                        : 'bg-[#FACC15] hover:bg-[#EAB308] text-black cursor-pointer'
+                      ? 'bg-[#FACC15]/30 text-black/40 cursor-not-allowed'
+                      : 'bg-[#FACC15] hover:bg-[#EAB308] text-black cursor-pointer'
                       }`}
                   >
                     {isUploading ? (

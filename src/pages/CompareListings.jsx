@@ -67,7 +67,7 @@ const CompareListings = () => {
             price: `LKR ${Number(item.price).toLocaleString()}`,
             distance: item.distance || "N/A",
             type: (item.type || "").replace('_', ' '),
-            rating: item.avg_rating || item.rating || 4.5,
+            rating: Number(item.avg_rating) || 0,
             reviews: item.review_count || item.reviews || 0,
             amenities: { wifi: hasWifi, ac: hasAc, kitchen: hasKitchen, parking: hasParking },
             availableDate: item.status === 'booked' ? 'Fully Booked' : 'Immediate',

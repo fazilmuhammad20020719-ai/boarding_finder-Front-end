@@ -102,7 +102,7 @@ const MapViewPage = () => {
             name: dbListing.title,
             location: dbListing.location,
             price: Number(dbListing.price),
-            rating: dbListing.avg_rating || 4.5,
+            rating: Number(dbListing.avg_rating) || 0,
             reviews: dbListing.review_count || 0,
             image: displayImage,
             latitude: dbListing.latitude || (6.9271 + (Math.random() - 0.5) * 0.1),

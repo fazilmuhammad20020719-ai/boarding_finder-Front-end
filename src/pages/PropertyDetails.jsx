@@ -202,12 +202,12 @@ const PropertyDetails = () => {
             university: data.university || "Nearby University",
             location: data.location,
             price: Number(data.price) || 0,
-            rating: data.rating || 4.5,
-            reviews: data.reviews || 12,
-            type: data.type || "boarding_house",
+            rating: Number(data.avg_rating) || 0,
+            reviews: Number(data.review_count) || 0,
+            type: data.property_type || "boarding_house",
             gender: data.gender || "mixed",
             amenities: parsedAmenities,
-            distance: data.distance || "0.5 km",
+            distance: data.distance_to_university || "",
             beds: data.beds || 1,
             images: allImages,
             image: allImages[0],
@@ -360,11 +360,16 @@ const PropertyDetails = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-1 bg-[#FACC15]/10 text-[#FACC15] px-3 py-1 rounded-md font-bold text-sm">
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  {listing.rating} <span className="text-[#FACC15]/70 ml-1 font-medium">({listing.reviews} reviews)</span>
+                  {listing.reviews > 0 ? (
+                    <>{listing.rating.toFixed(1)} <span className="text-[#FACC15]/70 ml-1 font-medium">({listing.reviews} {listing.reviews === 1 ? 'review' : 'reviews'})</span></>
+                  ) : (
+                    <span className="font-medium">No reviews yet</span>
+                  )}
                 </div>
-                <span className="bg-[#1A1A1A] border border-[#333] text-white font-bold text-[13px] px-3 py-1 rounded-md capitalize">{listing.gender}</span>
                 <span className="bg-[#1A1A1A] border border-[#333] text-white font-bold text-[13px] px-3 py-1 rounded-md capitalize">{listing.type.replace('_', ' ')}</span>
-                <span className="bg-[#111] border border-[#333] text-white/70 font-bold text-[13px] px-3 py-1 rounded-md">{listing.distance} from campus</span>
+                {listing.distance && (
+                  <span className="bg-[#111] border border-[#333] text-white/70 font-bold text-[13px] px-3 py-1 rounded-md">{listing.distance} from campus</span>
+                )}
               </div>
             </div>
 
@@ -382,7 +387,7 @@ const PropertyDetails = () => {
               </div>
               <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
                 <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                <span className="font-extrabold text-white">{listing.distance}</span>
+                <span className="font-extrabold text-white">{listing.distance || 'Not specified'}</span>
                 <span className="text-xs font-semibold text-white/50">from campus</span>
               </div>
             </div>

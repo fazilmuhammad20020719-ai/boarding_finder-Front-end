@@ -41,7 +41,7 @@ const Earnings = () => {
           </div>
           <div>
             <div className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Owner Dashboard</div>
-            <div className="text-sm font-extrabold">{user?.name || "Roberto Cruz"}</div>
+            <div className="text-sm font-extrabold">{user?.name || "Owner"}</div>
           </div>
         </div>
 

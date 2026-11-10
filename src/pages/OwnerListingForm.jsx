@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { createListing, updateListing, uploadListingPhotos, getListing } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -17,6 +18,7 @@ L.Icon.Default.mergeOptions({
 const OwnerListingForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user, logout } = useAuth();
   const isEditMode = Boolean(id);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
@@ -92,21 +94,23 @@ const OwnerListingForm = () => {
             parsedAmenities = { ...parsedAmenities, ...listing.amenities };
           }
 
+          const savedRules = (listing.house_rules && typeof listing.house_rules === 'object') ? listing.house_rules : {};
+
           setFormData({
             propertyName: listing.title || '',
-            propertyType: 'Dormitory',
+            propertyType: listing.property_type || 'Dormitory',
             description: listing.description || '',
             address: address,
             city: city,
-            nearestUniversity: '', 
-            distance: '',
+            nearestUniversity: listing.university || '',
+            distance: listing.distance_to_university || '',
             latitude: listing.latitude ? parseFloat(listing.latitude) : 6.9271,
             longitude: listing.longitude ? parseFloat(listing.longitude) : 79.8612,
             amenities: parsedAmenities,
-            rules: { noSmoking: false, noPets: false, curfew: false },
+            rules: { noSmoking: !!savedRules.noSmoking, noPets: !!savedRules.noPets, curfew: !!savedRules.curfew },
             monthlyRent: listing.price || '',
             securityDeposit: listing.security_deposit || '',
-            minimumStay: '6',
+            minimumStay: listing.min_stay_months ? String(listing.min_stay_months) : '6',
             photos: listing.image_urls || [],
             photoFiles: [], 
             virtualTourUrl: listing.virtual_tour_url || '',
@@ -178,8 +182,8 @@ const OwnerListingForm = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userLoggedIn');
-    navigate('/');
+    logout();
+    navigate('/login');
   };
 
   const handleInputChange = (e) => {
@@ -267,6 +271,11 @@ const OwnerListingForm = () => {
           amenities: JSON.stringify(formData.amenities),
           image_urls: [...formData.photos.filter(p => p.startsWith('https://')), ...imageUrls],
           virtual_tour_url: formData.virtualTourUrl.trim(),
+          university: formData.nearestUniversity,
+          property_type: formData.propertyType,
+          distance_to_university: formData.distance,
+          min_stay_months: Number(formData.minimumStay),
+          house_rules: formData.rules,
         };
 
         if (isEditMode) {
@@ -358,7 +367,7 @@ const OwnerListingForm = () => {
           </div>
           <div>
             <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">Owner Dashboard</div>
-            <div className="text-xl font-extrabold">Roberto Cruz</div>
+            <div className="text-xl font-extrabold">{user?.name || 'Owner'}</div>
           </div>
         </div>
 

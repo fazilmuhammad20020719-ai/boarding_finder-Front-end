@@ -117,7 +117,7 @@ function App() {
       <Route path="/admin-dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/manage-users" element={<ProtectedRoute role="admin"><ManageUsers /></ProtectedRoute>} />
       <Route path="/manage-listings" element={<ProtectedRoute role="admin"><ManageListings /></ProtectedRoute>} />
-      <Route path="/db" element={<ProtectedRoute role="admin"><DatabaseViewer /></ProtectedRoute>} />
+      <Route path="/db" element={<ProtectedRoute><DatabaseViewer /></ProtectedRoute>} />
 
       {/* ─── 404 Catch-all ─────────────────────── */}
       <Route path="*" element={<NotFound />} />
