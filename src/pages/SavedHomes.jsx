@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getSavedListings, removeSavedListing } from '../services/api';
+import { firstListingImage } from '../utils/imageUrl';
 
 const SavedHomesPage = () => {
   const [listings, setListings] = useState([]);
@@ -100,9 +101,7 @@ const SavedHomesPage = () => {
                 }
               }
               if (!Array.isArray(amenitiesList)) amenitiesList = [];
-              const displayImage = listing.image_urls && listing.image_urls.length > 0
-                ? (listing.image_urls[0].startsWith('http') ? listing.image_urls[0] : `http://localhost:5000${listing.image_urls[0]}`)
-                : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600"; // fallback image
+              const displayImage = firstListingImage(listing.image_urls);
 
               return (
                 <div

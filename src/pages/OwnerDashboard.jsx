@@ -872,7 +872,7 @@ const OwnerDashboard = () => {
                           <div className="text-white/80">{student.university || 'N/A'}</div>
                           <div className="text-xs text-white/60 font-normal">ID: {student.student_id || 'N/A'}</div>
                         </td>
-                        <td className="px-6 py-5 text-white/60">{student.listing_title}</td>
+                        <td className="px-6 py-5 text-white/60">{student.property_name || student.listing_title}</td>
                         <td className="px-6 py-5">
                           {student.account_status === 'active' && <span className="bg-[#10b981]/20 text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">Active Access</span>}
                           {student.account_status === 'paused' && <span className="bg-amber-500/20 text-amber-500 px-3 py-1.5 rounded-full text-xs font-bold">Paused</span>}

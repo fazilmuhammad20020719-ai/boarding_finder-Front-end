@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getConversations, getNotifications } from '../services/api';
+import { getConversations, getNotifications, getSavedListings } from '../services/api';
 import { subscribe } from '../services/realtime';
 
 
@@ -14,6 +14,17 @@ const Navbar = ({ likedCount = 0 }) => {
 
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [savedCount, setSavedCount] = useState(0);
+
+  // Real saved-homes count from the server. Pages pass `likedCount` when it
+  // changes, which only acts as a signal to refresh (some pages used to pass
+  // a placeholder value).
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    getSavedListings()
+      .then((rows) => setSavedCount(Array.isArray(rows) ? rows.length : 0))
+      .catch(() => {});
+  }, [isAuthenticated, likedCount]);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -84,9 +95,10 @@ const Navbar = ({ likedCount = 0 }) => {
         <div className="flex justify-between items-center h-20">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md" />
-            <span className="font-bold text-[22px] text-white tracking-tight">BoardingFinder<span className="text-[#FACC15]">.</span></span>
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md shrink-0" />
+            {/* On narrow phones the logo text would push the icons off screen */}
+            <span className={`font-bold text-lg sm:text-[22px] text-white tracking-tight truncate ${isAuthenticated ? 'hidden min-[400px]:inline' : ''}`}>BoardingFinder<span className="text-[#FACC15]">.</span></span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -112,7 +124,7 @@ const Navbar = ({ likedCount = 0 }) => {
           )}
 
           {/* User Actions & Mobile Hamburger */}
-          <div className="flex items-center gap-4 sm:gap-5">
+          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
             {isAuthenticated ? (
               <>
                 {/* Messages Badge */}
@@ -140,9 +152,9 @@ const Navbar = ({ likedCount = 0 }) => {
                   <svg className="w-6 h-6 text-gray-300 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                   </svg>
-                  {likedCount > 0 && (
+                  {savedCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-black">
-                      {likedCount}
+                      {savedCount}
                     </span>
                   )}
                 </Link>

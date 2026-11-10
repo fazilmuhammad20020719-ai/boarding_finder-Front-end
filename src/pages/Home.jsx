@@ -76,15 +76,15 @@ const mapListing = (dbListing) => {
   return {
     id: dbListing.listing_id,
     name: dbListing.title,
-    university: dbListing.university || 'Nearby University',
+    university: dbListing.university || 'University not specified',
     location: dbListing.location,
     price: Number(dbListing.price) || 0,
     rating: Number(dbListing.avg_rating) || 0,
     reviews: Number(dbListing.review_count) || 0,
-    type: dbListing.type || 'boarding_house',
-    gender: dbListing.gender || 'mixed',
+    // "Private Room" → "private_room"
+    type: dbListing.property_type ? dbListing.property_type.toLowerCase().replace(/\s+/g, '_') : 'not_specified',
     amenities: parsedAmenities,
-    distance: dbListing.distance || 'N/A',
+    distance: dbListing.distance_to_university || 'N/A',
     beds: dbListing.beds || 1,
     image: imageUrl,
     isFullyBooked: dbListing.status === 'booked',
@@ -315,14 +315,6 @@ const HomePage = () => {
                     <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                       LKR {listing.price.toLocaleString()}/mo
                     </span>
-                    <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
-                      ? 'bg-[#ea4335] text-white'
-                      : listing.gender === 'male'
-                        ? 'bg-[#4285f4] text-white'
-                        : 'bg-[#845ef7] text-white'
-                      }`}>
-                      {listing.gender}
-                    </span>
                   </div>
 
                   <button
@@ -433,7 +425,7 @@ const HomePage = () => {
                 {
                   step: "Step 01",
                   title: "Search & Filter",
-                  desc: "Search for boarding houses near your university. Filter by price, gender policy, facilities, and more.",
+                  desc: "Search for boarding houses near your university. Filter by price, property type, facilities, and more.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                       <circle cx="11" cy="11" r="8" />

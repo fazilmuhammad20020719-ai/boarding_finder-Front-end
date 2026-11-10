@@ -80,15 +80,15 @@ const mapListing = (dbListing) => {
   return {
     id: dbListing.listing_id,
     name: dbListing.title,
-    university: dbListing.university || 'Nearby University',
+    university: dbListing.university || 'University not specified',
     location: dbListing.location,
     price: Number(dbListing.price) || 0,
     rating: Number(dbListing.avg_rating) || 0,
     reviews: Number(dbListing.review_count) || 0,
-    type: dbListing.type || 'boarding_house',
-    gender: dbListing.gender || 'mixed',
+    // "Private Room" → "private_room", matching the type filter keys
+    type: dbListing.property_type ? dbListing.property_type.toLowerCase().replace(/\s+/g, '_') : 'not_specified',
     amenities: parsedAmenities,
-    distance: dbListing.distance || 'N/A',
+    distance: dbListing.distance_to_university || 'N/A',
     beds: dbListing.beds || 1,
     image: imageUrl,
     isFullyBooked: dbListing.status === 'booked',
@@ -137,8 +137,8 @@ const SearchPage = () => {
   });
   const [typeFilter, setTypeFilter] = useState({
     dormitory: false,
-    boarding_house: false,
-    studio_unit: false
+    apartment: false,
+    private_room: false
   });
   const [facilitiesFilter, setFacilitiesFilter] = useState({
     wifi: false,
@@ -175,7 +175,8 @@ const SearchPage = () => {
         listing.location.toLowerCase().includes(searchQuery.toLowerCase());
 
       // Price
-      const matchesPrice = listing.price <= maxPrice;
+      // The slider's top position means "no limit"
+      const matchesPrice = maxPrice >= 30000 || listing.price <= maxPrice;
 
       // Gender
       const activeGenders = Object.keys(genderFilter).filter(k => genderFilter[k]);
@@ -298,7 +299,7 @@ const SearchPage = () => {
                   </label>
                   <input
                     type="range"
-                    min="5000"
+                    min="1000"
                     max="30000"
                     step="500"
                     value={maxPrice}
@@ -306,40 +307,17 @@ const SearchPage = () => {
                     className="w-full h-1.5 bg-[#333] rounded-lg appearance-none cursor-pointer accent-[#FACC15]"
                   />
                   <div className="flex justify-between items-center mt-2 text-[11px] font-bold text-white/40">
-                    <span>LKR 5,000</span>
-                    <span>LKR 30,000</span>
+                    <span>LKR 1,000</span>
+                    <span>LKR 30,000+</span>
                   </div>
                   <div className="text-center mt-2">
-                    <span className="text-[#FACC15] font-extrabold text-sm">LKR {maxPrice.toLocaleString()}</span>
+                    <span className="text-[#FACC15] font-extrabold text-sm">{maxPrice >= 30000 ? 'Any price' : `Up to LKR ${maxPrice.toLocaleString()}`}</span>
                   </div>
                 </div>
 
                 <hr className="border-[#333]" />
 
-                {/* Gender Policy */}
-                <div>
-                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">
-                    Gender Policy
-                  </label>
-                  <div className="space-y-2.5">
-                    {['Male', 'Female', 'Mixed'].map((g) => {
-                      const key = g.toLowerCase();
-                      return (
-                        <label key={g} className="flex items-center gap-3 text-[14px] text-white/70 font-semibold cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={genderFilter[key]}
-                            onChange={() => setGenderFilter({ ...genderFilter, [key]: !genderFilter[key] })}
-                            className="w-4.5 h-4.5 rounded border-[#333] text-[#FACC15] focus:ring-[#FACC15]/20 cursor-pointer bg-[#111]"
-                          />
-                          {g}
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <hr className="border-[#333]" />
+                {/* (Gender policy filter removed: listings don't record a gender policy yet) */}
 
                 {/* Type */}
                 <div>
@@ -349,8 +327,8 @@ const SearchPage = () => {
                   <div className="space-y-2.5">
                     {[
                       { key: 'dormitory', label: 'Dormitory' },
-                      { key: 'boarding_house', label: 'Boarding House' },
-                      { key: 'studio_unit', label: 'Studio Unit' }
+                      { key: 'apartment', label: 'Apartment' },
+                      { key: 'private_room', label: 'Private Room' }
                     ].map((t) => (
                       <label key={t.key} className="flex items-center gap-3 text-[14px] text-white/70 font-semibold cursor-pointer select-none">
                         <input
@@ -440,14 +418,6 @@ const SearchPage = () => {
                         <div className="absolute bottom-4 left-4 z-20 flex gap-2">
                           <span className="bg-[#1A1A1A] border border-[#333] text-[#FACC15] text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                             LKR {listing.price.toLocaleString()}/mo
-                          </span>
-                          <span className={`text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md capitalize ${listing.gender === 'female'
-                              ? 'bg-[#ea4335] text-white'
-                              : listing.gender === 'male'
-                                ? 'bg-[#4285f4] text-white'
-                                : 'bg-[#845ef7] text-white'
-                            }`}>
-                            {listing.gender}
                           </span>
                         </div>
 

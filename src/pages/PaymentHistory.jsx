@@ -114,11 +114,13 @@ const PaymentHistory = () => {
           </div>
           <div className="bg-[#111] p-6 rounded-2xl shadow-sm border border-[#333] text-white relative overflow-hidden">
             <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#333]/30 rounded-full blur-xl pointer-events-none"></div>
-            <div className="text-sm font-bold text-white/60 uppercase tracking-wider mb-2">Active Payment Method</div>
-            <div className="text-xl font-bold flex items-center gap-3 text-[#FACC15]">
+            <div className="text-sm font-bold text-white/60 uppercase tracking-wider mb-2">Payment Method</div>
+            {/* No cards are stored: each payment goes through PayHere's secure checkout */}
+            <div className="text-xl font-bold flex items-center gap-3 text-[#FACC15]" hidden>
               <svg className="w-8 h-8 opacity-80" viewBox="0 0 36 24" fill="none"><rect width="36" height="24" rx="4" fill="#222" /><path d="M12.986 16.963h2.646l1.677-10.42h-2.646l-1.677 10.42zm11.396-10.2c-.417-.193-1.077-.4-1.855-.4-2.023 0-3.447 1.055-3.46 2.565-.022 1.114 1.026 1.737 1.804 2.115.795.385 1.062.632 1.062.977 0 .53-.65.772-1.25.772-.828 0-1.272-.124-1.954-.424l-.275-.128-.37 2.268c.484.22 1.385.412 2.316.42 2.164 0 3.56-1.045 3.585-2.665.01-1.348-1.253-1.84-1.84-2.12-.705-.347-1.14-.58-1.14-.932 0-.494.55-.785 1.206-.785.668 0 1.142.14 1.52.298l.183.085.47-2.146zm-9.395 10.2h2.825c.348 0 .65-.198.78-.507l3.32-8.543-1.202-1.37h-2.11c-.33 0-.61.137-.744.43L12.572 16.96h-2.585zm-2.88-10.155l-2.035 6.94-1.03-5.58c-.147-.648-.718-1.36-1.353-1.36H.488l-.066.304c1.28.274 2.73.93 3.614 1.638l3.18 8.058 2.65-10h-2.126z" fill="#FACC15" /></svg>
-              •••• 4242
             </div>
+            <div className="text-base font-bold text-[#FACC15]">PayHere checkout</div>
+            <div className="text-xs text-white/50 mt-1">Card, eZ Cash, mCash or bank transfer, chosen at payment time</div>
           </div>
         </div>
 

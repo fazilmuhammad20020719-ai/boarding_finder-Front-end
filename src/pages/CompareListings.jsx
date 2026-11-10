@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getSavedListings, removeSavedListing, getAccessToken } from '../services/api';
+import { firstListingImage } from '../utils/imageUrl';
 
 const CheckIcon = () => (
   <svg className="w-6 h-6 text-[#10b981] mx-auto" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -52,26 +53,22 @@ const CompareListings = () => {
 
           // Map amenities to specific checks
           const hasWifi = amenitiesList.some(a => (typeof a === 'string' && a.toLowerCase().includes('wifi')));
-          const hasAc = amenitiesList.some(a => (typeof a === 'string' && a.toLowerCase().includes('ac') || a.toLowerCase().includes('air')));
+          const hasAc = amenitiesList.some(a => typeof a === 'string' && (a.toLowerCase() === 'ac' || a.toLowerCase().includes('air')));
           const hasKitchen = amenitiesList.some(a => (typeof a === 'string' && a.toLowerCase().includes('kitchen')));
           const hasParking = amenitiesList.some(a => (typeof a === 'string' && a.toLowerCase().includes('parking')));
-
-          const displayImage = item.image_urls && item.image_urls.length > 0
-            ? (item.image_urls[0].startsWith('http') ? item.image_urls[0] : `http://localhost:5000${item.image_urls[0]}`)
-            : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
 
           return {
             id: item.listing_id,
             name: item.title,
-            image: displayImage,
+            image: firstListingImage(item.image_urls),
             price: `LKR ${Number(item.price).toLocaleString()}`,
-            distance: item.distance || "N/A",
-            type: (item.type || "").replace('_', ' '),
+            distance: item.distance_to_university || "Not specified",
+            type: item.property_type || "Not specified",
             rating: Number(item.avg_rating) || 0,
-            reviews: item.review_count || item.reviews || 0,
+            reviews: Number(item.review_count) || 0,
             amenities: { wifi: hasWifi, ac: hasAc, kitchen: hasKitchen, parking: hasParking },
-            availableDate: item.status === 'booked' ? 'Fully Booked' : 'Immediate',
-            deposit: "1 Month" // Can be mapped to real DB field if it exists
+            availableDate: item.is_paused ? 'Not available' : 'Immediate',
+            deposit: item.security_deposit ? `LKR ${Number(item.security_deposit).toLocaleString()}` : "Not specified"
           };
         });
 

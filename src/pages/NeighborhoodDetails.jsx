@@ -157,6 +157,8 @@ const NeighborhoodDetails = () => {
             </Link>
             <h1 className="text-2xl font-extrabold tracking-tight text-white capitalize">Neighborhood Guide</h1>
             <p className="text-sm text-white/60 mt-1 capitalize">Explore what's around {listing.title}.</p>
+            {/* The places below are generated examples, not real map data */}
+            <p className="text-xs text-amber-400/80 mt-2">Nearby places shown are illustrative examples; check a map for exact locations and distances.</p>
           </div>
 
           {/* Category Filters */}

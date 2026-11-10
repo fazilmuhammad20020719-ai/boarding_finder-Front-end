@@ -62,6 +62,17 @@ const MyBookings = () => {
               propertyName: b.title,
               location: b.location,
               status: b.status === 'pending' ? 'pending' : (b.status === 'approved' ? 'active' : b.status),
+              // Which tab the booking belongs to, based on its dates
+              phase: (() => {
+                if (b.status === 'pending') return 'upcoming';
+                if (b.status !== 'approved') return b.status;
+                const start = new Date(b.move_in_date);
+                const end = new Date(start); end.setMonth(end.getMonth() + Number(b.duration_months || 0));
+                const now = new Date();
+                if (now < start) return 'upcoming';
+                if (now >= end) return 'completed';
+                return 'active';
+              })(),
               moveInDate: new Date(b.move_in_date).toLocaleDateString(),
               durationMonths: b.duration_months,
               totalPrice: parseFloat(b.total_amount),
@@ -86,7 +97,7 @@ const MyBookings = () => {
     if (!window.confirm('Cancel this booking request?')) return;
     try {
       await updateBookingStatus(bookingId, 'cancelled');
-      setBookings(prev => prev.map(b => b.rawId === bookingId ? { ...b, status: 'cancelled' } : b));
+      setBookings(prev => prev.map(b => b.rawId === bookingId ? { ...b, status: 'cancelled', phase: 'cancelled' } : b));
     } catch (err) {
       alert(err.message || 'Failed to cancel booking');
     }
@@ -108,13 +119,11 @@ const MyBookings = () => {
   const filterBookings = () => {
     switch (activeTab) {
       case 'upcoming':
-        return bookings.filter(b => b.status === 'pending');
       case 'active':
-        return bookings.filter(b => b.status === 'active');
       case 'completed':
-        return bookings.filter(b => b.status === 'completed');
+        return bookings.filter(b => b.phase === activeTab);
       case 'cancelled':
-        return bookings.filter(b => b.status === 'cancelled');
+        return bookings.filter(b => b.status === 'cancelled' || b.status === 'rejected');
       default:
         return bookings;
     }
@@ -148,10 +157,10 @@ const MyBookings = () => {
         {/* Tabs */}
         <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-8 bg-[#111] p-2 rounded-2xl shadow-sm border border-[#333] w-fit">
           {[
-            { id: 'upcoming', label: 'Upcoming', count: bookings.filter(b => b.status === 'pending').length },
-            { id: 'active', label: 'Active', count: bookings.filter(b => b.status === 'active').length },
-            { id: 'completed', label: 'Completed', count: bookings.filter(b => b.status === 'completed').length },
-            { id: 'cancelled', label: 'Cancelled', count: bookings.filter(b => b.status === 'cancelled').length }
+            { id: 'upcoming', label: 'Upcoming', count: bookings.filter(b => b.phase === 'upcoming').length },
+            { id: 'active', label: 'Active', count: bookings.filter(b => b.phase === 'active').length },
+            { id: 'completed', label: 'Completed', count: bookings.filter(b => b.phase === 'completed').length },
+            { id: 'cancelled', label: 'Cancelled', count: bookings.filter(b => b.status === 'cancelled' || b.status === 'rejected').length }
           ].map(tab => (
             <button
               key={tab.id}
@@ -201,7 +210,9 @@ const MyBookings = () => {
                   <div className="sm:w-64 h-48 sm:h-auto bg-black relative flex-shrink-0 cursor-pointer overflow-hidden border-r border-[#333]" onClick={() => navigate(`/property/${booking.propertyId}`)}>
                     <img src={booking.image} alt={booking.propertyName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute top-4 left-4">
-                      {getStatusBadge(booking.status)}
+                      {booking.status === 'active' && booking.phase === 'upcoming'
+                        ? <span className="bg-[#10b981]/10 text-[#10b981] px-3 py-1 rounded-full text-xs font-bold border border-[#10b981]/20">Approved</span>
+                        : getStatusBadge(booking.status)}
                     </div>
                   </div>
 

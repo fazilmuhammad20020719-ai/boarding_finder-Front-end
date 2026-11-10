@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { addReview } from '../services/api';
+import { addReview, getListingById } from '../services/api';
+import { firstListingImage } from '../utils/imageUrl';
 
 const ReviewPage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,15 @@ const ReviewPage = () => {
   useEffect(() => {
     if (!listingId) navigate('/my-bookings', { replace: true });
   }, [listingId, navigate]);
+
+  // When opened by link (not from My Bookings), load the listing's name and photo
+  const [listingInfo, setListingInfo] = useState(null);
+  useEffect(() => {
+    if (!listingId || (booking.propertyName && booking.image)) return;
+    getListingById(listingId)
+      .then((res) => setListingInfo({ name: res.listing?.title, image: firstListingImage(res.listing?.image_urls, 400) }))
+      .catch(() => {});
+  }, [listingId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,11 +113,11 @@ const ReviewPage = () => {
           {/* Header Summary */}
           <div className="bg-[#111] p-8 text-white flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
             <div className="w-24 h-24 rounded-2xl bg-black/50 border border-[#333] p-1 flex-shrink-0">
-              <img src={booking.image || "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200"} alt="Property" className="w-full h-full object-cover rounded-xl" />
+              <img src={booking.image || listingInfo?.image || "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200"} alt="Property" className="w-full h-full object-cover rounded-xl" />
             </div>
             <div>
               <div className="text-xs font-bold text-white/80 uppercase tracking-wider mb-1">Write a Review for</div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">{booking.propertyName || 'Your Stay'}</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">{booking.propertyName || listingInfo?.name || 'Your Stay'}</h1>
               {booking.moveInDate && (
                 <p className="text-white/80 font-medium">Moved in: {booking.moveInDate}{booking.durationMonths ? ` (${booking.durationMonths} Months)` : ''}</p>
               )}

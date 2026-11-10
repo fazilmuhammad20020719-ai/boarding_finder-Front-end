@@ -208,6 +208,7 @@ const PropertyDetails = () => {
             gender: data.gender || "mixed",
             amenities: parsedAmenities,
             distance: data.distance_to_university || "",
+            minStay: Number(data.min_stay_months) || 1,
             beds: data.beds || 1,
             images: allImages,
             image: allImages[0],
@@ -764,6 +765,13 @@ const PropertyDetails = () => {
                   >
                     View My Bookings
                   </button>
+
+                  <button
+                    onClick={() => setIsReportOpen(true)}
+                    className="w-full py-2 bg-transparent text-white/40 hover:text-red-400 text-xs font-semibold transition-colors cursor-pointer border-none"
+                  >
+                    Report this listing
+                  </button>
                 </div>
               ) : (
                 <>
@@ -783,7 +791,7 @@ const PropertyDetails = () => {
                     <div>
                       <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Duration</label>
                       <div className="grid grid-cols-4 gap-2">
-                        {['3', '6', '9', '12'].map(dur => (
+                        {['3', '6', '9', '12'].filter(dur => Number(dur) >= (listing.minStay || 1)).map(dur => (
                           <button
                             key={dur}
                             onClick={() => setActiveDuration(dur)}

@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 import { getListingById } from '../services/api';
 
 const BookingConfirmation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const { user } = useAuth();
   const [showContent, setShowContent] = useState(false);
   const [checkAnimDone, setCheckAnimDone] = useState(false);
   const confettiRef = useRef(null);
@@ -17,8 +20,11 @@ const BookingConfirmation = () => {
   const propertyId = searchParams.get('propertyId');
   const duration = parseInt(searchParams.get('duration') || '6');
   const paymentMethod = searchParams.get('payment') || 'Cash on Move-in';
-  const bookingName = searchParams.get('name') || 'Juan Fernando';
-  const bookingEmail = searchParams.get('email') || 'juan.fernando@mrt.ac.lk';
+  // Personal details and the created booking arrive in router state (not the URL)
+  const routeState = location.state || {};
+  const createdBooking = routeState.booking || null;
+  const bookingName = routeState.name || user?.name || '';
+  const bookingEmail = routeState.email || user?.email || '';
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -63,23 +69,18 @@ const BookingConfirmation = () => {
           }
         }
 
-        // Amenities parsing
+        // Amenities are stored as a JSON object of flags, e.g. {"wifi":true,"ac":false}
+        const AMENITY_LABELS = { wifi: 'WiFi', ac: 'Air Conditioning', kitchen: 'Shared Kitchen', laundry: 'Laundry', parking: 'Parking', cctv: 'CCTV' };
         let parsedAmenities = [];
-        if (data.amenities) {
-          try {
-            if (Array.isArray(data.amenities)) {
-              parsedAmenities = data.amenities;
-            } else if (typeof data.amenities === 'string') {
-              if (data.amenities.startsWith('{') && data.amenities.endsWith('}')) {
-                const cleaned = data.amenities.slice(1, -1);
-                parsedAmenities = cleaned ? cleaned.split(',').map(a => a.trim().replace(/^"|"$/g, '')) : [];
-              } else {
-                parsedAmenities = JSON.parse(data.amenities);
-              }
-            }
-          } catch (e) {
-            parsedAmenities = typeof data.amenities === 'string' ? data.amenities.split(',').map(a => a.trim()) : [];
+        try {
+          const raw = typeof data.amenities === 'string' ? JSON.parse(data.amenities) : data.amenities;
+          if (Array.isArray(raw)) {
+            parsedAmenities = raw.map(String);
+          } else if (raw && typeof raw === 'object') {
+            parsedAmenities = Object.entries(raw).filter(([, on]) => on === true).map(([key]) => AMENITY_LABELS[key] || key);
           }
+        } catch (e) {
+          parsedAmenities = [];
         }
 
         setListing({
@@ -171,7 +172,10 @@ const BookingConfirmation = () => {
   const total = totalRent + securityDeposit;
 
   // Generate a booking reference
-  const bookingRef = `BF-${new Date().getFullYear()}-${String(propertyId).padStart(3, '0')}${String(Math.floor(Math.random() * 9000) + 1000)}`;
+  // Same reference format as My Bookings, from the real booking id
+  const bookingRef = createdBooking?.booking_id
+    ? `BF-BKG-${String(createdBooking.booking_id).padStart(6, '0')}`
+    : 'See My Bookings';
   const bookingDate = new Date().toLocaleDateString('en-LK', { year: 'numeric', month: 'long', day: 'numeric' });
   const bookingTime = new Date().toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' });
 
@@ -435,7 +439,7 @@ const BookingConfirmation = () => {
                     <span className="font-bold text-white">LKR {totalRent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[14px]">
-                    <span className="text-white/60 font-medium">Security Deposit (1 month)</span>
+                    <span className="text-white/60 font-medium">Security Deposit (refundable)</span>
                     <span className="font-bold text-white">LKR {securityDeposit.toLocaleString()}</span>
                   </div>
                 </div>
@@ -443,7 +447,7 @@ const BookingConfirmation = () => {
                 <div className="border-t border-dashed border-[#333] my-4" />
 
                 <div className="flex justify-between items-center">
-                  <span className="text-[16px] font-extrabold text-white">Total Amount</span>
+                  <span className="text-[16px] font-extrabold text-white">Total incl. deposit</span>
                   <span className="text-[20px] font-black text-[#FACC15]">LKR {total.toLocaleString()}</span>
                 </div>
               </div>

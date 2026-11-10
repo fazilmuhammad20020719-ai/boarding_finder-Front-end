@@ -167,7 +167,7 @@ const ManageListings = () => {
                     <div className="flex justify-between items-start mb-2 gap-4">
                       <h2 className="text-xl font-bold text-white line-clamp-1">{listing.title}</h2>
                       <span className="text-lg font-black text-[#FACC15] whitespace-nowrap">
-                        ${listing.price}<span className="text-sm text-white/60 font-medium">/mo</span>
+                        LKR {Number(listing.price).toLocaleString()}<span className="text-sm text-white/60 font-medium">/mo</span>
                       </span>
                     </div>
                     

@@ -77,6 +77,9 @@ const BookingPage = () => {
           ...data,
           parsed_image_url: primaryImage
         });
+        // A duration shorter than the minimum stay can't be booked
+        const min = Number(data.min_stay_months) || 1;
+        setActiveDuration(prev => (Number(prev) < min ? String([3, 6, 9, 12].find(m => m >= min) || min) : prev));
       } catch (error) {
         console.error("Failed to fetch listing:", error);
       }
@@ -98,7 +101,12 @@ const BookingPage = () => {
   const durationMonths = getDurationMonths();
   const rentPrice = parseFloat(listing.price) || 0;
   const securityDeposit = listing.security_deposit ? parseFloat(listing.security_deposit) : rentPrice;
-  const total = (rentPrice * durationMonths) + securityDeposit;
+  const rentTotal = rentPrice * durationMonths; // what the booking records as its total
+  const total = rentTotal + securityDeposit;
+  // Only offer stays that meet the listing's minimum stay
+  const minStay = Number(listing.min_stay_months) || 1;
+  const durationChoices = [3, 6, 9, 12].filter(m => m >= minStay);
+  if (durationChoices.length === 0) durationChoices.push(minStay);
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
@@ -135,7 +143,7 @@ const BookingPage = () => {
                 <span className="font-extrabold text-white">LKR {rentPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-[15px] mt-4 pt-4 border-t border-[#333]">
-                <span className="text-white/60 font-bold">Total</span>
+                <span className="text-white/60 font-bold">Total incl. deposit</span>
                 <span className="font-black text-white">LKR {total.toLocaleString()}</span>
               </div>
             </div>
@@ -200,7 +208,7 @@ const BookingPage = () => {
                         <div>
                           <label className="block text-[11px] font-bold text-[#FACC15] tracking-wider mb-2 uppercase">Duration</label>
                           <div className="grid grid-cols-4 gap-2">
-                            {['3mo', '6mo', '9mo', '12mo'].map(dur => (
+                            {durationChoices.map(m => `${m}mo`).map(dur => (
                               <button
                                 key={dur}
                                 type="button"
@@ -224,7 +232,7 @@ const BookingPage = () => {
                           type="text"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          placeholder="Juan Dela Cruz"
+                          placeholder="Kasun Perera"
                           className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3.5 text-[15px] text-white font-medium focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15] placeholder-white/40"
                           required
                         />
@@ -237,7 +245,7 @@ const BookingPage = () => {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="juan@up.edu.ph"
+                          placeholder="kasun@stu.kln.ac.lk"
                           className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3.5 text-[15px] text-white font-medium focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15] placeholder-white/40"
                           required
                         />
@@ -250,7 +258,7 @@ const BookingPage = () => {
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          placeholder="+63 9XX XXX XXXX"
+                          placeholder="+94 77 123 4567"
                           className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3.5 text-[15px] text-white font-medium focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15] placeholder-white/40"
                           required
                         />
@@ -263,7 +271,7 @@ const BookingPage = () => {
                           type="text"
                           value={university}
                           onChange={(e) => setUniversity(e.target.value)}
-                          placeholder="UP Diliman — BS Computer Science"
+                          placeholder="University of Kelaniya — BSc Computer Science"
                           className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3.5 text-[15px] text-white font-medium focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15] placeholder-white/40"
                           required
                         />
@@ -328,14 +336,17 @@ const BookingPage = () => {
                         try {
                           const messagePayload = `Name: ${fullName} | Email: ${email} | Phone: ${phone} | Uni: ${university} | Requests: ${specialRequests}`;
 
-                          await createBooking({
+                          const created = await createBooking({
                             listing_id: listing.listing_id || id,
                             move_in_date: moveInDate,
                             duration_months: durationMonths,
                             message: messagePayload
                           });
 
-                          navigate(`/booking-confirmation?propertyId=${listing.listing_id || id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}&name=${encodeURIComponent(fullName)}&email=${encodeURIComponent(email)}`);
+                          // Personal details travel in router state, never in the URL
+                          navigate(`/booking-confirmation?propertyId=${listing.listing_id || id}&duration=${durationMonths}&payment=${encodeURIComponent(paymentMethod)}`, {
+                            state: { booking: created.booking, name: fullName, email },
+                          });
                         } catch (err) {
                           console.error(err);
                           alert(err.message || 'Failed to create booking');
@@ -388,7 +399,11 @@ const BookingPage = () => {
                     <span className="font-extrabold text-white">{durationMonths} months</span>
                   </div>
                   <div className="flex justify-between items-center text-[15px]">
-                    <span className="text-white/60 font-medium">Security Deposit</span>
+                    <span className="text-white/60 font-medium">Rent total</span>
+                    <span className="font-extrabold text-white">LKR {rentTotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[15px]">
+                    <span className="text-white/60 font-medium">Security deposit (refundable)</span>
                     <span className="font-extrabold text-white">LKR {securityDeposit.toLocaleString()}</span>
                   </div>
                 </div>
@@ -398,7 +413,7 @@ const BookingPage = () => {
 
                 {/* Total */}
                 <div className="flex justify-between items-center text-lg">
-                  <span className="font-extrabold text-white">Total</span>
+                  <span className="font-extrabold text-white">Total incl. deposit</span>
                   <span className="font-black text-[#FACC15]">LKR {total.toLocaleString()}</span>
                 </div>
 

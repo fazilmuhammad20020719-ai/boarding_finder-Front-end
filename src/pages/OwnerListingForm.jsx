@@ -67,6 +67,8 @@ const OwnerListingForm = () => {
   });
 
   const [errors, setErrors] = useState({});
+  // The map starts on a default Colombo point; owners must place the pin themselves
+  const [pinPlaced, setPinPlaced] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(''); // '', 'uploading', 'done', 'error'
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,6 +130,7 @@ const OwnerListingForm = () => {
     useMapEvents({
       click(e) {
         setFormData(prev => ({ ...prev, latitude: e.latlng.lat, longitude: e.latlng.lng }));
+        setPinPlaced(true);
       },
     });
     return null;
@@ -151,6 +154,7 @@ const OwnerListingForm = () => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
           }));
+          setPinPlaced(true);
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -173,6 +177,7 @@ const OwnerListingForm = () => {
           latitude: parseFloat(data[0].lat),
           longitude: parseFloat(data[0].lon)
         }));
+        setPinPlaced(true);
       } else {
         alert("Location not found.");
       }
@@ -216,6 +221,7 @@ const OwnerListingForm = () => {
       if (!formData.address.trim()) newErrors.address = 'Address is required';
       if (!formData.city.trim()) newErrors.city = 'City is required';
       if (!formData.nearestUniversity.trim()) newErrors.nearestUniversity = 'Nearest university is required';
+      if (!pinPlaced && !isEditMode) newErrors.mapPin = 'Please place the pin on your property: click the map, search an area, or use your current location';
     } else if (currentStep === 4) {
       if (!formData.monthlyRent) newErrors.monthlyRent = 'Monthly rent is required';
       if (!formData.securityDeposit) newErrors.securityDeposit = 'Security deposit is required';
@@ -698,6 +704,7 @@ const OwnerListingForm = () => {
                     </div>
                   </div>
                   <p className="text-xs text-white/60 mt-2 text-center">Selected Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}</p>
+                  {errors.mapPin && <p className="text-red-500 text-xs mt-1 font-semibold text-center">{errors.mapPin}</p>}
                 </div>
               </div>
             </div>

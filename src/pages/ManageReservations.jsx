@@ -56,7 +56,8 @@ const ManageReservations = () => {
             checkOut: moveOut.toLocaleDateString(),
             guests: 1, // You might want to update this if you track guest count in the DB
             totalPrice: parseFloat(b.total_amount) || 0,
-            status: status
+            status: status,
+            leaseStatus: b.lease_status || null
           };
         });
         setReservations(mapped);
@@ -96,6 +97,7 @@ const ManageReservations = () => {
     try {
       const { generateLease } = await import('../services/api');
       await generateLease(bookingId);
+      setReservations(prev => prev.map(r => r.id === bookingId ? { ...r, leaseStatus: 'pending' } : r));
       alert("Lease generated successfully and is ready for the student to sign!");
     } catch (err) {
       alert(err.message || "Failed to generate lease. Maybe one already exists?");
@@ -338,7 +340,7 @@ const ManageReservations = () => {
                   </div>
                   <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333]">
                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Total Payout</p>
-                    <p className="text-lg font-black text-[#FACC15]">${res.totalPrice.toLocaleString()}</p>
+                    <p className="text-lg font-black text-[#FACC15]">LKR {res.totalPrice.toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -362,12 +364,18 @@ const ManageReservations = () => {
                   )}
                   {activeTab === 'Upcoming' && (
                     <>
-                      <button
-                        onClick={() => handleGenerateLease(res.id)}
-                        className="flex-1 lg:flex-none px-6 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl shadow-sm transition-colors text-sm border-none cursor-pointer"
-                      >
-                        Generate Lease
-                      </button>
+                      {res.leaseStatus ? (
+                        <span className="flex-1 lg:flex-none px-6 py-2.5 bg-[#10b981]/15 text-[#10b981] font-semibold rounded-xl text-sm text-center">
+                          {res.leaseStatus === 'signed' ? 'Lease signed' : 'Lease sent'}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleGenerateLease(res.id)}
+                          className="flex-1 lg:flex-none px-6 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white font-semibold rounded-xl shadow-sm transition-colors text-sm border-none cursor-pointer"
+                        >
+                          Generate Lease
+                        </button>
+                      )}
                       <Link to="/messages">
                         <button className="flex-1 lg:flex-none px-6 py-2.5 bg-[#111] border border-[#333] hover:bg-white/10 text-white/90 font-semibold rounded-xl transition-colors text-sm cursor-pointer">
                           Message

@@ -57,7 +57,7 @@ const VerificationDocPreview = ({ userId, index }) => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: currentAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('verifications');
 
   const [stats, setStats] = useState(null);
@@ -222,7 +222,14 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const data = await getVerificationStats();
-      setStats(data);
+      // Server sends { stats: { total, verified, pending, rejected, awaiting_docs } }
+      const s = data?.stats || {};
+      setStats({
+        total_users: Number(s.total) || 0,
+        verified_users: Number(s.verified) || 0,
+        pending_verifications: Number(s.pending) || 0,
+        rejected_verifications: Number(s.rejected) || 0,
+      });
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     } finally {
@@ -591,7 +598,16 @@ const AdminDashboard = () => {
             Review Moderation
           </button>
 
-
+          <button
+            onClick={() => setActiveTab('tickets')}
+            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'tickets' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+            Tickets & Reports
+            {allTickets.filter(t => t.status === 'open').length > 0 && (
+              <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{allTickets.filter(t => t.status === 'open').length}</span>
+            )}
+          </button>
 
           <button
             onClick={() => setActiveTab('announcements')}
@@ -810,7 +826,9 @@ const AdminDashboard = () => {
                               {new Date(user.created_at).toLocaleDateString()}
                             </td>
                             <td className="px-6 py-5 flex gap-2">
-                              {(!user.account_status || user.account_status === 'active') ? (
+                              {currentAdmin && user.id === currentAdmin.id ? (
+                                <span className="text-xs text-white/40">You</span>
+                              ) : (!user.account_status || user.account_status === 'active') ? (
                                 <>
                                   <button onClick={() => handleUpdateStatus(user.id, 'paused')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg transition-colors border-none cursor-pointer">Suspend</button>
                                   <button onClick={() => handleUpdateStatus(user.id, 'removed')} disabled={isProcessing} className="px-3 py-1.5 text-xs font-bold bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors border-none cursor-pointer">Ban</button>
@@ -873,7 +891,7 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td className="px-6 py-5 font-bold text-white">
-                          ${listing.price}/mo
+                          LKR {Number(listing.price).toLocaleString()}/mo
                         </td>
                         <td className="px-6 py-5">
                           <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${listing.approval_status === 'approved' ? 'bg-[#10b981]/20 text-[#10b981]' : listing.approval_status === 'pending' ? 'bg-amber-500/20 text-amber-500' : listing.approval_status === 'rejected' ? 'bg-red-500/20 text-red-500' : 'bg-[#333] text-white/60'}`}>
@@ -967,7 +985,7 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td className="px-6 py-5 font-bold text-white">
-                          ${booking.total_amount}
+                          LKR {Number(booking.total_amount).toLocaleString()}
                         </td>
                         <td className="px-6 py-5">
                           <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${booking.status === 'approved' ? 'bg-[#10b981]/20 text-[#10b981]' : booking.status === 'pending' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'}`}>
@@ -1097,7 +1115,81 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* ─── Tickets & Reports: support tickets, Contact Us messages, content reports ─── */}
+        {activeTab === 'tickets' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111]">
+              <h2 className="text-xl font-bold text-white">Tickets & Reports</h2>
+              <select
+                value={ticketFilterStatus}
+                onChange={(e) => setTicketFilterStatus(e.target.value)}
+                className="px-4 py-2 bg-[#1A1A1A] text-white text-sm font-semibold border border-[#333] rounded-xl outline-none focus:border-amber-500/50"
+              >
+                <option value="all">All Statuses</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
 
+            {loadingTickets ? (
+              <div className="p-12 text-center text-white/60">Loading tickets...</div>
+            ) : allTickets.filter(t => ticketFilterStatus === 'all' || t.status === ticketFilterStatus).length === 0 ? (
+              <div className="p-12 text-center text-white/60">No tickets found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[900px]">
+                  <thead>
+                    <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
+                      <th className="px-6 py-5">TYPE</th>
+                      <th className="px-6 py-5">FROM</th>
+                      <th className="px-6 py-5">SUBJECT & DETAILS</th>
+                      <th className="px-6 py-5">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#333]">
+                    {allTickets.filter(t => ticketFilterStatus === 'all' || t.status === ticketFilterStatus).map((ticket) => (
+                      <tr key={ticket.ticket_id} className="hover:bg-[#222]/50 transition-colors align-top">
+                        <td className="px-6 py-5">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${ticket.category === 'report' ? 'bg-red-500/20 text-red-400' : ticket.category === 'contact' ? 'bg-sky-500/20 text-sky-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                            {ticket.category || 'support'}
+                          </span>
+                          <div className="text-xs text-white/40 mt-2">#{ticket.ticket_id} · {new Date(ticket.created_at).toLocaleDateString()}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="font-semibold text-white">{ticket.user_name || 'Guest'}</div>
+                          <div className="text-xs text-white/60">{ticket.user_email}</div>
+                          <div className="text-xs text-white/40 capitalize">{ticket.user_role}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="font-semibold text-white break-words">{ticket.subject}</div>
+                          <div className="text-sm text-white/70 mt-1 max-w-md break-words whitespace-pre-wrap">{ticket.description}</div>
+                          {ticket.target_type === 'listing' && ticket.target_id && (
+                            <a href={`/property/${ticket.target_id}`} className="text-xs text-[#FACC15] mt-2 inline-block">View reported listing →</a>
+                          )}
+                        </td>
+                        <td className="px-6 py-5">
+                          <select
+                            value={ticket.status}
+                            onChange={(e) => handleUpdateTicketStatus(ticket.ticket_id, e.target.value)}
+                            disabled={isProcessing}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold border border-[#333] cursor-pointer outline-none bg-[#111] text-white"
+                          >
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {activeTab === 'announcements' && (
           <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
@@ -1255,7 +1347,7 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-[#1A1A1A] border border-[#333] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="text-white/60 font-semibold text-sm">Total Gross Revenue</h4>
+                      <h4 className="text-white/60 font-semibold text-sm">Payments Received</h4>
                       <div className="p-2 bg-[#1952c4]/20 rounded-xl">
                         <svg className="w-5 h-5 text-[#1952c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </div>
@@ -1263,6 +1355,7 @@ const AdminDashboard = () => {
                     <div>
                       <div className="text-3xl font-black text-white mb-1">Rs {analyticsData.revenue.totalGross.toLocaleString()}</div>
                       <div className="text-xs font-medium text-white/60">+{(analyticsData.revenue.platformNet || 0).toLocaleString()} (5% Platform Fee)</div>
+                      <div className="text-xs font-medium text-white/40 mt-1">Approved bookings value: Rs {(analyticsData.revenue.bookedValue || 0).toLocaleString()}</div>
                     </div>
                   </div>
 
