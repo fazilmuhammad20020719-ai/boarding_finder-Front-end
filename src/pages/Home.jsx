@@ -251,7 +251,7 @@ const HomePage = () => {
           <div className="mx-auto px-6 md:px-12 py-6 flex flex-wrap justify-center items-center gap-8 sm:gap-16">
             {[
               { value: stats ? `${stats.activeListings}+` : "0+", label: "Active listings" },
-              { value: stats ? `${stats.partnerUniversities}` : "0", label: "Partner universities" },
+              { value: stats ? `${stats.partnerUniversities}` : "0", label: "Universities" },
               { value: stats ? `${stats.studentsPlaced}+` : "0+", label: "Students placed" },
               { value: stats ? `${stats.avgRating}★` : "0.0★", label: "Average rating" },
             ].map((stat) => (
