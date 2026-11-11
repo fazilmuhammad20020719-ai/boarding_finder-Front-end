@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { deleteListing, getMyListings } from '../services/api';
+import { getAvailability } from '../utils/availability';
 
 const MyListings = () => {
   const navigate = useNavigate();
@@ -154,8 +155,11 @@ const MyListings = () => {
                     <div className="text-sm font-medium text-white/60 mb-2 line-clamp-1">
                       {listing.location}
                     </div>
-                    <div className="text-[17px] font-black text-[#FACC15] mb-4">
+                    <div className="text-[17px] font-black text-[#FACC15] mb-2">
                       LKR {Number(listing.price).toLocaleString()} <span className="text-sm font-medium text-white/60">/mo</span>
+                    </div>
+                    <div className={`text-xs font-bold mb-4 ${getAvailability(listing).full ? 'text-red-400' : 'text-[#10b981]'}`}>
+                      {getAvailability(listing).label}
                     </div>
 
                     <div className="mt-auto grid grid-cols-3 gap-3">

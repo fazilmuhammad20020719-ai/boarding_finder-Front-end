@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import ReportModal from '../components/ReportModal';
 import { useAuth } from '../context/AuthContext';
 import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin, checkSavedStatus, addSavedListing, removeSavedListing, sendMessage } from '../services/api';
+import { getAvailability } from '../utils/availability';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -211,11 +212,12 @@ const PropertyDetails = () => {
             amenities: parsedAmenities,
             distance: data.distance_to_university || "",
             minStay: Number(data.min_stay_months) || 1,
-            beds: data.beds || 1,
             images: allImages,
             image: allImages[0],
             description: data.description,
-            isFullyBooked: data.status === 'booked',
+            // Live availability from confirmed (owner-approved) bookings
+            availability: getAvailability(data),
+            isFullyBooked: getAvailability(data).full,
             liked: isSaved,
             ownerName: data.owner_name || "Property Owner",
             ownerEmail: data.owner_email || "",
@@ -382,13 +384,17 @@ const PropertyDetails = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
                 <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                <span className="font-extrabold text-white">{listing.beds} Rooms</span>
-                <span className="text-xs font-semibold text-[#FACC15]">Available</span>
+                <span className="font-extrabold text-white">{listing.availability.occupied}/{listing.availability.capacity} occupied</span>
+                <span className={`text-xs font-semibold ${listing.availability.full ? 'text-red-400' : 'text-[#10b981]'}`}>
+                  {listing.availability.full
+                    ? 'Fully Booked'
+                    : `${listing.availability.available} ${listing.availability.available === 1 ? 'space' : 'spaces'} available`}
+                </span>
               </div>
               <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
-                <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
-                <span className="font-extrabold text-white">1 Bathroom</span>
-                <span className="text-xs font-semibold text-white/50">Included</span>
+                <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span className="font-extrabold text-white">{listing.availability.capacity} {listing.availability.capacity === 1 ? 'person' : 'people'}</span>
+                <span className="text-xs font-semibold text-white/50">Room capacity</span>
               </div>
               <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1 border border-[#333]">
                 <svg className="w-6 h-6 text-[#FACC15] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -563,6 +569,12 @@ const PropertyDetails = () => {
                 <span className="text-white/50 font-medium ml-1">/ month</span>
               </div>
 
+              {/* Live availability (public) */}
+              <div className={`-mt-3 mb-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border ${listing.availability.full ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20'}`}>
+                <span className={`w-2 h-2 rounded-full ${listing.availability.full ? 'bg-red-400' : 'bg-[#10b981]'}`}></span>
+                {listing.availability.label}
+              </div>
+
               {/* Rating Mini */}
               <div className="flex items-center gap-1.5 mb-6 text-sm">
                 <div className="flex text-[#FACC15]">★</div>
@@ -693,16 +705,30 @@ const PropertyDetails = () => {
                     </div>
                   </div>
                 </div>
-              ) : listing.isFullyBooked ? (
+              ) : listing.isFullyBooked && !existingBooking ? (
                 <div className="flex flex-col items-center justify-center py-4 text-center">
                   <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4 border border-red-500/20">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </div>
                   <h4 className="text-lg font-extrabold text-white mb-1.5">Fully Booked</h4>
-                  <p className="text-sm text-white/50 font-medium mb-6">Check back later or save to get notified</p>
-                  <button className="w-full py-3.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-[#FACC15] font-bold rounded-xl transition-colors shadow-sm cursor-pointer">
-                    Save for Later
-                  </button>
+                  <p className="text-sm text-white/50 font-medium mb-1">
+                    All {listing.availability.capacity} {listing.availability.capacity === 1 ? 'space is' : 'spaces are'} taken.
+                  </p>
+                  <p className="text-sm text-white/50 font-medium mb-6">Save it and check back when a space frees up.</p>
+                  {user?.role === 'student' && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          if (!listing.liked) await addSavedListing(listing.id);
+                          setListing(prev => ({ ...prev, liked: true }));
+                        } catch (err) { console.error(err); }
+                      }}
+                      disabled={listing.liked}
+                      className="w-full py-3.5 bg-[#1A1A1A] border border-[#333] hover:bg-[#222] text-[#FACC15] font-bold rounded-xl transition-colors shadow-sm cursor-pointer disabled:opacity-60"
+                    >
+                      {listing.liked ? 'Saved' : 'Save for Later'}
+                    </button>
+                  )}
                 </div>
               ) : existingBooking ? (
                 /* ── User already booked this listing ── */

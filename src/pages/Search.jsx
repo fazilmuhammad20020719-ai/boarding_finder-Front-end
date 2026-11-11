@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getAccessToken } from '../services/api';
+import { getAvailability } from '../utils/availability';
 
 // Remove MOCK_LISTINGS and map from API instead
 const mapListing = (dbListing) => {
@@ -89,9 +90,9 @@ const mapListing = (dbListing) => {
     type: dbListing.property_type ? dbListing.property_type.toLowerCase().replace(/\s+/g, '_') : 'not_specified',
     amenities: parsedAmenities,
     distance: dbListing.distance_to_university || 'N/A',
-    beds: dbListing.beds || 1,
+    availability: getAvailability(dbListing),
     image: imageUrl,
-    isFullyBooked: dbListing.status === 'booked',
+    isFullyBooked: getAvailability(dbListing).full,
     liked: false,
     mapCoords: { top: randomTop, left: randomLeft }
   };
@@ -419,6 +420,11 @@ const SearchPage = () => {
                           <span className="bg-[#1A1A1A] border border-[#333] text-[#FACC15] text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
                             LKR {listing.price.toLocaleString()}/mo
                           </span>
+                          {!listing.isFullyBooked && (
+                            <span className="bg-[#10b981] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
+                              {listing.availability.available} of {listing.availability.capacity} free
+                            </span>
+                          )}
                         </div>
 
                         {/* Heart Like Button */}

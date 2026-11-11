@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getSavedListings, removeSavedListing, getAccessToken } from '../services/api';
 import { firstListingImage } from '../utils/imageUrl';
+import { getAvailability } from '../utils/availability';
 
 const CheckIcon = () => (
   <svg className="w-6 h-6 text-[#10b981] mx-auto" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -67,7 +68,7 @@ const CompareListings = () => {
             rating: Number(item.avg_rating) || 0,
             reviews: Number(item.review_count) || 0,
             amenities: { wifi: hasWifi, ac: hasAc, kitchen: hasKitchen, parking: hasParking },
-            availableDate: item.is_paused ? 'Not available' : 'Immediate',
+            availableDate: item.is_paused ? 'Not available' : getAvailability(item).label,
             deposit: item.security_deposit ? `LKR ${Number(item.security_deposit).toLocaleString()}` : "Not specified"
           };
         });

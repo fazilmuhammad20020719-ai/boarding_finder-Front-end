@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getAllListings, getSavedListings, getAccessToken } from '../services/api';
+import { getAvailability } from '../utils/availability';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -108,10 +109,9 @@ const MapViewPage = () => {
             latitude: dbListing.latitude || (6.9271 + (Math.random() - 0.5) * 0.1),
             longitude: dbListing.longitude || (79.8612 + (Math.random() - 0.5) * 0.1),
             liked: savedIds.includes(dbListing.listing_id),
-            university: "Unknown",
-            beds: 1,
-            gender: "mixed",
-            type: dbListing.type ? dbListing.type.replace('_', ' ') : 'Property',
+            university: dbListing.university || "University not specified",
+            availability: getAvailability(dbListing),
+            type: dbListing.property_type || 'Property',
           };
         });
 
@@ -193,6 +193,9 @@ const MapViewPage = () => {
                       <div className="flex justify-between items-center">
                         <span className="font-extrabold text-[#FACC15]">LKR {listing.price.toLocaleString()}</span>
                         <span className="text-xs text-yellow-500 font-bold">★ {listing.rating}</span>
+                      </div>
+                      <div className={`text-[11px] font-bold ${listing.availability.full ? 'text-red-500' : 'text-emerald-600'}`}>
+                        {listing.availability.label}
                       </div>
                       <button
                         onClick={() => navigate(`/property/${listing.id}`)}
@@ -290,6 +293,7 @@ const MapViewPage = () => {
                         <div className="flex flex-col">
                           <span className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Monthly</span>
                           <span className="text-lg font-extrabold text-[#FACC15] leading-none">LKR {listing.price.toLocaleString()}</span>
+                          <span className={`text-[11px] font-bold mt-1 ${listing.availability.full ? 'text-red-400' : 'text-[#10b981]'}`}>{listing.availability.short}</span>
                         </div>
                         <div className="flex items-center bg-[#FACC15]/20 text-[#FACC15] px-2 py-0.5 rounded-md border border-transparent">
                           <svg className="w-3 h-3 mr-0.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>

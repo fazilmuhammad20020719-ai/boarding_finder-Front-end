@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, duplicateListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
+import { getAvailability } from '../utils/availability';
 import { subscribe } from '../services/realtime';
 
 const OwnerDashboard = () => {
@@ -515,7 +516,7 @@ const OwnerDashboard = () => {
                 </div>
                 <div>
                   <div className="text-[22px] font-black text-white">{overviewStats.occupancy.occupied}/{overviewStats.occupancy.total}</div>
-                  <div className="text-xs font-semibold text-white/60">Rooms Occupied</div>
+                  <div className="text-xs font-semibold text-white/60">Beds Occupied</div>
                   <div className="text-xs font-bold text-[#10b981] mt-1">{overviewStats.occupancy.rate}% occupancy</div>
                 </div>
               </div>
@@ -607,8 +608,11 @@ const OwnerDashboard = () => {
                         <div className="text-sm font-medium text-white/60 mb-2 line-clamp-1">
                           {listing.location}
                         </div>
-                        <div className="text-[17px] font-black text-[#FACC15] mb-4">
+                        <div className="text-[17px] font-black text-[#FACC15] mb-2">
                           LKR {Number(listing.price).toLocaleString()} <span className="text-sm font-medium text-white/60">/mo</span>
+                        </div>
+                        <div className={`text-xs font-bold mb-4 ${getAvailability(listing).full ? 'text-red-400' : 'text-[#10b981]'}`}>
+                          {getAvailability(listing).label}
                         </div>
 
                         <div className="mt-auto grid grid-cols-2 gap-2">

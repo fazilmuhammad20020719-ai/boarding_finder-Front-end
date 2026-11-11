@@ -28,6 +28,7 @@ const OwnerListingForm = () => {
     // Step 1: Basic Info
     propertyName: '',
     propertyType: 'Dormitory', // Dormitory, Apartment, Room
+    capacity: '1', // how many people the room holds
     description: '',
 
     // Step 2: Location
@@ -101,6 +102,7 @@ const OwnerListingForm = () => {
           setFormData({
             propertyName: listing.title || '',
             propertyType: listing.property_type || 'Dormitory',
+            capacity: String(listing.capacity || 1),
             description: listing.description || '',
             address: address,
             city: city,
@@ -217,6 +219,8 @@ const OwnerListingForm = () => {
     if (currentStep === 1) {
       if (!formData.propertyName.trim()) newErrors.propertyName = 'Property name is required';
       if (!formData.description.trim()) newErrors.description = 'Description is required';
+      const beds = Number(formData.capacity);
+      if (!Number.isInteger(beds) || beds < 1 || beds > 100) newErrors.capacity = 'Capacity must be a whole number from 1 to 100';
     } else if (currentStep === 2) {
       if (!formData.address.trim()) newErrors.address = 'Address is required';
       if (!formData.city.trim()) newErrors.city = 'City is required';
@@ -281,6 +285,7 @@ const OwnerListingForm = () => {
           property_type: formData.propertyType,
           distance_to_university: formData.distance,
           min_stay_months: Number(formData.minimumStay),
+          capacity: Number(formData.capacity),
           house_rules: formData.rules,
         };
 
@@ -437,6 +442,22 @@ const OwnerListingForm = () => {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-white/80 mb-2">Capacity (number of people) *</label>
+                  <input
+                    type="number"
+                    name="capacity"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={formData.capacity}
+                    onChange={handleInputChange}
+                    className={`w-full sm:w-40 px-4 py-3 rounded-xl border bg-[#111] text-white ${errors.capacity ? 'border-red-500 bg-red-500/20' : 'border-[#333]'} focus:outline-none focus:ring-2 focus:ring-[#FACC15]/20 transition-all`}
+                  />
+                  <p className="text-xs text-white/50 mt-1">Each approved booking takes one space. The room shows "Fully Booked" when all spaces are taken.</p>
+                  {errors.capacity && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.capacity}</p>}
                 </div>
 
                 <div>
@@ -899,6 +920,10 @@ const OwnerListingForm = () => {
                   <div className="flex justify-between pb-3 border-b border-[#333]">
                     <span className="text-white/60 font-medium text-sm">Nearest University</span>
                     <span className="font-bold text-white text-right">{formData.nearestUniversity}</span>
+                  </div>
+                  <div className="flex justify-between pb-3 border-b border-[#333]">
+                    <span className="text-white/60 font-medium text-sm">Capacity</span>
+                    <span className="font-bold text-white">{formData.capacity} {Number(formData.capacity) === 1 ? 'person' : 'people'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60 font-medium text-sm">Photos Uploaded</span>

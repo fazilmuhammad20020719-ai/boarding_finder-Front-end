@@ -89,7 +89,7 @@ const ManageReservations = () => {
       );
     } catch (err) {
       console.error("Failed to update status", err);
-      alert("Failed to update status.");
+      alert(err.message || "Failed to update status."); // e.g. "This room is fully booked (8/8 beds taken)."
     }
   };
 

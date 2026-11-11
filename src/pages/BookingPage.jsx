@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { getListingById, createBooking } from '../services/api';
+import { getAvailability } from '../utils/availability';
 
 const BookingPage = () => {
   const { id } = useParams();
@@ -97,6 +98,28 @@ const BookingPage = () => {
   };
 
   if (!listing) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
+
+  // Every bed taken by a confirmed booking: no new requests (the server refuses them too)
+  const roomAvailability = getAvailability(listing);
+  if (roomAvailability.full && step !== 3) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center px-6 py-16">
+          <div className="bg-[#1A1A1A] border border-[#333] rounded-3xl p-8 max-w-md w-full text-center">
+            <h1 className="text-2xl font-extrabold mb-2">Fully Booked</h1>
+            <p className="text-white/60 text-sm mb-6">{listing.title} has no free spaces right now ({roomAvailability.label}). Save it and check back later.</p>
+            <button
+              onClick={() => navigate(`/property/${listing.listing_id || id}`)}
+              className="px-6 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl border-none cursor-pointer"
+            >
+              Back to listing
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const durationMonths = getDurationMonths();
   const rentPrice = parseFloat(listing.price) || 0;
