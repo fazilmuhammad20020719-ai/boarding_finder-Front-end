@@ -1,0 +1,45 @@
+// Universities offered in the owner listing form, with APPROXIMATE campus
+// coordinates (±~1 km) used only to rank listings by distance. Names must
+// match OwnerListingForm exactly, since owners pick their "nearest university"
+// from that list. lat/lng are null where there is no single main campus.
+export const UNIVERSITIES = [
+  { name: 'University of Colombo', lat: 6.9022, lng: 79.8608 },
+  { name: 'University of Peradeniya', lat: 7.2550, lng: 80.5970 },
+  { name: 'University of Sri Jayewardenepura', lat: 6.8530, lng: 79.9035 },
+  { name: 'University of Kelaniya', lat: 6.9737, lng: 79.9160 },
+  { name: 'University of Moratuwa', lat: 6.7951, lng: 79.9008 },
+  { name: 'University of Jaffna', lat: 9.6847, lng: 80.0216 },
+  { name: 'University of Ruhuna', lat: 5.9381, lng: 80.5761 },
+  { name: 'Eastern University, Sri Lanka', lat: 7.7944, lng: 81.5797 },
+  { name: 'South Eastern University of Sri Lanka', lat: 7.2971, lng: 81.8519 },
+  { name: 'Rajarata University of Sri Lanka', lat: 8.3595, lng: 80.5035 },
+  { name: 'Sabaragamuwa University of Sri Lanka', lat: 6.7148, lng: 80.7872 },
+  { name: 'Wayamba University of Sri Lanka', lat: 7.4688, lng: 80.0398 },
+  { name: 'Uva Wellassa University', lat: 6.9817, lng: 81.0770 },
+  { name: 'University of the Visual & Performing Arts', lat: 6.9018, lng: 79.8593 },
+  { name: 'Open University of Sri Lanka', lat: 6.8836, lng: 79.8839 },
+  { name: 'University of Vavuniya', lat: 8.7542, lng: 80.4982 },
+  { name: 'Trincomalee Campus (Eastern University)', lat: 8.6380, lng: 81.2120 },
+  { name: 'Sri Lanka Institute of Information Technology (SLIIT)', lat: 6.9147, lng: 79.9729 },
+  { name: 'National Institute of Business Management (NIBM)', lat: 6.9061, lng: 79.8708 },
+  { name: 'Institute of Technology, University of Moratuwa (ITUM)', lat: 6.8180, lng: 80.0350 },
+  { name: 'Sri Lanka Technological Campus (SLTC)', lat: 6.8420, lng: 80.0900 },
+  { name: 'Informatics Institute of Technology (IIT)', lat: 6.8723, lng: 79.8601 },
+  { name: 'CINEC Campus', lat: 6.9110, lng: 79.9665 },
+  { name: 'NSBM Green University', lat: 6.8213, lng: 80.0416 },
+  { name: 'Kotelawala Defence University (KDU)', lat: 6.8197, lng: 79.8892 },
+  { name: 'Aquinas University College', lat: 6.9104, lng: 79.8768 },
+  { name: 'Buddhist and Pali University of Sri Lanka', lat: 6.8413, lng: 80.0135 },
+  { name: 'Gampaha Wickramarachchi University of Indigenous Medicine', lat: 7.0889, lng: 80.0333 },
+  { name: 'Sri Lanka Institute of Advanced Technological Education (SLIATE)', lat: null, lng: null },
+  { name: 'University of Vocational Technology (UNIVOTEC)', lat: 6.8260, lng: 79.8780 },
+  { name: 'Postgraduate Institute of Medicine (PGIM)', lat: 6.9050, lng: 79.8630 },
+  { name: 'Faculty of Medicine, University of Colombo', lat: 6.9000, lng: 79.8650 },
+  { name: 'Faculty of Medicine, University of Kelaniya', lat: 7.0300, lng: 79.9200 },
+  { name: 'Faculty of Medicine, University of Peradeniya', lat: 7.2600, lng: 80.5970 },
+  { name: 'Faculty of Medicine, University of Jaffna', lat: 9.6720, lng: 80.0150 },
+  { name: 'Faculty of Medicine, University of Ruhuna', lat: 6.0640, lng: 80.2290 },
+  { name: 'Faculty of Allied Health Sciences, University of Sri Jayewardenepura', lat: 6.8530, lng: 79.9035 },
+];
+
+export const findUniversity = (name) => UNIVERSITIES.find((u) => u.name === name) || null;

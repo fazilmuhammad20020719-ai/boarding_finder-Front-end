@@ -1,8 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getAccessToken } from '../services/api';
 import { getAvailability } from '../utils/availability';
+import { useAuth } from '../context/AuthContext';
+import { UNIVERSITIES, findUniversity } from '../data/universities';
+import { distanceFrom, formatKm, cityOf, RADIUS_OPTIONS_KM } from '../utils/proximity';
 
 // Remove MOCK_LISTINGS and map from API instead
 const mapListing = (dbListing) => {
@@ -82,6 +85,11 @@ const mapListing = (dbListing) => {
     id: dbListing.listing_id,
     name: dbListing.title,
     university: dbListing.university || 'University not specified',
+    universityName: dbListing.university || null,
+    distanceBand: dbListing.distance_to_university || null,
+    lat: dbListing.latitude,
+    lng: dbListing.longitude,
+    city: cityOf(dbListing.location),
     location: dbListing.location,
     price: Number(dbListing.price) || 0,
     rating: Number(dbListing.avg_rating) || 0,
@@ -124,10 +132,40 @@ const SearchPage = () => {
     fetchData();
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // Text typed on the Home page search box arrives as ?q=
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
   const [viewMode, setViewMode] = useState('list'); // 'list', 'map'
 
-  const [sortBy, setSortBy] = useState('rating'); // 'rating', 'price_asc', 'price_desc'
+  // ── Distance from the chosen university (default: the student's own) or "near me" ──
+  const { user } = useAuth();
+  const [selectedUni, setSelectedUni] = useState(() => (findUniversity(user?.university) ? user.university : ''));
+  const [refType, setRefType] = useState('university'); // 'university' | 'me'
+  const [userPos, setUserPos] = useState(null);         // browser location, never stored or sent anywhere
+  const [locating, setLocating] = useState(false);
+  const [geoError, setGeoError] = useState('');
+  const [radiusKm, setRadiusKm] = useState(null);       // null = any distance
+  const [cityFilter, setCityFilter] = useState('');
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) { setGeoError('Location is not supported by this browser.'); return; }
+    setLocating(true);
+    setGeoError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setRefType('me'); setSortBy('nearest'); setLocating(false); },
+      () => { setGeoError('Could not get your location. Please allow location access or choose a university.'); setLocating(false); },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  };
+
+  const reference = refType === 'me'
+    ? (userPos ? { type: 'me', ...userPos } : null)
+    : (selectedUni ? { type: 'university', name: selectedUni } : null);
+
+  const cities = useMemo(() => [...new Set(listings.map(l => l.city).filter(Boolean))].sort(), [listings]);
+
+  // Default sort: nearest to the selected university / your location
+  const [sortBy, setSortBy] = useState('nearest'); // 'nearest', 'rating', 'price_asc', 'price_desc'
 
   // Sidebar Filters States
   const [maxPrice, setMaxPrice] = useState(30000);
@@ -168,7 +206,22 @@ const SearchPage = () => {
 
   // Sorting & Filtering Logic
   const filteredListings = useMemo(() => {
-    let result = listings.filter((listing) => {
+    // Attach the distance from the current reference point (km, or null if unknown)
+    const withDistance = listings.map((l) => {
+      const d = distanceFrom(l, reference);
+      return { ...l, distanceKm: d.km, distanceHow: d.how };
+    });
+    let result = withDistance.filter((listing) => {
+      // Location (city / area)
+      if (cityFilter && listing.city !== cityFilter) return false;
+
+      // Distance: within the radius, or the owner named this university (distance unknown)
+      if (reference && radiusKm !== null) {
+        const sameUni = reference.type === 'university' && listing.universityName === reference.name;
+        const within = listing.distanceKm !== null ? listing.distanceKm <= radiusKm : sameUni;
+        if (!within) return false;
+      }
+
       // Search Query
       const matchesSearch =
         listing.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -197,7 +250,10 @@ const SearchPage = () => {
     });
 
     // Sorting
-    if (sortBy === 'rating') {
+    if (sortBy === 'nearest' && reference) {
+      // Closest first; listings with unknown distance go last
+      result.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+    } else if (sortBy === 'rating' || sortBy === 'nearest') {
       result.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === 'price_asc') {
       result.sort((a, b) => a.price - b.price);
@@ -206,7 +262,7 @@ const SearchPage = () => {
     }
 
     return result;
-  }, [listings, searchQuery, maxPrice, genderFilter, typeFilter, facilitiesFilter, sortBy]);
+  }, [listings, searchQuery, maxPrice, genderFilter, typeFilter, facilitiesFilter, sortBy, cityFilter, radiusKm, refType, selectedUni, userPos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
@@ -243,6 +299,16 @@ const SearchPage = () => {
 
           {/* Sort & View Actions */}
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setSortBy('nearest')}
+              title={reference ? '' : 'Choose a university or use Near me to sort by distance'}
+              className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'nearest'
+                  ? 'bg-[#FACC15] text-black shadow-sm border border-[#FACC15]'
+                  : 'bg-[#1A1A1A] hover:bg-[#222] text-white/70 border border-[#333] shadow-sm'
+                }`}
+            >
+              Nearest
+            </button>
             <button
               onClick={() => setSortBy('rating')}
               className={`px-5 py-3 rounded-full font-bold text-[13px] transition-all cursor-pointer ${sortBy === 'rating'
@@ -293,6 +359,57 @@ const SearchPage = () => {
               <h3 className="text-xl font-bold text-white mb-6">Filters</h3>
 
               <div className="space-y-6">
+                {/* University / near me */}
+                <div>
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">University</label>
+                  <select
+                    value={refType === 'me' ? '' : selectedUni}
+                    onChange={(e) => { setSelectedUni(e.target.value); setRefType('university'); }}
+                    className="w-full bg-[#111] border border-[#333] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FACC15]"
+                  >
+                    <option value="">Any university</option>
+                    {UNIVERSITIES.map(u => <option key={u.name} value={u.name}>{u.name}</option>)}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={useMyLocation}
+                    className={`mt-2 w-full px-3 py-2.5 rounded-xl text-sm font-bold border cursor-pointer ${refType === 'me' ? 'bg-[#FACC15] text-black border-[#FACC15]' : 'bg-[#111] text-white border-[#333] hover:border-[#FACC15]/50'}`}
+                  >
+                    {locating ? 'Locating…' : refType === 'me' ? '📍 Using your location' : '📍 Near me'}
+                  </button>
+                  {geoError && <p className="text-xs text-red-400 mt-2">{geoError}</p>}
+                </div>
+
+                {/* Distance from the chosen university / your location */}
+                <div>
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">Distance</label>
+                  <select
+                    value={radiusKm ?? ''}
+                    onChange={(e) => setRadiusKm(e.target.value ? Number(e.target.value) : null)}
+                    disabled={!reference}
+                    className="w-full bg-[#111] border border-[#333] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FACC15] disabled:opacity-50"
+                  >
+                    <option value="">Any distance</option>
+                    {RADIUS_OPTIONS_KM.map(km => <option key={km} value={km}>Within {km} km</option>)}
+                  </select>
+                  {!reference && <p className="text-[11px] text-white/40 mt-1.5">Choose a university or use Near me first</p>}
+                </div>
+
+                {/* Location (city / area) */}
+                <div>
+                  <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">Location</label>
+                  <select
+                    value={cityFilter}
+                    onChange={(e) => setCityFilter(e.target.value)}
+                    className="w-full bg-[#111] border border-[#333] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FACC15]"
+                  >
+                    <option value="">All locations</option>
+                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                <hr className="border-[#333]" />
+
                 {/* Max Monthly Price */}
                 <div>
                   <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-3 uppercase">
@@ -480,7 +597,7 @@ const SearchPage = () => {
                           {/* Distance & Location Info */}
                           <div className="flex items-center justify-between text-[13px] text-white/50 mb-4 font-semibold">
                             <span className="truncate">📍 {listing.location}</span>
-                            <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distance}</span>
+                            <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distanceKm != null ? `${listing.distanceHow === 'map' ? '~' : ''}${formatKm(listing.distanceKm)}` : listing.distance}</span>
                           </div>
 
                           {/* Amenities Badges */}

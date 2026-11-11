@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getStats, getAccessToken } from '../services/api';
 import { getAvailability } from '../utils/availability';
+import { useAuth } from '../context/AuthContext';
+import { UNIVERSITIES, findUniversity } from '../data/universities';
+import { splitByProximity, formatKm, cityOf, RADIUS_OPTIONS_KM, DEFAULT_RADIUS_KM } from '../utils/proximity';
 
 // Remove MOCK_LISTINGS and map from API instead
 const mapListing = (dbListing) => {
@@ -78,6 +81,11 @@ const mapListing = (dbListing) => {
     id: dbListing.listing_id,
     name: dbListing.title,
     university: dbListing.university || 'University not specified',
+    universityName: dbListing.university || null,       // owner's "nearest university"
+    distanceBand: dbListing.distance_to_university || null,
+    lat: dbListing.latitude,
+    lng: dbListing.longitude,
+    city: cityOf(dbListing.location),
     location: dbListing.location,
     price: Number(dbListing.price) || 0,
     rating: Number(dbListing.avg_rating) || 0,
@@ -102,6 +110,49 @@ const HomePage = () => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // ── Nearby ranking: reference point + filters ──
+  // Default reference: the student's own university (from their profile), if we know it
+  const [selectedUni, setSelectedUni] = useState(() => (findUniversity(user?.university) ? user.university : ''));
+  const [refType, setRefType] = useState('university'); // 'university' | 'me'
+  const [userPos, setUserPos] = useState(null);         // browser location, never stored or sent anywhere
+  const [locating, setLocating] = useState(false);
+  const [geoError, setGeoError] = useState('');
+  const [radiusKm, setRadiusKm] = useState(DEFAULT_RADIUS_KM);
+  const [cityFilter, setCityFilter] = useState('');
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) { setGeoError('Location is not supported by this browser.'); return; }
+    setLocating(true);
+    setGeoError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setRefType('me');
+        setLocating(false);
+      },
+      () => {
+        setGeoError('Could not get your location. Please allow location access or choose a university.');
+        setLocating(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  };
+
+  const reference = refType === 'me'
+    ? (userPos ? { type: 'me', ...userPos } : null)
+    : (selectedUni ? { type: 'university', name: selectedUni } : null);
+
+  const cities = useMemo(
+    () => [...new Set(listings.map(l => l.city).filter(Boolean))].sort(),
+    [listings]
+  );
+
+  const { nearby, others } = useMemo(() => {
+    const pool = cityFilter ? listings.filter(l => l.city === cityFilter) : listings;
+    return splitByProximity(pool, reference, radiusKm);
+  }, [listings, cityFilter, radiusKm, refType, selectedUni, userPos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const fetchData = async () => {
@@ -173,6 +224,142 @@ const HomePage = () => {
   }, []);
 
   const prevBgIndex = (currentBgIndex - 1 + heroImages.length) % heroImages.length;
+
+
+  // One listing card (same design everywhere on this page)
+  const renderCard = (listing) => (
+      <div
+        key={listing.id}
+        onClick={() => navigate(`/property/${listing.id}`)}
+        className="bg-[#1A1A1A] rounded-[24px] overflow-hidden border border-[#2a2a2a] shadow-sm hover:border-[#333] transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+      >
+        {/* Photo */}
+        <div className="h-48 w-full relative overflow-hidden bg-slate-100">
+          <img
+            src={listing.image}
+            alt={listing.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+
+          {listing.isFullyBooked && (
+            <div className="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-[2px] flex items-center justify-center z-10">
+              <span className="bg-white text-slate-800 text-sm font-extrabold px-5 py-2 rounded-full shadow-lg uppercase tracking-wide">
+                Fully Booked
+              </span>
+            </div>
+          )}
+
+          <div className="absolute bottom-4 left-4 z-20 flex gap-2">
+            <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
+              LKR {listing.price.toLocaleString()}/mo
+            </span>
+            {!listing.isFullyBooked && (
+              <span className="bg-[#10b981] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
+                {listing.availability.available} of {listing.availability.capacity} free
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!getAccessToken()) {
+                alert("Please login to save properties.");
+                return;
+              }
+              try {
+                if (listing.liked) {
+                  await removeSavedListing(listing.id);
+                } else {
+                  await addSavedListing(listing.id);
+                }
+                setListings(listings.map(l => l.id === listing.id ? { ...l, liked: !l.liked } : l));
+              } catch (err) {
+                console.error("Failed to toggle save status", err);
+              }
+            }}
+            className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white hover:bg-slate-50 shadow-md flex items-center justify-center transition-transform hover:scale-105 border-none cursor-pointer"
+          >
+            <svg
+              className={`w-5 h-5 ${listing.liked ? 'text-red-500 fill-current' : 'text-slate-400'}`}
+              fill={listing.liked ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2.2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Details */}
+        <div className="p-5 flex-grow flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="text-[11px] font-bold text-[#FACC15] uppercase tracking-wider truncate">
+                {listing.university}
+              </span>
+              <span className="bg-[#111] text-white/70 text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize flex-shrink-0 border border-[#333]">
+                {listing.type.replace('_', ' ')}
+              </span>
+            </div>
+
+            <h3 className="text-base font-bold text-white group-hover:text-[#FACC15] transition-colors line-clamp-1 mb-1.5">
+              {listing.name}
+            </h3>
+
+            <div className="flex items-center justify-between text-[12px] text-white/50 mb-3 font-semibold">
+              <span className="truncate">📍 {listing.location}</span>
+              <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distanceKm != null ? `${listing.distanceHow === 'map' ? '~' : ''}${formatKm(listing.distanceKm)}` : listing.distance}</span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {listing.amenities.slice(0, 3).map((amenity, idx) => (
+                <span
+                  key={idx}
+                  className="bg-[#111] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#333]"
+                >
+                  {amenity}
+                </span>
+              ))}
+              {listing.amenities.length > 3 && (
+                <span className="bg-[#111] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#333]">
+                  +{listing.amenities.length - 3}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-[#333] pt-3 flex justify-between items-center">
+            <div className="flex items-center gap-1 font-bold text-[13px] text-white">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} className={i < Math.floor(listing.rating) ? "text-[#FACC15]" : "text-white/20"}>★</span>
+              ))}
+              <span className="text-white ml-1">{listing.rating}</span>
+              <span className="text-white/40 font-normal text-xs">({listing.reviews})</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
+                className="text-xs font-bold text-white/60 hover:text-[#FACC15] transition-colors border border-[#333] rounded-md px-2 py-1 bg-transparent cursor-pointer"
+              >
+                Compare
+              </button>
+              <span className="text-xs font-bold text-[#FACC15]">View details ➔</span>
+            </div>
+          </div>
+        </div>
+      </div>
+  );
+
+  const listingGrid = (items, emptyText) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {items.length === 0 ? (
+        <div className="col-span-full py-10 text-center text-white/50 text-sm bg-[#111] border border-[#2a2a2a] rounded-2xl">{emptyText}</div>
+      ) : items.map(renderCard)}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
@@ -269,153 +456,93 @@ const HomePage = () => {
 
 
 
-        {/* ===== FEATURED LISTINGS ===== */}
+        {/* ===== NEARBY + OTHER BOARDING ===== */}
         <section className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-14">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">Featured Listings</h2>
-              <p className="text-white/50 text-sm mt-1 font-normal">Top-rated boarding houses this month</p>
+          {/* Reference point + filters */}
+          <div className="bg-[#1A1A1A] border border-[#2a2a2a] rounded-[24px] p-5 mb-10 flex flex-col lg:flex-row lg:items-end gap-4">
+            <div className="flex-1 min-w-0">
+              <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Show boarding near</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <select
+                  value={refType === 'me' ? '' : selectedUni}
+                  onChange={(e) => { setSelectedUni(e.target.value); setRefType('university'); }}
+                  className="flex-1 min-w-0 bg-[#111] border border-[#333] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FACC15]"
+                >
+                  <option value="">Select a university…</option>
+                  {UNIVERSITIES.map(u => <option key={u.name} value={u.name}>{u.name}</option>)}
+                </select>
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  className={`px-4 py-3 rounded-xl text-sm font-bold border cursor-pointer whitespace-nowrap ${refType === 'me' ? 'bg-[#FACC15] text-black border-[#FACC15]' : 'bg-[#111] text-white border-[#333] hover:border-[#FACC15]/50'}`}
+                >
+                  {locating ? 'Locating…' : '📍 Near me'}
+                </button>
+              </div>
+              {geoError && <p className="text-xs text-red-400 mt-2">{geoError}</p>}
             </div>
-            <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1">
-              See all listings →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
-              <div className="col-span-full py-12 flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
-              </div>
-            ) : listings.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-slate-500">
-                No listings available right now.
-              </div>
-            ) : listings.slice(0, 6).map((listing) => (
-              <div
-                key={listing.id}
-                onClick={() => navigate(`/property/${listing.id}`)}
-                className="bg-[#1A1A1A] rounded-[24px] overflow-hidden border border-[#2a2a2a] shadow-sm hover:border-[#333] transition-all duration-300 flex flex-col group hover:-translate-y-1 cursor-pointer relative"
+            <div>
+              <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Distance</label>
+              <select
+                value={radiusKm}
+                onChange={(e) => setRadiusKm(Number(e.target.value))}
+                className="bg-[#111] border border-[#333] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FACC15]"
               >
-                {/* Photo */}
-                <div className="h-48 w-full relative overflow-hidden bg-slate-100">
-                  <img
-                    src={listing.image}
-                    alt={listing.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-
-                  {listing.isFullyBooked && (
-                    <div className="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-[2px] flex items-center justify-center z-10">
-                      <span className="bg-white text-slate-800 text-sm font-extrabold px-5 py-2 rounded-full shadow-lg uppercase tracking-wide">
-                        Fully Booked
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="absolute bottom-4 left-4 z-20 flex gap-2">
-                    <span className="bg-[#1952c4] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
-                      LKR {listing.price.toLocaleString()}/mo
-                    </span>
-                    {!listing.isFullyBooked && (
-                      <span className="bg-[#10b981] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md">
-                        {listing.availability.available} of {listing.availability.capacity} free
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      if (!getAccessToken()) {
-                        alert("Please login to save properties.");
-                        return;
-                      }
-                      try {
-                        if (listing.liked) {
-                          await removeSavedListing(listing.id);
-                        } else {
-                          await addSavedListing(listing.id);
-                        }
-                        setListings(listings.map(l => l.id === listing.id ? { ...l, liked: !l.liked } : l));
-                      } catch (err) {
-                        console.error("Failed to toggle save status", err);
-                      }
-                    }}
-                    className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white hover:bg-slate-50 shadow-md flex items-center justify-center transition-transform hover:scale-105 border-none cursor-pointer"
-                  >
-                    <svg
-                      className={`w-5 h-5 ${listing.liked ? 'text-red-500 fill-current' : 'text-slate-400'}`}
-                      fill={listing.liked ? 'currentColor' : 'none'}
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Details */}
-                <div className="p-5 flex-grow flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <span className="text-[11px] font-bold text-[#FACC15] uppercase tracking-wider truncate">
-                        {listing.university}
-                      </span>
-                      <span className="bg-[#111] text-white/70 text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize flex-shrink-0 border border-[#333]">
-                        {listing.type.replace('_', ' ')}
-                      </span>
-                    </div>
-
-                    <h3 className="text-base font-bold text-white group-hover:text-[#FACC15] transition-colors line-clamp-1 mb-1.5">
-                      {listing.name}
-                    </h3>
-
-                    <div className="flex items-center justify-between text-[12px] text-white/50 mb-3 font-semibold">
-                      <span className="truncate">📍 {listing.location}</span>
-                      <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distance}</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {listing.amenities.slice(0, 3).map((amenity, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-[#111] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#333]"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                      {listing.amenities.length > 3 && (
-                        <span className="bg-[#111] text-white/70 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#333]">
-                          +{listing.amenities.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-[#333] pt-3 flex justify-between items-center">
-                    <div className="flex items-center gap-1 font-bold text-[13px] text-white">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span key={i} className={i < Math.floor(listing.rating) ? "text-[#FACC15]" : "text-white/20"}>★</span>
-                      ))}
-                      <span className="text-white ml-1">{listing.rating}</span>
-                      <span className="text-white/40 font-normal text-xs">({listing.reviews})</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
-                        className="text-xs font-bold text-white/60 hover:text-[#FACC15] transition-colors border border-[#333] rounded-md px-2 py-1 bg-transparent cursor-pointer"
-                      >
-                        Compare
-                      </button>
-                      <span className="text-xs font-bold text-[#FACC15]">View details ➔</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                {RADIUS_OPTIONS_KM.map(km => <option key={km} value={km}>Within {km} km</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Location</label>
+              <select
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="bg-[#111] border border-[#333] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FACC15]"
+              >
+                <option value="">All locations</option>
+                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
           </div>
+
+          {isLoading ? (
+            <div className="py-12 flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1952c4]"></div>
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="py-12 text-center text-slate-500">No listings available right now.</div>
+          ) : (
+            <>
+              {reference && (
+                <div className="mb-14">
+                  <div className="flex items-center justify-between mb-6 gap-4">
+                    <div className="min-w-0">
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Nearby Boarding</h2>
+                      <p className="text-white/50 text-sm mt-1 font-normal truncate">
+                        Within {radiusKm} km of {refType === 'me' ? 'your location' : selectedUni}, closest first
+                      </p>
+                    </div>
+                    <span className="text-sm font-bold text-[#FACC15] flex-shrink-0">{nearby.length} found</span>
+                  </div>
+                  {listingGrid(nearby, `No boarding places within ${radiusKm} km yet. Try a larger distance, or see the other hostels below.`)}
+                </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-6 gap-4">
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-bold text-white tracking-tight">{reference ? 'Other Available Hostels' : 'Available Hostels'}</h2>
+                    <p className="text-white/50 text-sm mt-1 font-normal">
+                      {reference ? 'In other locations, nearest first' : 'Choose your university or use "Near me" to see the closest places first'}
+                    </p>
+                  </div>
+                  <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1 flex-shrink-0">
+                    See all listings →
+                  </Link>
+                </div>
+                {listingGrid(others.slice(0, 9), 'No other boarding places match these filters.')}
+              </div>
+            </>
+          )}
         </section>
 
         {/* ===== HOW IT WORKS ===== */}
