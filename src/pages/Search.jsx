@@ -688,7 +688,7 @@ const SearchPage = () => {
                 <span className="text-[#FACC15] text-xs font-bold uppercase tracking-wider mb-1">Step 01</span>
                 <h3 className="text-lg font-bold text-white mb-1.5">Search & Filter</h3>
                 <p className="text-white/50 text-sm leading-relaxed font-normal">
-                  Search for boarding houses near your university. Filter by price, gender policy, facilities, and more.
+                  Search for boarding houses near your university. Filter by price, property type, facilities, and more.
                 </p>
               </div>
             </div>
