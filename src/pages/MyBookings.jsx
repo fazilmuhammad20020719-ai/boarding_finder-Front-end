@@ -73,6 +73,15 @@ const MyBookings = () => {
                 if (now >= end) return 'completed';
                 return 'active';
               })(),
+              // Same rule as the server: approved stay that has finished, or began 3+ days ago
+              canReview: (() => {
+                if (!['approved', 'completed'].includes(b.status)) return false;
+                const start = new Date(b.move_in_date);
+                const end = new Date(start); end.setMonth(end.getMonth() + Number(b.duration_months || 0));
+                const threeDaysIn = new Date(start); threeDaysIn.setDate(threeDaysIn.getDate() + 3);
+                const now = new Date();
+                return now >= end || now >= threeDaysIn;
+              })(),
               moveInDate: new Date(b.move_in_date).toLocaleDateString(),
               durationMonths: b.duration_months,
               totalPrice: parseFloat(b.total_amount),
@@ -286,7 +295,7 @@ const MyBookings = () => {
                             Cancel Request
                           </button>
                         )}
-                        {(booking.status === 'completed' || booking.status === 'active') && (
+                        {booking.canReview && booking.phase !== 'upcoming' && (
                           <button
                             onClick={() => navigate(`/write-review?listing_id=${booking.propertyId}`, {
                               state: {

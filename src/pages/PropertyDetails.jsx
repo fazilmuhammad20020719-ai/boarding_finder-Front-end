@@ -54,14 +54,16 @@ const PropertyDetails = () => {
           ...prev,
           avg_rating: data.avg_rating,
           review_count: data.review_count,
-          reviews_data: data.reviews_data
+          reviews_data: data.reviews_data,
+          reviewPermission: data.review_permission || prev.reviewPermission,
         }));
       }
       setReviewText('');
       setReviewRating(5);
     } catch (err) {
       console.error(err);
-      alert("Failed to submit review.");
+      // Show the server's reason (e.g. not eligible yet, already reviewed)
+      alert(err.message || "Failed to submit review.");
     } finally {
       setIsSubmittingReview(false);
     }
@@ -222,6 +224,8 @@ const PropertyDetails = () => {
             avg_rating: data.avg_rating,
             review_count: data.review_count,
             reviews_data: data.reviews_data,
+            // Decided by the server: only students who stayed here can rate/review
+            reviewPermission: data.review_permission || { canReview: false, code: 'login', reason: '' },
             approval_status: data.approval_status || 'approved',
           });
         }
@@ -472,8 +476,16 @@ const PropertyDetails = () => {
                 </div>
               </div>
 
-              {/* Write Review Form (Only for logged-in students) */}
-              {user && user.role === 'student' && (
+              {/* Reviews are public; only eligible guests (stayed 3+ days or finished their stay) may write one */}
+              {!listing.reviewPermission?.canReview && listing.reviewPermission?.reason && user?.role !== 'owner' && user?.role !== 'admin' && (
+                <div className="bg-[#111] border border-[#333] p-4 rounded-2xl mb-6 text-sm text-white/60 flex items-start gap-3">
+                  <span className="text-[#FACC15]">ⓘ</span>
+                  <span>{listing.reviewPermission.reason}</span>
+                </div>
+              )}
+
+              {/* Write Review Form (only for students the server says are eligible) */}
+              {listing.reviewPermission?.canReview && (
                 <div className="bg-[#111] border border-[#333] p-5 rounded-2xl mb-6">
                   <h4 className="font-bold text-white text-sm mb-3">Write a Review</h4>
                   <form onSubmit={handleReviewSubmit}>
