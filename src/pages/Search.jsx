@@ -845,7 +845,7 @@ const SearchPage = () => {
                 <span className="text-[#FACC15] text-xs font-bold uppercase tracking-wider mb-1">Step 03</span>
                 <h3 className="text-lg font-bold text-white mb-1.5">Book Securely</h3>
                 <p className="text-white/50 text-sm leading-relaxed font-normal">
-                  Send a booking request directly to the owner and confirm your stay with secure payment options.
+                  Send a booking request directly to the owner and pay in cash when you move in — no online payment needed.
                 </p>
               </div>
             </div>

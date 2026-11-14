@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PaymentBadge, ConfirmCashButton } from '../components/CashPayment';
 import {
   getPendingUsers, verifyUserAdmin, getVerificationStats,
   getAllUsers, updateUserStatusAdmin, updateUserRoleAdmin,
@@ -953,7 +954,7 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[1000px]">
+                <table className="w-full text-left border-collapse min-w-[1200px]">
                   <thead>
                     <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
                       <th className="px-6 py-5 rounded-tl-3xl">BOOKING ID</th>
@@ -962,6 +963,7 @@ const AdminDashboard = () => {
                       <th className="px-6 py-5">OWNER</th>
                       <th className="px-6 py-5">TOTAL AMOUNT</th>
                       <th className="px-6 py-5">STATUS</th>
+                      <th className="px-6 py-5">PAYMENT (CASH ON MOVE-IN)</th>
                       <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
                     </tr>
                   </thead>
@@ -991,6 +993,18 @@ const AdminDashboard = () => {
                           <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${booking.status === 'approved' ? 'bg-[#10b981]/20 text-[#10b981]' : booking.status === 'pending' ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-500'}`}>
                             {booking.status}
                           </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          {booking.status === 'approved' ? (
+                            <div className="flex flex-col items-start gap-2">
+                              <PaymentBadge booking={booking} />
+                              <ConfirmCashButton
+                                booking={booking}
+                                onChange={(u) => setAllBookings(prev => prev.map(b => b.booking_id === booking.booking_id
+                                  ? { ...b, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at } : b))}
+                              />
+                            </div>
+                          ) : <span className="text-xs text-white/40">—</span>}
                         </td>
                         <td className="px-6 py-5 flex gap-2">
                           <select
@@ -1347,7 +1361,7 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-[#1A1A1A] border border-[#333] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="text-white/60 font-semibold text-sm">Payments Received</h4>
+                      <h4 className="text-white/60 font-semibold text-sm">Cash Received (confirmed)</h4>
                       <div className="p-2 bg-[#1952c4]/20 rounded-xl">
                         <svg className="w-5 h-5 text-[#1952c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </div>

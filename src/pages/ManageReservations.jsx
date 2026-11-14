@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getOwnerBookings, updateBookingStatus, getMyListings } from '../services/api';
+import { PaymentBadge, ConfirmCashButton } from '../components/CashPayment';
 import { useAuth } from '../context/AuthContext';
 
 const ManageReservations = () => {
@@ -57,7 +58,9 @@ const ManageReservations = () => {
             guests: 1, // You might want to update this if you track guest count in the DB
             totalPrice: parseFloat(b.total_amount) || 0,
             status: status,
-            leaseStatus: b.lease_status || null
+            leaseStatus: b.lease_status || null,
+            // Fields the Cash on Move-in badge/button need
+            payment: { booking_id: b.booking_id, status: b.status, payment_status: b.payment_status, paid_amount: b.paid_amount, paid_at: b.paid_at, price: b.price, security_deposit: b.security_deposit }
           };
         });
         setReservations(mapped);
@@ -85,7 +88,7 @@ const ManageReservations = () => {
       await updateBookingStatus(id, backendStatus);
 
       setReservations(prev =>
-        prev.map(res => res.id === id ? { ...res, status: newStatus === 'Declined' || newStatus === 'Cancelled' ? 'Past' : newStatus } : res)
+        prev.map(res => res.id === id ? { ...res, status: newStatus === 'Declined' || newStatus === 'Cancelled' ? 'Past' : newStatus, payment: { ...res.payment, status: backendStatus } } : res)
       );
     } catch (err) {
       console.error("Failed to update status", err);
@@ -214,7 +217,7 @@ const ManageReservations = () => {
             className="px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none bg-transparent text-white/70 hover:text-white hover:bg-white/10"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Earnings
+            Payments
           </button>
         </div>
 
@@ -339,9 +342,20 @@ const ManageReservations = () => {
                     <p className="text-sm font-bold text-white">{res.checkIn} - {res.checkOut}</p>
                   </div>
                   <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333]">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Total Payout</p>
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Booking value</p>
                     <p className="text-lg font-black text-[#FACC15]">LKR {res.totalPrice.toLocaleString()}</p>
                   </div>
+                  {res.payment?.status === 'approved' && (
+                    <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333] flex flex-col gap-2">
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Move-in payment (cash)</p>
+                      <PaymentBadge booking={res.payment} />
+                      <ConfirmCashButton
+                        booking={res.payment}
+                        onChange={(u) => setReservations(prev => prev.map(r => r.id === res.id
+                          ? { ...r, payment: { ...r.payment, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at } } : r))}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Actions */}

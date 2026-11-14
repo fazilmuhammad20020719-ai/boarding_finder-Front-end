@@ -211,7 +211,7 @@ const Navbar = ({ likedCount = 0 }) => {
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
                         >
-                          Payment History
+                          My Payments
                         </Link>
                         <Link
                           to="/maintenance-portal"

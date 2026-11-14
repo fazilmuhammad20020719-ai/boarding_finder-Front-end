@@ -644,51 +644,19 @@ export const signLease = async (leaseId, signature) => {
   return data;
 };
 
-// ─── PAYMENTS ─────────────────────────────────────────────────────────────
-
-export const getPaymentConfig = async () => {
-  return request("/payments/config", { method: "GET" });
-};
-
-export const getPromotionPlans = async () => {
-  return request("/payments/promotion-plans", { method: "GET" });
-};
-
-export const startBookingCheckout = async ({ booking_id, amount, payment_type }) => {
-  return request("/payments/checkout/booking", {
-    method: "POST",
-    body: JSON.stringify({ booking_id, amount, payment_type }),
-  });
-};
-
-export const startPromotionCheckout = async ({ listing_id, plan_id }) => {
-  return request("/payments/checkout/promotion", {
-    method: "POST",
-    body: JSON.stringify({ listing_id, plan_id }),
-  });
-};
-
-export const getPaymentOrder = async (orderId) => {
-  return request(`/payments/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
-};
+// ─── PAYMENTS (Cash on Move-in only) ─────────────────────────────────────────
 
 /**
- * Redirect the browser to the PayHere hosted checkout by submitting the
- * signed form fields returned from one of the checkout endpoints.
+ * Owner (or admin) confirms the move-in cash was received — or undoes it.
+ * amount is optional; the server defaults it to first month's rent + deposit.
  */
-export const redirectToPayHere = ({ action, fields }) => {
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = action;
-  Object.entries(fields).forEach(([name, value]) => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    form.appendChild(input);
+export const setBookingPayment = async (bookingId, paid, amount) => {
+  const data = await request(`/bookings/${bookingId}/payment`, {
+    method: "PUT",
+    body: JSON.stringify(paid ? { paid: true, amount } : { paid: false }),
   });
-  document.body.appendChild(form);
-  form.submit();
+  if (data.error) throw new Error(data.error);
+  return data;
 };
 
 export const getPaymentHistory = async () => {

@@ -24,7 +24,7 @@ const BookingPage = () => {
   const [specialRequests, setSpecialRequests] = useState('');
 
   const [step, setStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Cash on Move-in'); // the only payment method
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -315,7 +315,7 @@ const BookingPage = () => {
                       {/* Submit */}
                       <div className="pt-4">
                         <button type="submit" className="w-full py-4 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer border-none text-[15px]">
-                          Continue to Payment
+                          Continue
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
@@ -339,6 +339,7 @@ const BookingPage = () => {
                             }`}
                         >
                           <div className="font-bold">{method}</div>
+                          <div className="text-sm text-white/60 mt-1">No online payment. Pay the first month's rent and deposit to the owner in cash when you move in. The owner confirms it in the system.</div>
                         </div>
                       ))}
                     </div>

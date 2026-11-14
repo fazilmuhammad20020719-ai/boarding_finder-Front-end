@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getMyBookings, updateBookingStatus } from '../services/api';
+import { PaymentBadge } from '../components/CashPayment';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -88,6 +89,8 @@ const MyBookings = () => {
               bookingDate: new Date(b.created_at).toLocaleDateString(),
               image: imageUrl,
               owner_id: b.owner_id,
+              // Cash on Move-in status (confirmed by the owner)
+              payment: { status: b.status, payment_status: b.payment_status, paid_amount: b.paid_amount, paid_at: b.paid_at, price: b.price, security_deposit: b.security_deposit },
               ownerName: "Owner" // Owner details aren't joined in the student view currently, fallback
             };
           });
@@ -264,6 +267,12 @@ const MyBookings = () => {
                           <div className="text-[13px] font-bold text-[#FACC15]">LKR {booking.totalPrice.toLocaleString()}</div>
                         </div>
                       </div>
+                      {booking.payment?.status === 'approved' && (
+                        <div className="flex flex-wrap items-center gap-2 mb-5">
+                          <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Payment</span>
+                          <PaymentBadge booking={booking.payment} />
+                        </div>
+                      )}
                     </div>
 
                     {/* Actions */}
