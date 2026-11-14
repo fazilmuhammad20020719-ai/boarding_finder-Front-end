@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { createListing, updateListing, uploadListingPhotos, getListing } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { CITIES, PROVINCES, citiesNearUniversity } from '../data/cities';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -193,9 +194,25 @@ const OwnerListingForm = () => {
     navigate('/login');
   };
 
+  // City dropdown: only the cities near the chosen university (null = show all)
+  const [showAllCities, setShowAllCities] = useState(false);
+  const nearCities = useMemo(() => citiesNearUniversity(formData.nearestUniversity), [formData.nearestUniversity]);
+  const shownCityNames = nearCities && !showAllCities ? nearCities.map(c => c.name) : CITIES.map(c => c.name);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'nearestUniversity') {
+      // A new university gets a new city list: clear the city if it is not near it
+      const near = citiesNearUniversity(value);
+      setShowAllCities(false);
+      setFormData(prev => ({
+        ...prev,
+        nearestUniversity: value,
+        city: !value || (near && !near.some(c => c.name === prev.city)) ? '' : prev.city,
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
@@ -559,95 +576,39 @@ const OwnerListingForm = () => {
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 rounded-xl border bg-[#111] text-white ${errors.city ? 'border-red-500 bg-red-500/20' : 'border-[#333]'} focus:outline-none focus:ring-2 focus:ring-[#FACC15]/20 transition-all`}
+                      disabled={!formData.nearestUniversity}
+                      className={`w-full px-4 py-3 rounded-xl border bg-[#111] text-white disabled:opacity-50 disabled:cursor-not-allowed ${errors.city ? 'border-red-500 bg-red-500/20' : 'border-[#333]'} focus:outline-none focus:ring-2 focus:ring-[#FACC15]/20 transition-all`}
                     >
-                      <option value="">-- Select City --</option>
-                      <optgroup label="Western Province">
-                        <option value="Colombo">Colombo</option>
-                        <option value="Dehiwala-Mount Lavinia">Dehiwala-Mount Lavinia</option>
-                        <option value="Moratuwa">Moratuwa</option>
-                        <option value="Kotte (Sri Jayewardenepura)">Kotte (Sri Jayewardenepura)</option>
-                        <option value="Kolonnawa">Kolonnawa</option>
-                        <option value="Kaduwela">Kaduwela</option>
-                        <option value="Maharagama">Maharagama</option>
-                        <option value="Kesbewa">Kesbewa</option>
-                        <option value="Boralesgamuwa">Boralesgamuwa</option>
-                        <option value="Homagama">Homagama</option>
-                        <option value="Piliyandala">Piliyandala</option>
-                        <option value="Nugegoda">Nugegoda</option>
-                        <option value="Gampaha">Gampaha</option>
-                        <option value="Negombo">Negombo</option>
-                        <option value="Wattala">Wattala</option>
-                        <option value="Ja-Ela">Ja-Ela</option>
-                        <option value="Kandana">Kandana</option>
-                        <option value="Kelaniya">Kelaniya</option>
-                        <option value="Minuwangoda">Minuwangoda</option>
-                        <option value="Kalutara">Kalutara</option>
-                        <option value="Panadura">Panadura</option>
-                        <option value="Beruwala">Beruwala</option>
-                        <option value="Horana">Horana</option>
-                      </optgroup>
-                      <optgroup label="Central Province">
-                        <option value="Kandy">Kandy</option>
-                        <option value="Peradeniya">Peradeniya</option>
-                        <option value="Gampola">Gampola</option>
-                        <option value="Nawalapitiya">Nawalapitiya</option>
-                        <option value="Matale">Matale</option>
-                        <option value="Dambulla">Dambulla</option>
-                        <option value="Nuwara Eliya">Nuwara Eliya</option>
-                        <option value="Hatton">Hatton</option>
-                      </optgroup>
-                      <optgroup label="Southern Province">
-                        <option value="Galle">Galle</option>
-                        <option value="Unawatuna">Unawatuna</option>
-                        <option value="Hikkaduwa">Hikkaduwa</option>
-                        <option value="Matara">Matara</option>
-                        <option value="Weligama">Weligama</option>
-                        <option value="Hambantota">Hambantota</option>
-                        <option value="Tangalle">Tangalle</option>
-                        <option value="Ambalangoda">Ambalangoda</option>
-                      </optgroup>
-                      <optgroup label="Northern Province">
-                        <option value="Jaffna">Jaffna</option>
-                        <option value="Kilinochchi">Kilinochchi</option>
-                        <option value="Mullaitivu">Mullaitivu</option>
-                        <option value="Point Pedro">Point Pedro</option>
-                        <option value="Chavakachcheri">Chavakachcheri</option>
-                        <option value="Vavuniya">Vavuniya</option>
-                        <option value="Mannar">Mannar</option>
-                      </optgroup>
-                      <optgroup label="Eastern Province">
-                        <option value="Batticaloa">Batticaloa</option>
-                        <option value="Trincomalee">Trincomalee</option>
-                        <option value="Ampara">Ampara</option>
-                        <option value="Kalmunai">Kalmunai</option>
-                        <option value="Akkaraipattu">Akkaraipattu</option>
-                      </optgroup>
-                      <optgroup label="North Western Province">
-                        <option value="Kurunegala">Kurunegala</option>
-                        <option value="Puttalam">Puttalam</option>
-                        <option value="Chilaw">Chilaw</option>
-                        <option value="Kuliyapitiya">Kuliyapitiya</option>
-                      </optgroup>
-                      <optgroup label="North Central Province">
-                        <option value="Anuradhapura">Anuradhapura</option>
-                        <option value="Polonnaruwa">Polonnaruwa</option>
-                        <option value="Mihintale">Mihintale</option>
-                      </optgroup>
-                      <optgroup label="Uva Province">
-                        <option value="Badulla">Badulla</option>
-                        <option value="Bandarawela">Bandarawela</option>
-                        <option value="Ella">Ella</option>
-                        <option value="Monaragala">Monaragala</option>
-                        <option value="Wellawaya">Wellawaya</option>
-                      </optgroup>
-                      <optgroup label="Sabaragamuwa Province">
-                        <option value="Ratnapura">Ratnapura</option>
-                        <option value="Kegalle">Kegalle</option>
-                        <option value="Balangoda">Balangoda</option>
-                        <option value="Embilipitiya">Embilipitiya</option>
-                      </optgroup>
+                      <option value="">{formData.nearestUniversity ? '-- Select City --' : '-- Select a university first --'}</option>
+                      {nearCities && !showAllCities ? (
+                        <optgroup label={`Near ${formData.nearestUniversity}`}>
+                          {nearCities.map(c => (
+                            <option key={c.name} value={c.name}>{c.name} (~{c.km} km)</option>
+                          ))}
+                        </optgroup>
+                      ) : (
+                        PROVINCES.map(p => (
+                          <optgroup key={p} label={p}>
+                            {CITIES.filter(c => c.province === p).map(c => (
+                              <option key={c.name} value={c.name}>{c.name}</option>
+                            ))}
+                          </optgroup>
+                        ))
+                      )}
+                      {/* Keep a saved city selectable even if it is not in the list shown */}
+                      {formData.city && !shownCityNames.includes(formData.city) && (
+                        <option value={formData.city}>{formData.city}</option>
+                      )}
                     </select>
+                    {nearCities && formData.nearestUniversity && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllCities(v => !v)}
+                        className="mt-2 text-xs font-semibold text-[#FACC15] hover:underline bg-transparent border-none cursor-pointer p-0"
+                      >
+                        {showAllCities ? 'Show only cities near the university' : "My city isn't listed - show all cities"}
+                      </button>
+                    )}
                     {errors.city && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.city}</p>}
                   </div>
                   <div>
