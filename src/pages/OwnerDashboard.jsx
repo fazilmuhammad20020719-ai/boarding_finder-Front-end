@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, duplicateListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
 import { getAvailability } from '../utils/availability';
 import { subscribe } from '../services/realtime';
 
@@ -191,37 +191,6 @@ const OwnerDashboard = () => {
       ));
     } catch (err) {
       alert('Failed to update listing status: ' + (err.message || 'Unknown error'));
-    }
-  };
-
-  const handleDuplicate = async (id) => {
-    if (window.confirm('Are you sure you want to duplicate this listing?')) {
-      try {
-        const res = await duplicateListing(id);
-        if (res.listing) {
-          // Parse image urls for the duplicated listing as done on fetch
-          let imageUrl = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600";
-          let parsedImages = res.listing.image_urls || [];
-          if (typeof parsedImages === 'string') {
-             try { parsedImages = JSON.parse(parsedImages); } catch(e) { parsedImages = []; }
-          }
-          if (parsedImages.length > 0) {
-             const firstImg = parsedImages[0];
-             if (firstImg.includes('drive.google.com/uc?id=')) {
-               imageUrl = firstImg.replace('uc?id=', 'thumbnail?id=').replace('&export=view', '') + '&sz=w1000';
-             } else if (firstImg.startsWith('http')) {
-               imageUrl = firstImg;
-             } else {
-               const cleanUrl = firstImg.startsWith('/') ? firstImg.substring(1) : firstImg;
-               imageUrl = `/${cleanUrl.startsWith('images/') ? '' : 'images/'}${cleanUrl}`;
-             }
-          }
-          const duplicated = { ...res.listing, parsed_image_url: imageUrl };
-          setListings(prev => [duplicated, ...prev]);
-        }
-      } catch (err) {
-        alert('Failed to duplicate listing: ' + (err.message || 'Unknown error'));
-      }
     }
   };
 
@@ -638,13 +607,6 @@ const OwnerDashboard = () => {
                             Stats
                           </button>
                           <button
-                            onClick={() => handleDuplicate(listing.listing_id)}
-                            className="py-2 flex items-center justify-center gap-1.5 text-[13px] font-bold text-white bg-[#111] border border-[#333] rounded-xl hover:bg-[#222] transition-colors cursor-pointer"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
-                            Duplicate
-                          </button>
-                          <button
                             onClick={() => handlePause(listing.listing_id, listing.is_paused)}
                             className="py-2 flex items-center justify-center gap-1.5 text-[13px] font-bold text-white bg-[#111] border border-[#333] rounded-xl hover:bg-[#222] transition-colors cursor-pointer"
                           >
@@ -662,7 +624,7 @@ const OwnerDashboard = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(listing.listing_id)}
-                            className="py-2 flex items-center justify-center gap-1.5 text-[13px] font-bold text-red-500 bg-[#111] border border-[#333] rounded-xl hover:bg-[#222] transition-colors cursor-pointer"
+                            className="col-span-2 py-2 flex items-center justify-center gap-1.5 text-[13px] font-bold text-red-500 bg-[#111] border border-[#333] rounded-xl hover:bg-[#222] transition-colors cursor-pointer"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             Delete

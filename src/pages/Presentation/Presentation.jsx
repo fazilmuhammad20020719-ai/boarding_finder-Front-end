@@ -183,7 +183,7 @@ export default function Presentation() {
             {[
               { id: 'FR-01', t: 'Registration & Auth', d: 'Role-specific registration, email OTP, JWT login, forgot/reset password' },
               { id: 'FR-02', t: 'Identity Verification', d: 'Document upload, admin review & approval, verification status tracking' },
-              { id: 'FR-03', t: 'Listing Management', d: 'Create, edit, pause, duplicate, delete listings with photo upload & analytics' },
+              { id: 'FR-03', t: 'Listing Management', d: 'Create, edit, pause, delete listings with photo upload & analytics' },
               { id: 'FR-04', t: 'Search & Discovery', d: 'Filters, map view, neighborhood details, side-by-side comparison' },
               { id: 'FR-05', t: 'Booking System', d: 'Submit requests, approve/reject, status tracking (pending/approved/rejected)' },
               { id: 'FR-06', t: 'Digital Lease', d: 'Auto-generated lease agreements, digital e-signing, terms & conditions' },

@@ -205,11 +205,6 @@ export async function pauseListing(id, is_paused) {
   });
 }
 
-export async function duplicateListing(id) {
-  return request(`/listings/${id}/duplicate`, {
-    method: "POST",
-  });
-}
 
 export async function getListingAnalytics(id) {
   return request(`/listings/${id}/analytics`, {
