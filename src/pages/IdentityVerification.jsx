@@ -151,7 +151,7 @@ const IdentityVerification = () => {
                   />
 
                   <FileUploadBox
-                    label={isOwner ? 'Business Registration (BR) document / GS Registration doc' : 'Student ID Card'}
+                    label={isOwner ? 'GS Registration doc / Other Docs' : 'Student ID Card'}
                     preview={secondPreview}
                     onChange={(e) => handleFileChange(e, 'second')}
                     inputId="second-upload"

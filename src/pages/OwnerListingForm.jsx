@@ -61,8 +61,8 @@ const OwnerListingForm = () => {
     minimumStay: '6', // months
 
     // Photos
-    photos: [],      // preview URLs for display
-    photoFiles: [],   // actual File objects for upload
+    photos: [],      // display order: saved Drive URLs and blob: previews of new files
+    photoFiles: [],  // [{ url, file }] — each new file linked to its blob: preview URL
 
     // Optional 360°/video tour link (YouTube, Vimeo, Matterport, Kuula, Momento360)
     virtualTourUrl: '',
@@ -278,13 +278,25 @@ const OwnerListingForm = () => {
 
       try {
         // Step 1: Upload photos to Google Drive (if any)
-        let imageUrls = [];
-        if (formData.photoFiles.length > 0) {
+        // New photos, in the order the owner arranged them
+        const newPhotos = formData.photos
+          .map((src) => formData.photoFiles.find((p) => p.url === src))
+          .filter(Boolean);
+        const uploadedBySrc = {};
+        if (newPhotos.length > 0) {
           setUploadStatus('uploading');
-          const uploadResult = await uploadListingPhotos(formData.photoFiles);
-          imageUrls = uploadResult.urls;
+          const uploadResult = await uploadListingPhotos(newPhotos.map((p) => p.file));
+          const urls = uploadResult.urls || [];
+          if (urls.length !== newPhotos.length) {
+            throw new Error(`${newPhotos.length - urls.length} of ${newPhotos.length} photos failed to upload. Please try again.`);
+          }
+          newPhotos.forEach((p, i) => { uploadedBySrc[p.url] = urls[i]; });
           setUploadStatus('done');
         }
+        // Keep the owner's order: the first photo is the cover shown on cards
+        const imageUrls = formData.photos
+          .map((src) => (src.startsWith('https://') ? src : uploadedBySrc[src]))
+          .filter(Boolean);
 
         // Step 2: Create or Update the listing with Drive URLs
         const payload = {
@@ -296,7 +308,7 @@ const OwnerListingForm = () => {
           latitude: formData.latitude,
           longitude: formData.longitude,
           amenities: JSON.stringify(formData.amenities),
-          image_urls: [...formData.photos.filter(p => p.startsWith('https://')), ...imageUrls],
+          image_urls: imageUrls,
           virtual_tour_url: formData.virtualTourUrl.trim(),
           university: formData.nearestUniversity,
           property_type: formData.propertyType,
@@ -326,24 +338,37 @@ const OwnerListingForm = () => {
   };
 
   // Photo Upload Handler — stores File objects for real upload + preview URLs for display
+  const MAX_PHOTOS = 5;
   const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const newPreviews = files.map(file => URL.createObjectURL(file));
+    const room = MAX_PHOTOS - formData.photos.length;
+    const files = Array.from(e.target.files).slice(0, Math.max(0, room));
+    e.target.value = ''; // allow picking the same file again after removing it
+    if (files.length === 0) return;
+    const added = files.map((file) => ({ url: URL.createObjectURL(file), file }));
     setFormData(prev => ({
       ...prev,
-      photos: [...prev.photos, ...newPreviews].slice(0, 5),
-      photoFiles: [...prev.photoFiles, ...files].slice(0, 5)
+      photos: [...prev.photos, ...added.map((p) => p.url)],
+      photoFiles: [...prev.photoFiles, ...added],
     }));
   };
 
   const removePhoto = (index) => {
-    // Revoke the object URL to free memory
-    URL.revokeObjectURL(formData.photos[index]);
+    const src = formData.photos[index];
+    if (src.startsWith('blob:')) URL.revokeObjectURL(src);
     setFormData(prev => ({
       ...prev,
       photos: prev.photos.filter((_, i) => i !== index),
-      photoFiles: prev.photoFiles.filter((_, i) => i !== index)
+      photoFiles: prev.photoFiles.filter((p) => p.url !== src),
     }));
+  };
+
+  // Move a photo to the front — the first photo is the listing's cover image
+  const makeCover = (index) => {
+    setFormData(prev => {
+      const photos = [...prev.photos];
+      const [picked] = photos.splice(index, 1);
+      return { ...prev, photos: [picked, ...photos] };
+    });
   };
 
   const renderStepIndicator = () => (
@@ -830,22 +855,34 @@ const OwnerListingForm = () => {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                   </div>
                   <p className="font-bold text-white">Click or drag photos to upload</p>
-                  <p className="text-xs text-white/60 mt-1">JPEG, PNG up to 5MB (Max 5 photos)</p>
+                  <p className="text-xs text-white/60 mt-1">JPEG, PNG up to 5MB (Max 5 photos) · The first photo is the cover</p>
                 </div>
 
                 {/* Photo Previews */}
                 {formData.photos.length > 0 && (
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {formData.photos.map((src, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden shadow-sm group">
-                        <img src={src} alt={`Upload ${idx + 1}`} className="w-full h-full object-cover" />
+                      <div key={src} className={`relative aspect-square rounded-xl overflow-hidden shadow-sm group ${idx === 0 ? 'ring-2 ring-[#FACC15]' : ''}`}>
+                        <img src={src} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => removePhoto(idx)}
-                          className="absolute top-1 right-1 w-6 h-6 bg-black/50 hover:bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border-none cursor-pointer"
+                          aria-label={`Remove photo ${idx + 1}`}
+                          className="absolute top-1 right-1 w-7 h-7 bg-black/70 hover:bg-red-500 text-white rounded-full flex items-center justify-center transition-colors border-none cursor-pointer"
                         >
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
+                        {idx === 0 ? (
+                          <span className="absolute bottom-1 left-1 px-2 py-0.5 rounded-full bg-[#FACC15] text-black text-[10px] font-bold">Cover</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => makeCover(idx)}
+                            className="absolute bottom-1 left-1 px-2 py-0.5 rounded-full bg-black/70 hover:bg-[#FACC15] hover:text-black text-white text-[10px] font-bold border-none cursor-pointer transition-colors"
+                          >
+                            Set as cover
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
