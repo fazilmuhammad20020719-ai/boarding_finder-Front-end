@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import BrandLogo from './Logo';
+import UserAvatar from './UserAvatar';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -40,7 +41,6 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, openTickets = 0
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const userName = user?.name || 'Admin';
-  const userInitial = userName.charAt(0).toUpperCase();
 
   const go = (key) => {
     if (onTabChange) onTabChange(key);
@@ -82,9 +82,7 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, openTickets = 0
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 className="flex items-center gap-2.5 px-3 py-1.5 border border-[#333] bg-[#1A1A1A] hover:bg-[#222] rounded-full text-white text-sm font-semibold transition-all cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-full bg-[#333] text-[#FACC15] flex items-center justify-center font-bold text-xs shadow-sm">
-                  {userInitial}
-                </div>
+                <UserAvatar user={user} className="w-7 h-7 text-xs shadow-sm" />
                 <span className="hidden sm:inline">{userName.split(' ')[0]}</span>
                 <svg className="w-3.5 h-3.5 fill-current text-gray-400 hidden sm:inline" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />

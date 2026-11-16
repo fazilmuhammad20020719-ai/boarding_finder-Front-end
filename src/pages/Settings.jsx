@@ -1,49 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import AvatarUploader from '../components/AvatarUploader';
 import { useAuth } from '../context/AuthContext';
-import { requestPasswordReset } from '../services/api';
+import { updatePreferences, changePassword, deleteAccount } from '../services/api';
 
-// Settings for every role. Account details come from the signed-in user and are
-// saved with updateUser(); the fields shown depend on the role (student, owner, admin).
-// Notification and privacy switches are remembered on this device.
+// Settings for every role. Everything here is saved on the server:
+// account details (updateUser), profile picture, notification + privacy
+// preferences, password change and account deletion.
 
 const inputClass =
   'w-full px-4 py-3 rounded-xl border border-[#333] focus:outline-none focus:ring-2 focus:ring-[#FACC15]/20 focus:border-[#FACC15]/50 transition-all bg-[#111] focus:bg-black text-white disabled:opacity-50';
 
 const ROLE_LABEL = { student: '🎓 Student', owner: '🏠 Property Owner', admin: '🛡️ System Administrator' };
 
-// Notification options per role
+// Must match NOTIFICATION_KEYS / PRIVACY_KEYS in backend/controllers/auth/accountSettings.js.
+// Switching one off stops those notifications (in the app and by email).
 const NOTIFICATION_OPTIONS = {
   student: [
-    { id: 'bookingUpdates', title: 'Booking Updates', text: 'When an owner approves or rejects your booking request.', on: true },
-    { id: 'messages', title: 'Direct Messages', text: 'When a boarding owner sends you a new message.', on: true },
-    { id: 'maintenance', title: 'Maintenance Updates', text: 'When the status of your repair request changes.', on: true },
-    { id: 'announcements', title: 'Announcements', text: 'Platform news and updates from BoardingFinder.', on: false },
+    { id: 'bookingUpdates', title: 'Booking Updates', text: 'When an owner approves, rejects or cancels your booking, or confirms your move-in payment.' },
+    { id: 'maintenance', title: 'Maintenance Updates', text: 'When the status of your repair request changes.' },
+    { id: 'announcements', title: 'Announcements', text: 'Platform news and updates from the BoardingFinder team.' },
   ],
   owner: [
-    { id: 'newBookings', title: 'New Booking Requests', text: 'When a student requests to book one of your listings.', on: true },
-    { id: 'messages', title: 'Direct Messages', text: 'When a student sends you a new message.', on: true },
-    { id: 'maintenance', title: 'Maintenance Requests', text: 'When a tenant submits a new repair request.', on: true },
-    { id: 'reviews', title: 'New Reviews', text: 'When a student leaves a review on your listing.', on: true },
-    { id: 'announcements', title: 'Announcements', text: 'Platform news and updates from BoardingFinder.', on: false },
+    { id: 'newBookings', title: 'Booking Requests', text: 'New booking requests, cancellations and when a room becomes fully booked.' },
+    { id: 'maintenance', title: 'Maintenance Requests', text: 'When a tenant submits a new repair request.' },
+    { id: 'reviews', title: 'New Reviews', text: 'When a student reviews one of your listings.' },
+    { id: 'announcements', title: 'Announcements', text: 'Platform news and updates from the BoardingFinder team.' },
   ],
   admin: [
-    { id: 'verifications', title: 'New Verifications', text: 'When a user uploads documents for identity verification.', on: true },
-    { id: 'newListings', title: 'New Listings', text: 'When an owner publishes a new listing.', on: true },
-    { id: 'reports', title: 'Reports & Complaints', text: 'When a user reports a listing or another user.', on: true },
+    { id: 'verifications', title: 'New Verifications', text: 'When a user uploads identity documents for review.' },
+    { id: 'newListings', title: 'New Listings', text: 'When an owner publishes a new listing.' },
+    { id: 'reports', title: 'Support & Reports', text: 'New support tickets, Contact Us messages and reports.' },
   ],
 };
 
-// Privacy options per role (admins have none)
 const PRIVACY_OPTIONS = {
   student: [
-    { id: 'profileVisible', title: 'Profile Visibility', text: 'Let boarding owners see your university and course when you send a booking request.', on: true },
-    { id: 'onlineStatus', title: 'Show Online Status', text: 'Show when you are active in Messages.', on: true },
+    { id: 'profileVisible', title: 'Show My Student Details', text: 'Let owners of the rooms you book see your university, course and student ID.' },
   ],
   owner: [
-    { id: 'showPhone', title: 'Show Phone Number', text: 'Show your phone number to students on your listings.', on: true },
-    { id: 'onlineStatus', title: 'Show Online Status', text: 'Show when you are active in Messages.', on: true },
+    { id: 'showPhone', title: 'Show My Phone Number', text: 'Show your phone number to signed-in students on your listing pages.' },
   ],
   admin: [],
 };
@@ -55,17 +52,32 @@ const Toggle = ({ checked, onChange }) => (
   </label>
 );
 
+// Missing key = switched on
+const readPrefs = (options, saved) => {
+  const out = {};
+  options.forEach((o) => { out[o.id] = saved?.[o.id] !== false; });
+  return out;
+};
+
 const Settings = () => {
-  const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
+  const { user, updateUser, patchUser, clearSession } = useAuth();
   const role = user?.role === 'owner' || user?.role === 'admin' ? user.role : 'student';
 
   const [activeTab, setActiveTab] = useState('account');
-  const [message, setMessage] = useState(null); // { ok: boolean, text: string }
+  const [message, setMessage] = useState(null); // { ok, text }
   const [isSaving, setIsSaving] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
 
-  // Account form, filled from the signed-in user
+  // Account form
   const [form, setForm] = useState({});
+  // Preferences
+  const [notifications, setNotifications] = useState({});
+  const [privacy, setPrivacy] = useState({});
+  // Password
+  const [pw, setPw] = useState({ current: '', next: '', confirm: '' });
+  // Delete account
+  const [del, setDel] = useState({ open: false, password: '', confirm: '' });
+
   useEffect(() => {
     if (!user) return;
     setForm({
@@ -78,62 +90,73 @@ const Settings = () => {
       permitNumber: user.permit_number || '',
       propertyAddress: user.property_address || '',
     });
-  }, [user]);
-
-  // Notification + privacy switches, remembered per user on this device
-  const prefsKey = `bf-settings-${user?.id || user?.user_id || 'me'}`;
-  const defaults = () => {
-    const d = {};
-    [...NOTIFICATION_OPTIONS[role], ...PRIVACY_OPTIONS[role]].forEach((o) => { d[o.id] = o.on; });
-    return d;
-  };
-  const [prefs, setPrefs] = useState(defaults);
-  useEffect(() => {
-    let saved = null;
-    try { saved = JSON.parse(localStorage.getItem(prefsKey) || 'null'); } catch { saved = null; }
-    setPrefs({ ...defaults(), ...(saved || {}) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefsKey, role]);
+    setNotifications(readPrefs(NOTIFICATION_OPTIONS[role], user.notification_prefs));
+    setPrivacy(readPrefs(PRIVACY_OPTIONS[role], user.privacy_prefs));
+  }, [user, role]);
 
   const flash = (ok, text) => {
     setMessage({ ok, text });
-    setTimeout(() => setMessage(null), 3000);
+    setTimeout(() => setMessage(null), 4000);
+  };
+
+  const saveAccount = async () => {
+    const payload = { name: form.name, phone: form.phone };
+    if (role === 'student') Object.assign(payload, { university: form.university, course: form.course });
+    if (role === 'owner') {
+      Object.assign(payload, {
+        propertyName: form.propertyName,
+        propertyType: form.propertyType,
+        permitNumber: form.permitNumber,
+        propertyAddress: form.propertyAddress,
+      });
+    }
+    await updateUser(payload);
+    flash(true, 'Account details saved.');
+  };
+
+  const savePreferences = async () => {
+    const data = await updatePreferences(notifications, privacy);
+    patchUser({ notification_prefs: data.notification_prefs, privacy_prefs: data.privacy_prefs });
+    flash(true, 'Preferences saved.');
+  };
+
+  const savePassword = async () => {
+    if (pw.next !== pw.confirm) {
+      flash(false, 'The new passwords do not match.');
+      return;
+    }
+    const data = await changePassword(pw.current, pw.next);
+    setPw({ current: '', next: '', confirm: '' });
+    flash(true, data.message || 'Password changed.');
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (activeTab === 'account') {
-      setIsSaving(true);
-      try {
-        const payload = { name: form.name, phone: form.phone };
-        if (role === 'student') Object.assign(payload, { university: form.university, course: form.course });
-        if (role === 'owner') {
-          Object.assign(payload, {
-            propertyName: form.propertyName,
-            propertyType: form.propertyType,
-            permitNumber: form.permitNumber,
-            propertyAddress: form.propertyAddress,
-          });
-        }
-        await updateUser(payload);
-        flash(true, 'Account details saved.');
-      } catch (err) {
-        flash(false, err.message || 'Could not save your details.');
-      } finally {
-        setIsSaving(false);
-      }
-      return;
+    setIsSaving(true);
+    try {
+      if (activeTab === 'account') await saveAccount();
+      else if (activeTab === 'security') await savePassword();
+      else await savePreferences();
+    } catch (err) {
+      flash(false, err.message || 'Could not save. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
-    try { localStorage.setItem(prefsKey, JSON.stringify(prefs)); } catch { /* storage may be blocked */ }
-    flash(true, 'Preferences saved.');
   };
 
-  const sendReset = async () => {
+  const handleDelete = async () => {
+    if (del.confirm !== 'DELETE') {
+      flash(false, 'Type DELETE to confirm.');
+      return;
+    }
+    setIsSaving(true);
     try {
-      await requestPasswordReset(user.email);
-      setResetSent(true);
+      await deleteAccount(del.password);
+      clearSession();
+      navigate('/login', { replace: true });
     } catch (err) {
-      flash(false, err.message || 'Could not send the reset link.');
+      flash(false, err.message || 'Could not delete your account.');
+      setIsSaving(false);
     }
   };
 
@@ -159,7 +182,7 @@ const Settings = () => {
     </div>
   );
 
-  const optionList = (options) => (
+  const optionList = (options, values, setValues) => (
     <div className="space-y-4">
       {options.map((o) => (
         <div key={o.id} className="flex items-start justify-between gap-4 p-4 rounded-2xl border border-[#333] hover:bg-[#111] transition-colors">
@@ -167,7 +190,7 @@ const Settings = () => {
             <h4 className="font-bold text-white text-[15px]">{o.title}</h4>
             <p className="text-sm text-white/50 mt-1">{o.text}</p>
           </div>
-          <Toggle checked={!!prefs[o.id]} onChange={(v) => setPrefs({ ...prefs, [o.id]: v })} />
+          <Toggle checked={!!values[o.id]} onChange={(v) => setValues({ ...values, [o.id]: v })} />
         </div>
       ))}
     </div>
@@ -178,6 +201,8 @@ const Settings = () => {
     owner: 'Manage your owner account, property details, security and notifications.',
     admin: 'Manage your administrator account, security and alerts.',
   }[role];
+
+  const saveLabel = activeTab === 'security' ? 'Change Password' : 'Save Changes';
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
@@ -195,7 +220,7 @@ const Settings = () => {
             {tabs.map((t) => (
               <button
                 key={t.id}
-                onClick={() => setActiveTab(t.id)}
+                onClick={() => { setActiveTab(t.id); setMessage(null); }}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-[14px] transition-all border-none cursor-pointer text-left ${
                   activeTab === t.id ? 'bg-[#FACC15] text-black shadow-md' : 'bg-transparent text-white/60 hover:bg-[#111] hover:text-white'
                 }`}
@@ -220,17 +245,11 @@ const Settings = () => {
                 <div>
                   <h2 className="text-xl font-bold text-white mb-6">Account Details</h2>
 
-                  <div className="flex items-center gap-5 mb-8 pb-8 border-b border-[#333]">
-                    <div className="w-20 h-20 rounded-full bg-[#FACC15]/10 text-[#FACC15] flex items-center justify-center font-black text-3xl border border-[#FACC15]/30 shrink-0">
-                      {(user?.name || '?').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-white text-lg truncate">{user?.name}</div>
-                      <div className="text-sm text-white/50 truncate">{user?.email}</div>
-                      <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold bg-[#FACC15]/10 text-[#FACC15] border border-[#FACC15]/30">
-                        {ROLE_LABEL[role]}
-                      </span>
-                    </div>
+                  <div className="mb-8 pb-8 border-b border-[#333]">
+                    <AvatarUploader />
+                    <span className="inline-block mt-4 px-3 py-1 rounded-full text-xs font-bold bg-[#FACC15]/10 text-[#FACC15] border border-[#FACC15]/30">
+                      {ROLE_LABEL[role]}
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
@@ -271,66 +290,108 @@ const Settings = () => {
               {activeTab === 'security' && (
                 <div>
                   <h2 className="text-xl font-bold text-white mb-6">Password & Security</h2>
-                  <div className="p-5 rounded-2xl border border-[#333] mb-6">
-                    <h4 className="font-bold text-white text-[15px]">Change Password</h4>
-                    <p className="text-sm text-white/50 mt-1 mb-4">
-                      We'll email a secure reset link to <span className="text-white">{user?.email}</span>. Open it to choose a new password.
-                    </p>
-                    {resetSent ? (
-                      <div className="text-sm font-bold text-[#10b981]">Reset link sent. Check your inbox.</div>
-                    ) : (
-                      <button type="button" onClick={sendReset} className="px-5 py-2.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors cursor-pointer border-none text-sm">
-                        Send Reset Link
-                      </button>
-                    )}
-                  </div>
 
-                  {role !== 'admin' && (
-                    <div className="p-5 rounded-2xl border border-red-500/30">
-                      <h4 className="font-bold text-red-500 text-[15px]">Close Account</h4>
-                      <p className="text-sm text-white/50 mt-1 mb-4">
-                        {role === 'owner'
-                          ? 'To close your owner account and remove your listings, contact our support team.'
-                          : 'To close your account and remove your data, contact our support team.'}
-                      </p>
-                      <Link to="/contact" className="inline-block px-5 py-2.5 border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold rounded-xl transition-colors text-sm">
-                        Contact Support
-                      </Link>
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-bold text-white/70 mb-2">Current Password</label>
+                      <input type="password" autoComplete="current-password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} className={inputClass} />
                     </div>
-                  )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-bold text-white/70 mb-2">New Password</label>
+                        <input type="password" autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={inputClass} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-white/70 mb-2">Confirm New Password</label>
+                        <input type="password" autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} className={inputClass} />
+                      </div>
+                    </div>
+                    <p className="text-xs text-white/40">
+                      At least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol.
+                      Changing it signs you out on your other devices.
+                    </p>
+                  </div>
                 </div>
               )}
 
               {/* NOTIFICATIONS */}
               {activeTab === 'notifications' && (
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-6">Notification Preferences</h2>
-                  {optionList(NOTIFICATION_OPTIONS[role])}
+                  <h2 className="text-xl font-bold text-white mb-2">Notification Preferences</h2>
+                  <p className="text-sm text-white/50 mb-6">Switched-off notifications aren't sent to you in the app or by email. Account and security messages are always sent.</p>
+                  {optionList(NOTIFICATION_OPTIONS[role], notifications, setNotifications)}
                 </div>
               )}
 
-              {/* PRIVACY (students and owners) */}
+              {/* PRIVACY */}
               {activeTab === 'privacy' && PRIVACY_OPTIONS[role].length > 0 && (
                 <div>
                   <h2 className="text-xl font-bold text-white mb-6">Privacy Controls</h2>
-                  {optionList(PRIVACY_OPTIONS[role])}
+                  {optionList(PRIVACY_OPTIONS[role], privacy, setPrivacy)}
                 </div>
               )}
 
-              {/* Save (not needed on the security tab) */}
-              {activeTab !== 'security' && (
-                <div className="mt-10 pt-6 border-t border-[#333] flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="px-8 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors cursor-pointer border-none shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    {isSaving ? 'Saving…' : 'Save Changes'}
-                  </button>
-                </div>
-              )}
+              <div className="mt-10 pt-6 border-t border-[#333] flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-8 py-3 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl transition-colors cursor-pointer border-none shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  {isSaving ? 'Saving…' : saveLabel}
+                </button>
+              </div>
             </form>
+
+            {/* Delete account (students and owners) */}
+            {activeTab === 'security' && role !== 'admin' && (
+              <div className="mt-10 p-5 rounded-2xl border border-red-500/30">
+                <h4 className="font-bold text-red-500 text-[15px]">Delete Account</h4>
+                <p className="text-sm text-white/50 mt-1">
+                  {role === 'owner'
+                    ? 'Your listings go offline, pending booking requests are cancelled and you can no longer sign in. This cannot be undone.'
+                    : 'Your pending booking requests are cancelled and you can no longer sign in. This cannot be undone.'}
+                </p>
+
+                {!del.open ? (
+                  <button
+                    type="button"
+                    onClick={() => setDel({ open: true, password: '', confirm: '' })}
+                    className="mt-4 px-5 py-2.5 bg-transparent border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold rounded-xl transition-colors cursor-pointer text-sm"
+                  >
+                    Delete my account
+                  </button>
+                ) : (
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-white/70 mb-2">Your password</label>
+                      <input type="password" autoComplete="current-password" value={del.password} onChange={(e) => setDel({ ...del, password: e.target.value })} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-white/70 mb-2">Type <span className="text-red-400">DELETE</span> to confirm</label>
+                      <input type="text" value={del.confirm} onChange={(e) => setDel({ ...del, confirm: e.target.value })} className={inputClass} />
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={handleDelete}
+                        disabled={isSaving || !del.password || del.confirm !== 'DELETE'}
+                        className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors cursor-pointer border-none text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Permanently delete account
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDel({ open: false, password: '', confirm: '' })}
+                        className="px-5 py-2.5 bg-transparent border border-[#333] text-white/70 hover:text-white font-bold rounded-xl cursor-pointer text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>

@@ -111,6 +111,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /** Merge fields into the signed-in user (e.g. new avatar or preferences). */
+  const patchUser = (fields) => setUser((prev) => (prev ? { ...prev, ...fields } : prev));
+
+  /** Clear the session locally (account deleted on the server). */
+  const clearSession = () => {
+    setAccessToken(null);
+    setUser(null);
+  };
+
   const value = {
     user,
     token,
@@ -128,6 +137,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     refreshUser,
+    patchUser,
+    clearSession,
   };
 
   return (

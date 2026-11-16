@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import BrandLogo from '../components/Logo';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import SearchResultsMap from '../components/SearchResultsMap';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getAccessToken } from '../services/api';
 import { getAvailability } from '../utils/availability';
 import { useAuth } from '../context/AuthContext';
@@ -78,10 +79,6 @@ const mapListing = (dbListing) => {
     }
   }
 
-  // Randomize map coordinates slightly so they don't overlap completely if we have multiple
-  const randomTop = Math.floor(Math.random() * 60 + 20) + '%';
-  const randomLeft = Math.floor(Math.random() * 60 + 20) + '%';
-
   return {
     id: dbListing.listing_id,
     name: dbListing.title,
@@ -103,7 +100,6 @@ const mapListing = (dbListing) => {
     image: imageUrl,
     isFullyBooked: getAvailability(dbListing).full,
     liked: false,
-    mapCoords: { top: randomTop, left: randomLeft }
   };
 };
 
@@ -658,7 +654,8 @@ const SearchPage = () => {
               {filteredListings.map((listing) => (
                 <div
                   key={listing.id}
-                  onClick={() => navigate(`/property/${listing.id}`)}
+                  onClick={() => setSelectedMapListing(listing)}
+                  onDoubleClick={() => navigate(`/property/${listing.id}`)}
                   onMouseEnter={() => setHoveredMapListing(listing.id)}
                   onMouseLeave={() => setHoveredMapListing(null)}
                   className={`p-3 rounded-2xl border transition-all duration-200 flex gap-3 cursor-pointer ${selectedMapListing?.id === listing.id
@@ -689,101 +686,16 @@ const SearchPage = () => {
               ))}
             </div>
 
-            {/* SVG/Custom Styled Interactive Map */}
-            <div className="w-full lg:w-[65%] h-[400px] lg:h-[550px] rounded-[24px] bg-[#111] border border-[#333] relative overflow-hidden shadow-inner flex items-center justify-center">
-              <svg className="absolute inset-0 w-full h-full z-0 opacity-40" xmlns="http://www.w3.org/2000/svg">
-                {/* River */}
-                <path d="M-50 150 C 200 180, 150 350, 600 450 L600 550 L-50 550 Z" fill="#193c73" />
-                {/* Roads */}
-                <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="#333" strokeWidth="12" strokeLinecap="round" />
-                <path d="M 50 -10 L 50 600 M 350 -10 L 350 600 M -10 120 L 600 120 M -10 380 L 600 380" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeDasharray="5,5" />
-
-                {/* University Shaded Zones */}
-                <rect x="30" y="30" width="180" height="80" rx="10" fill="#22c55e" fillOpacity="0.15" stroke="#22c55e" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="40" y="55" fill="#22c55e" className="text-[11px] font-bold">MORATUWA ZONE</text>
-
-                <rect x="380" y="240" width="180" height="100" rx="10" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="390" y="265" fill="#3b82f6" className="text-[11px] font-bold">COLOMBO ZONE</text>
-
-                <rect x="260" y="10" width="150" height="80" rx="10" fill="#f59e0b" fillOpacity="0.1" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="3,3" />
-                <text x="270" y="35" fill="#f59e0b" className="text-[11px] font-bold">KELANIYA ZONE</text>
-              </svg>
-
-              <span className="absolute bottom-4 left-4 z-10 bg-[#1A1A1A]/80 backdrop-blur-sm border border-[#333] text-[10px] text-white/50 font-semibold px-3 py-1.5 rounded-md shadow-sm">
-                Interactive Campus Map (Simulated)
-              </span>
-
-              {/* Price Markers */}
-              {filteredListings.map((listing) => {
-                const isHovered = hoveredMapListing === listing.id;
-                const isSelected = selectedMapListing?.id === listing.id;
-                return (
-                  <div
-                    key={listing.id}
-                    className="absolute z-10 transition-transform duration-200"
-                    style={{
-                      top: listing.mapCoords.top,
-                      left: listing.mapCoords.left,
-                      transform: isHovered || isSelected ? 'scale(1.15) translate(-50%, -50%)' : 'scale(1) translate(-50%, -50%)',
-                      transformOrigin: 'top left'
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        setSelectedMapListing(listing);
-                        setSearchQuery(listing.name);
-                      }}
-                      onMouseEnter={() => setHoveredMapListing(listing.id)}
-                      onMouseLeave={() => setHoveredMapListing(null)}
-                      className={`px-3 py-1.5 rounded-full font-bold text-xs shadow-md border flex items-center gap-1 transition-all cursor-pointer ${isSelected
-                          ? 'bg-[#FACC15] border-[#FACC15] text-black ring-4 ring-[#FACC15]/20'
-                          : isHovered
-                            ? 'bg-[#EAB308] border-[#EAB308] text-black shadow-lg'
-                            : 'bg-[#1A1A1A] border-[#333] text-[#FACC15]'
-                        }`}
-                    >
-                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                      </svg>
-                      LKR {(listing.price / 1000).toFixed(0)}k
-                    </button>
-
-                    {isSelected && (
-                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-48 bg-[#1A1A1A] border border-[#333] p-2.5 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-fadeIn">
-                        <div className="relative">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedMapListing(null);
-                            }}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-[#1A1A1A] border border-[#333] rounded-full flex items-center justify-center text-[10px] text-white/50 hover:text-white shadow-sm"
-                          >
-                            ✕
-                          </button>
-                          <img
-                            src={listing.image}
-                            alt=""
-                            className="w-full h-20 rounded-xl object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h5 className="font-bold text-white text-[12px] truncate">{listing.name}</h5>
-                          <span className="text-[12px] font-extrabold text-[#FACC15] mt-0.5 block">LKR {listing.price.toLocaleString()}/mo</span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/property/${listing.id}`);
-                          }}
-                          className="w-full py-1 bg-[#FACC15] text-black font-bold text-[10px] rounded-lg transition-all"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            {/* Real map (OpenStreetMap) with a price pin per listing */}
+            <div className="w-full lg:w-[65%] h-[400px] lg:h-[550px] rounded-[24px] border border-[#333] relative overflow-hidden">
+              <SearchResultsMap
+                listings={filteredListings}
+                hoveredId={hoveredMapListing}
+                selected={selectedMapListing}
+                onSelect={setSelectedMapListing}
+                onHover={setHoveredMapListing}
+                onOpen={(listing) => navigate(`/property/${listing.id}`)}
+              />
             </div>
           </div>
         )}

@@ -241,6 +241,42 @@ export async function getNeighborhoodDetails(id) {
 
 // ─── Profile API Methods ─────────────────────
 
+// ─── Account settings ────────────────────────
+export async function updatePreferences(notifications, privacy) {
+  return request("/auth/preferences", {
+    method: "PUT",
+    body: JSON.stringify({ notifications, privacy }),
+  });
+}
+
+export async function changePassword(currentPassword, newPassword) {
+  const data = await request("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  if (data?.token) setAccessToken(data.token); // other sessions were signed out
+  return data;
+}
+
+export async function deleteAccount(password) {
+  const data = await request("/auth/delete-account", {
+    method: "POST",
+    body: JSON.stringify({ password, confirm: "DELETE" }),
+  });
+  setAccessToken(null);
+  return data;
+}
+
+export async function uploadAvatar(file) {
+  const formData = new FormData();
+  formData.append("avatar", file);
+  return request("/auth/avatar", { method: "POST", body: formData });
+}
+
+export async function removeAvatar() {
+  return request("/auth/avatar", { method: "DELETE" });
+}
+
 export async function updateProfile(profileData) {
   return request("/auth/profile", {
     method: "PUT",
