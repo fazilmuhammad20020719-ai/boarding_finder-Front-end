@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const TermsPrivacy = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('terms');
 
   // Handle smooth scrolling when clicking sidebar links
@@ -154,8 +156,8 @@ const TermsPrivacy = () => {
                 <h4 className="font-bold text-[#FACC15]">Need to contact our legal team?</h4>
                 <p className="text-sm text-[#FACC15]/80 mt-1">For specific privacy concerns, reach out to us directly.</p>
               </div>
-              <button className="px-6 py-2.5 bg-[#FACC15] text-black font-bold rounded-xl shadow-sm border-none cursor-pointer hover:bg-[#EAB308] transition-colors whitespace-nowrap">
-                Email Legal Team
+              <button onClick={() => navigate('/contact')} className="px-6 py-2.5 bg-[#FACC15] text-black font-bold rounded-xl shadow-sm border-none cursor-pointer hover:bg-[#EAB308] transition-colors whitespace-nowrap">
+                Contact Us
               </button>
             </div>
           </section>

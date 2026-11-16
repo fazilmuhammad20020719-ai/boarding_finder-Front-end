@@ -307,7 +307,7 @@ const ManageReservations = () => {
                     </>
                   )}
                   {activeTab === 'Past' && (
-                    <button className="flex-1 lg:flex-none px-6 py-2.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white/80 font-semibold rounded-xl transition-colors text-sm cursor-pointer">
+                    <button onClick={() => navigate(`/property/${res.propertyId}`)} className="flex-1 lg:flex-none px-6 py-2.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white/80 font-semibold rounded-xl transition-colors text-sm cursor-pointer">
                       View Details
                     </button>
                   )}

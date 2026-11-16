@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -28,6 +29,7 @@ const FAQItem = ({ question, answer }) => {
 };
 
 const FAQ = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('students');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -35,7 +37,7 @@ const FAQ = () => {
     students: [
       {
         q: "How do I book a boarding house?",
-        a: "Booking is simple! Once you find a property you like, click the 'Apply' or 'Book' button. You'll need to fill out a brief application form. The owner will review it, and once approved, you can complete your payment to secure the room."
+        a: "Booking is simple! Once you find a property you like, click the 'Apply' or 'Book' button. You'll need to fill out a brief application form. The owner will review it, and once approved, you pay the first month's rent and deposit to the owner in cash when you move in. There is no online payment."
       },
       {
         q: "Are the utility bills included in the rent?",
@@ -53,7 +55,7 @@ const FAQ = () => {
     owners: [
       {
         q: "How much does it cost to list a property?",
-        a: "Listing your property on BoardingFinder is currently free! We only take a small service fee (3%) when a booking is successfully completed through our platform."
+        a: "Listing your property on BoardingFinder is free. There are no service fees or commissions: students pay you directly in cash on move-in, and you confirm the payment in your dashboard."
       },
       {
         q: "How do I get paid?",
@@ -148,7 +150,7 @@ const FAQ = () => {
         <div className="mt-16 bg-[#111] border border-[#333] rounded-3xl p-8 text-center">
           <h3 className="text-xl font-extrabold text-[#FACC15] mb-3">Still have questions?</h3>
           <p className="text-white/70 mb-6 max-w-md mx-auto">If you couldn't find what you're looking for, our support team is ready to help you out.</p>
-          <button className="bg-[#FACC15] hover:bg-[#EAB308] text-black px-8 py-3 rounded-xl font-bold transition-colors border-none cursor-pointer shadow-sm">
+          <button onClick={() => navigate('/contact')} className="bg-[#FACC15] hover:bg-[#EAB308] text-black px-8 py-3 rounded-xl font-bold transition-colors border-none cursor-pointer shadow-sm">
             Contact Support
           </button>
         </div>

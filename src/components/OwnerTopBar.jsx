@@ -26,6 +26,7 @@ const MENU = [
   { to: '/manage-reservations', label: 'Manage Reservations' },
   { to: '/earnings', label: 'Payments' },
   { to: '/settings', label: 'Account Settings' },
+  { to: '/support', label: 'Help & Support' },
 ];
 
 const linkClass = (active) =>

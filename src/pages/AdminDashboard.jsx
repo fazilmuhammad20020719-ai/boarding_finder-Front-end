@@ -499,6 +499,7 @@ const AdminDashboard = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         pendingCount={stats?.pending_verifications || 0}
+        openTickets={allTickets.filter(t => t.status === 'open').length}
         user={currentAdmin}
         onLogout={handleLogout}
       />
@@ -1041,6 +1042,86 @@ const AdminDashboard = () => {
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ─── Support: support tickets, Contact Us messages and content reports ─── */}
+        {activeTab === 'support' && (
+          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
+            <div className="p-6 border-b border-[#333] flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111]">
+              <div>
+                <h2 className="text-xl font-bold text-white">Support Inbox</h2>
+                <p className="text-xs text-white/50 mt-1">Support tickets, Contact Us messages and reports from users.</p>
+              </div>
+              <select
+                value={ticketFilterStatus}
+                onChange={(e) => setTicketFilterStatus(e.target.value)}
+                className="px-4 py-2 bg-[#1A1A1A] text-white text-sm font-semibold border border-[#333] rounded-xl outline-none focus:border-amber-500/50"
+              >
+                <option value="all">All Statuses</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            {(() => {
+              const rows = allTickets.filter(t => ticketFilterStatus === 'all' || t.status === ticketFilterStatus);
+              if (loadingTickets) return <div className="p-12 text-center text-white/60">Loading...</div>;
+              if (rows.length === 0) return <div className="p-12 text-center text-white/60">Nothing here.</div>;
+              return (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[900px]">
+                    <thead>
+                      <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
+                        <th className="px-6 py-5">TYPE</th>
+                        <th className="px-6 py-5">FROM</th>
+                        <th className="px-6 py-5">SUBJECT & DETAILS</th>
+                        <th className="px-6 py-5">STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#333]">
+                      {rows.map((ticket) => (
+                        <tr key={ticket.ticket_id} className="hover:bg-[#222]/50 transition-colors align-top">
+                          <td className="px-6 py-5">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${ticket.category === 'report' ? 'bg-red-500/20 text-red-400' : ticket.category === 'contact' ? 'bg-sky-500/20 text-sky-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                              {ticket.category || 'support'}
+                            </span>
+                            <div className="text-xs text-white/40 mt-2">#{ticket.ticket_id} · {new Date(ticket.created_at).toLocaleDateString()}</div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="font-semibold text-white">{ticket.user_name || 'Guest'}</div>
+                            <div className="text-xs text-white/60">{ticket.user_email}</div>
+                            <div className="text-xs text-white/40 capitalize">{ticket.user_role}</div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="font-semibold text-white break-words">{ticket.subject}</div>
+                            <div className="text-sm text-white/70 mt-1 max-w-md break-words whitespace-pre-wrap">{ticket.description}</div>
+                            {ticket.target_type === 'listing' && ticket.target_id && (
+                              <a href={`/property/${ticket.target_id}`} className="text-xs text-[#FACC15] mt-2 inline-block">View reported listing →</a>
+                            )}
+                          </td>
+                          <td className="px-6 py-5">
+                            <select
+                              value={ticket.status}
+                              onChange={(e) => handleUpdateTicketStatus(ticket.ticket_id, e.target.value)}
+                              disabled={isProcessing}
+                              className="px-3 py-1.5 rounded-lg text-xs font-bold border border-[#333] cursor-pointer outline-none bg-[#111] text-white"
+                            >
+                              <option value="open">Open</option>
+                              <option value="in_progress">In Progress</option>
+                              <option value="resolved">Resolved</option>
+                              <option value="closed">Closed</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
           </div>
         )}
 

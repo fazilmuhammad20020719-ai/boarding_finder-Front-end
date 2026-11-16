@@ -124,6 +124,7 @@ const SiteNavbar = ({ likedCount = 0 }) => {
           { to: '/payment-history', label: 'My Payments' },
           { to: '/maintenance-portal', label: 'Maintenance Portal' },
           { to: '/settings', label: 'Account Settings' },
+          { to: '/support', label: 'Help & Support' },
         ];
   const homePath = !isAuthenticated ? '/' : role === 'owner' ? '/owner-dashboard' : role === 'admin' ? '/admin-dashboard' : '/home';
 

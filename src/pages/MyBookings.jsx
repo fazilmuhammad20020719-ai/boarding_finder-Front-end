@@ -328,12 +328,12 @@ const MyBookings = () => {
                             >
                               View / Sign Lease
                             </button>
-                            <button className="px-4 py-2 bg-transparent border border-[#333] hover:border-[#FACC15]/50 hover:bg-[#FACC15]/10 text-[#FACC15] font-bold rounded-lg transition-colors cursor-pointer text-xs">
+                            <button onClick={() => navigate('/maintenance-portal')} className="px-4 py-2 bg-transparent border border-[#333] hover:border-[#FACC15]/50 hover:bg-[#FACC15]/10 text-[#FACC15] font-bold rounded-lg transition-colors cursor-pointer text-xs">
                               Request Maintenance
                             </button>
                           </>
                         )}
-                        <button className="px-4 py-2 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-bold rounded-lg transition-colors cursor-pointer text-xs">
+                        <button onClick={() => navigate(`/property/${booking.propertyId}`)} className="px-4 py-2 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-bold rounded-lg transition-colors cursor-pointer text-xs">
                           View Details
                         </button>
                       </div>

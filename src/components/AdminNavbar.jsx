@@ -13,6 +13,7 @@ const TABS = [
   { key: 'listings', label: 'Listings' },
   { key: 'bookings', label: 'Bookings' },
   { key: 'reviews', label: 'Reviews' },
+  { key: 'support', label: 'Support' },
   { key: 'announcements', label: 'Announcements' },
 ];
 
@@ -28,7 +29,7 @@ const mobileLinkClass = (active) =>
 
 // On the Admin Dashboard pass activeTab/onTabChange/pendingCount. On other pages
 // (Profile, Settings...) render it with no props: links open the dashboard tab.
-const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user: userProp, onLogout: onLogoutProp }) => {
+const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, openTickets = 0, user: userProp, onLogout: onLogoutProp }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
@@ -47,10 +48,12 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user: userProp,
     setIsMobileMenuOpen(false);
   };
 
-  const badge = (t) =>
-    t.key === 'verifications' && pendingCount > 0 ? (
-      <span className="ml-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{pendingCount}</span>
+  const badge = (t) => {
+    const n = t.key === 'verifications' ? pendingCount : t.key === 'support' ? openTickets : 0;
+    return n > 0 ? (
+      <span className="ml-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{n}</span>
     ) : null;
+  };
 
   return (
     <nav className="w-full bg-black border-b border-[#222] shadow-sm z-50 sticky top-0 font-sans">
