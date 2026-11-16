@@ -1193,7 +1193,6 @@ const AdminDashboard = () => {
                     </div>
                     <div>
                       <div className="text-3xl font-black text-white mb-1">Rs {analyticsData.revenue.totalGross.toLocaleString()}</div>
-                      <div className="text-xs font-medium text-white/60">+{(analyticsData.revenue.platformNet || 0).toLocaleString()} (5% Platform Fee)</div>
                       <div className="text-xs font-medium text-white/40 mt-1">Approved bookings value: Rs {(analyticsData.revenue.bookedValue || 0).toLocaleString()}</div>
                     </div>
                   </div>
