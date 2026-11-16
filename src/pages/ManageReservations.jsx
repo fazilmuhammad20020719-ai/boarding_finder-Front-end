@@ -317,10 +317,13 @@ const ManageReservations = () => {
             </div>
           ) : (
             filteredReservations.map((res) => (
-              <div key={res.id} className="bg-[#1A1A1A] p-6 rounded-[24px] shadow-sm border border-[#333] flex flex-col lg:flex-row gap-6 justify-between lg:items-center">
+              <div key={res.id} className="bg-[#1A1A1A] p-6 rounded-[24px] shadow-sm border border-[#333] flex flex-col gap-5">
+
+                {/* Top row: tenant info on the left, actions on the right */}
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
 
                 {/* Tenant & Property Info */}
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 min-w-0">
                   <img src={res.avatar} alt={res.tenant} className="w-12 h-12 rounded-full border border-[#333]" />
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -335,31 +338,8 @@ const ManageReservations = () => {
                   </div>
                 </div>
 
-                {/* Dates & Price Info */}
-                <div className="flex flex-col sm:flex-row gap-6 lg:gap-12">
-                  <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333]">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Stay Dates</p>
-                    <p className="text-sm font-bold text-white">{res.checkIn} - {res.checkOut}</p>
-                  </div>
-                  <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333]">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Booking value</p>
-                    <p className="text-lg font-black text-[#FACC15]">LKR {res.totalPrice.toLocaleString()}</p>
-                  </div>
-                  {res.payment?.status === 'approved' && (
-                    <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333] flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Move-in payment (cash)</p>
-                      <PaymentBadge booking={res.payment} />
-                      <ConfirmCashButton
-                        booking={res.payment}
-                        onChange={(u) => setReservations(prev => prev.map(r => r.id === res.id
-                          ? { ...r, payment: { ...r.payment, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at } } : r))}
-                      />
-                    </div>
-                  )}
-                </div>
-
                 {/* Actions */}
-                <div className="flex items-center gap-3 mt-4 lg:mt-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#333]">
+                <div className="flex flex-wrap items-center md:justify-end gap-3 shrink-0">
                   {activeTab === 'Pending' && (
                     <>
                       <button
@@ -407,6 +387,30 @@ const ManageReservations = () => {
                     <button className="flex-1 lg:flex-none px-6 py-2.5 bg-[#111] hover:bg-[#222] border border-[#333] text-white/80 font-semibold rounded-xl transition-colors text-sm cursor-pointer">
                       View Details
                     </button>
+                  )}
+                </div>
+                </div>
+
+                {/* Bottom row: dates, price and payment, in even columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-5 border-t border-[#333]">
+                  <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333]">
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Stay Dates</p>
+                    <p className="text-sm font-bold text-white whitespace-nowrap">{res.checkIn} - {res.checkOut}</p>
+                  </div>
+                  <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333]">
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Booking value</p>
+                    <p className="text-lg font-black text-[#FACC15] whitespace-nowrap">LKR {res.totalPrice.toLocaleString()}</p>
+                  </div>
+                  {res.payment?.status === 'approved' && (
+                    <div className="bg-[#111] px-4 py-3 rounded-xl border border-[#333] flex flex-col items-start gap-2 sm:col-span-2 lg:col-span-1">
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Move-in payment (cash)</p>
+                      <PaymentBadge booking={res.payment} />
+                      <ConfirmCashButton
+                        booking={res.payment}
+                        onChange={(u) => setReservations(prev => prev.map(r => r.id === res.id
+                          ? { ...r, payment: { ...r.payment, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at } } : r))}
+                      />
+                    </div>
                   )}
                 </div>
               </div>

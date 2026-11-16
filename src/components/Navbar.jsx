@@ -73,16 +73,65 @@ const Navbar = ({ likedCount = 0 }) => {
   const userName = user?.name || 'User';
   const userInitial = userName.charAt(0).toUpperCase();
 
-  const getLinkClass = (tabName) => {
-    const targetPath = `/${tabName}`;
+  // Each role gets its own top-bar links and profile menu
+  const role = user?.role;
+  const isStudent = role !== 'owner' && role !== 'admin';
+  const navLinks =
+    role === 'owner'
+      ? [
+          { to: '/owner-dashboard', label: 'Dashboard' },
+          { to: '/my-listings', label: 'My Listings' },
+          { to: '/add-listing', label: 'Add Listing' },
+          { to: '/manage-reservations', label: 'Reservations' },
+          { to: '/earnings', label: 'Payments' },
+        ]
+      : role === 'admin'
+      ? [
+          { to: '/admin-dashboard', label: 'Dashboard' },
+          { to: '/manage-users', label: 'Users' },
+          { to: '/manage-listings', label: 'Listings' },
+        ]
+      : [
+          { to: '/home', label: 'Home' },
+          { to: '/search', label: 'Search' },
+          { to: '/map', label: 'Map View' },
+          { to: '/about', label: 'About us' },
+          { to: '/contact', label: 'Contact us' },
+        ];
+  const menuLinks =
+    role === 'owner'
+      ? [
+          { to: '/profile', label: 'My Profile' },
+          { to: '/owner-dashboard', label: 'Owner Dashboard' },
+          { to: '/my-listings', label: 'My Listings' },
+          { to: '/manage-reservations', label: 'Manage Reservations' },
+          { to: '/earnings', label: 'Payments' },
+          { to: '/settings', label: 'Account Settings' },
+        ]
+      : role === 'admin'
+      ? [
+          { to: '/profile', label: 'My Profile' },
+          { to: '/admin-dashboard', label: 'Admin Dashboard' },
+          { to: '/settings', label: 'Account Settings' },
+        ]
+      : [
+          { to: '/profile', label: 'My Profile' },
+          { to: '/saved-homes', label: 'Saved Homes' },
+          { to: '/my-bookings', label: 'My Bookings' },
+          { to: '/payment-history', label: 'My Payments' },
+          { to: '/maintenance-portal', label: 'Maintenance Portal' },
+          { to: '/settings', label: 'Account Settings' },
+        ];
+  const homePath = !isAuthenticated ? '/' : role === 'owner' ? '/owner-dashboard' : role === 'admin' ? '/admin-dashboard' : '/home';
+
+  const getLinkClass = (targetPath) => {
     const isActive = location.pathname === targetPath || location.pathname.startsWith(`${targetPath}/`);
     return isActive
       ? "relative text-[14px] font-medium text-[#FACC15] transition-colors px-4 py-1.5 after:content-[''] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-[2px] after:bg-[#FACC15] after:rounded-full"
       : "text-[14px] font-medium text-gray-300 hover:text-white transition-colors px-4 py-1.5";
   };
 
-  const getMobileLinkClass = (tabName) => {
-    const targetPath = `/${tabName}`;
+  const getMobileLinkClass = (targetPath) => {
     const isActive = location.pathname === targetPath || location.pathname.startsWith(`${targetPath}/`);
     return isActive
       ? "text-[15px] font-semibold text-[#FACC15] bg-[#222] px-4 py-2.5 rounded-xl inline-block w-fit"
@@ -95,7 +144,7 @@ const Navbar = ({ likedCount = 0 }) => {
         <div className="flex justify-between items-center h-20">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Link to={homePath} className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md shrink-0" />
             {/* On narrow phones the logo text would push the icons off screen */}
             <span className={`font-bold text-lg sm:text-[22px] text-white tracking-tight truncate ${isAuthenticated ? 'hidden min-[400px]:inline' : ''}`}>BoardingFinder<span className="text-[#FACC15]">.</span></span>
@@ -104,22 +153,11 @@ const Navbar = ({ likedCount = 0 }) => {
           {/* Desktop Navigation Links */}
           {isAuthenticated && (
             <div className="hidden xl:flex items-center gap-1 bg-[#1A1A1A] rounded-full px-2 py-1.5 border border-[#333]">
-              <Link to="/home" className={getLinkClass('home')}>
-                Home
-              </Link>
-              <Link to="/search" className={getLinkClass('search')}>
-                Search
-              </Link>
-              <Link to="/map" className={getLinkClass('map')}>
-                Map View
-              </Link>
-
-              <Link to="/about" className={getLinkClass('about')}>
-                About us
-              </Link>
-              <Link to="/contact" className={getLinkClass('contact')}>
-                Contact us
-              </Link>
+              {navLinks.map((l) => (
+                <Link key={l.to} to={l.to} className={getLinkClass(l.to)}>
+                  {l.label}
+                </Link>
+              ))}
             </div>
           )}
 
@@ -147,7 +185,8 @@ const Navbar = ({ likedCount = 0 }) => {
                   )}
                 </Link>
 
-                {/* Saved Hearts Badge */}
+                {/* Saved Hearts Badge (students only) */}
+                {isStudent && (
                 <Link to="/saved-homes" className="relative cursor-pointer hover:scale-105 transition-transform block">
                   <svg className="w-6 h-6 text-gray-300 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -158,6 +197,7 @@ const Navbar = ({ likedCount = 0 }) => {
                     </span>
                   )}
                 </Link>
+                )}
 
                 {/* Profile Dropdown */}
                 <div className="relative">
@@ -184,50 +224,16 @@ const Navbar = ({ likedCount = 0 }) => {
                       ></div>
 
                       <div className="absolute right-0 mt-2 w-48 bg-[#1A1A1A] border border-[#333] rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
-                        <Link
-                          to="/profile"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          My Profile
-                        </Link>
-                        <Link
-                          to="/saved-homes"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          Saved Homes
-                        </Link>
-
-                        <Link
-                          to="/my-bookings"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          My Bookings
-                        </Link>
-                        <Link
-                          to="/payment-history"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          My Payments
-                        </Link>
-                        <Link
-                          to="/maintenance-portal"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          Maintenance Portal
-                        </Link>
-
-                        <Link
-                          to="/settings"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
-                        >
-                          Account Settings
-                        </Link>
+                        {menuLinks.map((l) => (
+                          <Link
+                            key={l.to}
+                            to={l.to}
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white"
+                          >
+                            {l.label}
+                          </Link>
+                        ))}
                         <hr className="border-[#333] my-1" />
                         <button
                           onClick={handleLogoutClick}
@@ -281,42 +287,16 @@ const Navbar = ({ likedCount = 0 }) => {
       {isAuthenticated && isMobileMenuOpen && (
         <div className="xl:hidden absolute top-20 left-0 w-full bg-black border-b border-[#333] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-2">
-            <Link
-              to="/home"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={getMobileLinkClass('home')}
-            >
-              Home
-            </Link>
-            <Link
-              to="/search"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={getMobileLinkClass('search')}
-            >
-              Search
-            </Link>
-            <Link
-              to="/map"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={getMobileLinkClass('map')}
-            >
-              Map View
-            </Link>
-            <Link
-              to="/about"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={getMobileLinkClass('about')}
-            >
-              About us
-            </Link>
-
-            <Link
-              to="/contact"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={getMobileLinkClass('contact')}
-            >
-              Contact us
-            </Link>
+            {navLinks.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={getMobileLinkClass(l.to)}
+              >
+                {l.label}
+              </Link>
+            ))}
 
             {!isAuthenticated && (
               <div className="flex gap-3 mt-4">
