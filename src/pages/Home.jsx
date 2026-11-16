@@ -636,8 +636,8 @@ const HomePage = () => {
                 List Your Property
               </button>
               <button
-                onClick={() => navigate('/register')}
-                className="px-6 py-3 border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-all text-sm cursor-pointer bg-[#1A1A1A] font-medium"
+                type="button"
+                className="px-6 py-3 border border-[#333] text-white font-bold rounded-xl text-sm cursor-default bg-[#1A1A1A] font-medium"
               >
                 Learn More
               </button>
@@ -674,30 +674,30 @@ const HomePage = () => {
             <div>
               <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-4">For Students</h4>
               <ul className="flex flex-col gap-3 text-black text-sm font-normal">
-                <li><Link to="/search" className="hover:text-gray-600 transition-colors">Search Listings</Link></li>
-                <li><Link to="/map" className="hover:text-gray-600 transition-colors">Map View</Link></li>
-                <li><Link to="/saved-homes" className="hover:text-gray-600 transition-colors">Saved Listings</Link></li>
-                <li><Link to="/home" className="hover:text-gray-600 transition-colors">Reviews</Link></li>
+                <li><span className="cursor-default">Search Listings</span></li>
+                <li><span className="cursor-default">Map View</span></li>
+                <li><span className="cursor-default">Saved Listings</span></li>
+                <li><span className="cursor-default">Reviews</span></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-4">For Owners</h4>
               <ul className="flex flex-col gap-3 text-black text-sm font-normal">
-                <li><Link to="/register" className="hover:text-gray-600 transition-colors">List Property</Link></li>
-                <li><Link to="/register" className="hover:text-gray-600 transition-colors">Owner Dashboard</Link></li>
-                <li><Link to="/register" className="hover:text-gray-600 transition-colors">Pricing</Link></li>
-                <li><Link to="/register" className="hover:text-gray-600 transition-colors">Support</Link></li>
+                <li><span className="cursor-default">List Property</span></li>
+                <li><span className="cursor-default">Owner Dashboard</span></li>
+                <li><span className="cursor-default">Pricing</span></li>
+                <li><span className="cursor-default">Support</span></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-4">Company</h4>
               <ul className="flex flex-col gap-3 text-black text-sm font-normal">
-                <li><Link to="/" className="hover:text-gray-600 transition-colors">About Us</Link></li>
-                <li><Link to="/" className="hover:text-gray-600 transition-colors">Blog</Link></li>
-                <li><Link to="/" className="hover:text-gray-600 transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/" className="hover:text-gray-600 transition-colors">Terms of Service</Link></li>
+                <li><span className="cursor-default">About Us</span></li>
+                <li><span className="cursor-default">Blog</span></li>
+                <li><span className="cursor-default">Privacy Policy</span></li>
+                <li><span className="cursor-default">Terms of Service</span></li>
               </ul>
             </div>
           </div>

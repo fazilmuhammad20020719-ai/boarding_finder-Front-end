@@ -344,10 +344,6 @@ const BookingPage = () => {
                       ))}
                     </div>
 
-                    <p className="text-sm text-center text-white/50 font-medium mb-6">
-                      I agree to the <span className="text-[#FACC15] font-bold cursor-pointer hover:underline">Terms of Service</span> and house rules of {listing.title}.
-                    </p>
-
                     <button
                       disabled={isSubmitting}
                       onClick={async () => {
