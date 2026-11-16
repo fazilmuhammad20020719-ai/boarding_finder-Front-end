@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
+import { getSavedListings, getMyBookings, getMyListings, getOwnerBookings } from '../services/api';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -52,14 +53,19 @@ const ProfilePage = () => {
     }
   }, [user]);
 
+  // Real counts for the profile card: owners see listings + bookings received,
+  // students see saved homes + their bookings.
+  const [listingCount, setListingCount] = useState(0);
   useEffect(() => {
-    // Read liked listings from localStorage to show badge count
-    const localListings = localStorage.getItem('listings');
-    if (localListings) {
-      const parsed = JSON.parse(localListings);
-      setLikedCount(parsed.filter(l => l.liked).length);
+    if (!user || user.role === 'admin') return;
+    if (user.role === 'owner') {
+      getMyListings().then((d) => setListingCount((d?.listings || []).length)).catch(() => {});
+      getOwnerBookings().then((d) => setBookingRequests(d?.bookings || [])).catch(() => {});
+    } else {
+      getSavedListings().then((rows) => setLikedCount(Array.isArray(rows) ? rows.length : 0)).catch(() => {});
+      getMyBookings().then((d) => setBookingRequests(d?.bookings || (Array.isArray(d) ? d : []))).catch(() => {});
     }
-  }, []);
+  }, [user]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -90,6 +96,7 @@ const ProfilePage = () => {
 
   const isStudent = profile.role === 'student';
   const isOwner = profile.role === 'owner';
+  const isAdmin = profile.role === 'admin';
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
@@ -101,7 +108,7 @@ const ProfilePage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Account & Profile</h1>
           <p className="text-white/50 text-sm mt-1">
-            {isOwner ? 'Manage your owner details and property information.' : 'Manage your student details and view your booking statuses.'}
+            {isAdmin ? 'Manage your administrator account details.' : isOwner ? 'Manage your owner details and property information.' : 'Manage your student details and view your booking statuses.'}
           </p>
         </div>
 
@@ -138,11 +145,12 @@ const ProfilePage = () => {
 
             <div className="w-full border-t border-[#333] my-6"></div>
 
-            {/* Quick stats */}
+            {/* Quick stats (not for admins) */}
+            {!isAdmin && (<>
             <div className="grid grid-cols-2 gap-4 w-full">
               <div className="bg-[#111] rounded-2xl p-3 flex flex-col items-center">
-                <span className="text-2xl font-black text-[#FACC15]">{likedCount}</span>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider mt-0.5">Saved Homes</span>
+                <span className="text-2xl font-black text-[#FACC15]">{isOwner ? listingCount : likedCount}</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider mt-0.5">{isOwner ? 'My Listings' : 'Saved Homes'}</span>
               </div>
               <div className="bg-[#111] rounded-2xl p-3 flex flex-col items-center">
                 <span className="text-2xl font-black text-amber-500">{bookingRequests.length}</span>
@@ -151,6 +159,7 @@ const ProfilePage = () => {
             </div>
 
             <div className="w-full border-t border-[#333] my-6"></div>
+            </>)}
 
             {/* Side menu / info */}
             <div className="w-full space-y-4 text-left">
@@ -278,7 +287,7 @@ const ProfilePage = () => {
                     Account Type
                   </label>
                   <div className="w-full px-4 py-3 rounded-xl bg-[#111] border border-[#333] text-white text-[14px] capitalize">
-                    {profile.role === 'student' ? '🎓 Student' : '🏠 Property Owner'}
+                    {profile.role === 'student' ? '🎓 Student' : profile.role === 'admin' ? '🛡️ System Administrator' : '🏠 Property Owner'}
                   </div>
                 </div>
 

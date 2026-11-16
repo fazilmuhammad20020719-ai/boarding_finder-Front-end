@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import BrandLogo from './Logo';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // Admin top bar in the same style as the student Navbar:
 // logo left, rounded pill of section links in the middle, profile pill + dropdown right.
@@ -25,7 +26,15 @@ const mobileLinkClass = (active) =>
     ? 'text-left text-[15px] font-semibold text-[#FACC15] bg-[#222] px-4 py-2.5 rounded-xl inline-block w-fit border-none cursor-pointer'
     : 'text-left text-[15px] font-semibold text-gray-300 hover:text-white py-2 bg-transparent border-0 border-b border-solid border-[#333] cursor-pointer';
 
-const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user, onLogout }) => {
+// On the Admin Dashboard pass activeTab/onTabChange/pendingCount. On other pages
+// (Profile, Settings...) render it with no props: links open the dashboard tab.
+const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user: userProp, onLogout: onLogoutProp }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const auth = useAuth();
+  const user = userProp || auth.user;
+  const onLogout = onLogoutProp || (() => { auth.logout(); navigate('/login'); });
+  const onDashboard = location.pathname === '/admin-dashboard';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -33,7 +42,8 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user, onLogout 
   const userInitial = userName.charAt(0).toUpperCase();
 
   const go = (key) => {
-    onTabChange(key);
+    if (onTabChange) onTabChange(key);
+    else navigate('/admin-dashboard', { state: { tab: key } });
     setIsMobileMenuOpen(false);
   };
 
@@ -55,7 +65,7 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user, onLogout 
           {/* Desktop links */}
           <div className="hidden xl:flex items-center gap-1 bg-[#1A1A1A] rounded-full px-2 py-1.5 border border-[#333]">
             {TABS.map((t) => (
-              <button key={t.key} onClick={() => go(t.key)} className={linkClass(activeTab === t.key)}>
+              <button key={t.key} onClick={() => go(t.key)} className={linkClass(onDashboard && activeTab === t.key)}>
                 {t.label}
                 {badge(t)}
               </button>
@@ -121,7 +131,7 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user, onLogout 
         <div className="xl:hidden absolute top-20 left-0 w-full bg-black border-b border-[#333] shadow-lg py-4 px-6 z-40 animate-slideDown">
           <div className="flex flex-col gap-2">
             {TABS.map((t) => (
-              <button key={t.key} onClick={() => go(t.key)} className={mobileLinkClass(activeTab === t.key)}>
+              <button key={t.key} onClick={() => go(t.key)} className={mobileLinkClass(onDashboard && activeTab === t.key)}>
                 {t.label}
                 {badge(t)}
               </button>

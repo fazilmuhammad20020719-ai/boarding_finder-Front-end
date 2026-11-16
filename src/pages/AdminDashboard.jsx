@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PaymentBadge, ConfirmCashButton } from '../components/CashPayment';
 import AdminNavbar from '../components/AdminNavbar';
@@ -60,7 +60,12 @@ const VerificationDocPreview = ({ userId, index }) => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { logout, user: currentAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'overview');
+  // Nav links on other admin pages send the tab to open in router state
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab);
+  }, [location.state]);
 
   const [stats, setStats] = useState(null);
   const [pendingUsers, setPendingUsers] = useState([]);

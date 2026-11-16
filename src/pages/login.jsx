@@ -121,7 +121,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-[#FACC15] transition-colors focus:outline-none cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/60 hover:text-[#FACC15] bg-transparent border-none z-10 transition-colors focus:outline-none cursor-pointer"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

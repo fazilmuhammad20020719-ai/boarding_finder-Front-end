@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import BrandLogo from './Logo';
+import OwnerTopBar from './OwnerTopBar';
+import AdminNavbar from './AdminNavbar';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getNotifications, getSavedListings } from '../services/api';
 import { subscribe } from '../services/realtime';
 
 
-const Navbar = ({ likedCount = 0 }) => {
+const SiteNavbar = ({ likedCount = 0 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -320,6 +322,15 @@ const Navbar = ({ likedCount = 0 }) => {
       )}
     </nav>
   );
+};
+
+// Owners and admins get their own top bar on every shared page (Profile, Settings,
+// Messages, Notifications...) so the owner section always looks the same.
+const Navbar = (props) => {
+  const { user } = useAuth();
+  if (user?.role === 'owner') return <OwnerTopBar />;
+  if (user?.role === 'admin') return <AdminNavbar />;
+  return <SiteNavbar {...props} />;
 };
 
 export default Navbar;
