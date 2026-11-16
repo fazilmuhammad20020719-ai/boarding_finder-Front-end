@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import OwnerTopBar from '../components/OwnerTopBar';
 import { deleteListing, getMyListings } from '../services/api';
 import { getAvailability } from '../utils/availability';
 
@@ -87,7 +87,7 @@ const MyListings = () => {
 
   return (
     <div className="min-h-screen bg-black font-sans antialiased text-white">
-      <Navbar />
+      <OwnerTopBar />
 
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">

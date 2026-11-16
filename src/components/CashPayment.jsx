@@ -16,14 +16,14 @@ export const PaymentBadge = ({ booking, className = '' }) => {
   if (!booking || booking.status !== 'approved') return null;
   if (isPaid(booking)) {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full whitespace-nowrap text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 ${className}`}>
         ✓ Paid {lkr(booking.paid_amount)}
         {booking.paid_at && <span className="font-medium text-emerald-400/70">· {new Date(booking.paid_at).toLocaleDateString()}</span>}
       </span>
     );
   }
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full whitespace-nowrap text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 ${className}`}>
       Cash on move-in · {lkr(moveInAmount(booking))} due
     </span>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PaymentBadge, ConfirmCashButton } from '../components/CashPayment';
+import AdminNavbar from '../components/AdminNavbar';
 import {
   getPendingUsers, verifyUserAdmin, getVerificationStats,
   getAllUsers, updateUserStatusAdmin, updateUserRoleAdmin,
@@ -489,28 +490,18 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-black font-sans antialiased text-white">
-      {/* Top Bar */}
-      <header className="bg-black border-b border-[#333] text-white px-8 py-5 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full border border-[#FACC15]/20 flex items-center justify-center bg-[#FACC15]/10 text-[#FACC15]">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-[#FACC15] uppercase tracking-wide">System Administrator</div>
-            <div className="text-xl font-extrabold text-white">BoardingFinder Admin</div>
-          </div>
-        </div>
+      <AdminNavbar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        pendingCount={stats?.pending_verifications || 0}
+        user={currentAdmin}
+        onLogout={handleLogout}
+      />
 
-        <button onClick={handleLogout} className="flex items-center gap-2 text-white/60 hover:text-white font-semibold transition-colors cursor-pointer bg-transparent border-none">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          Logout
-        </button>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 md:px-8 py-10">
+      <main className="max-w-[1600px] w-full mx-auto px-4 md:px-8 lg:px-12 py-8">
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
           <div className="bg-[#1A1A1A] rounded-3xl p-6 shadow-sm border border-[#333] flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-[#1952c4]/20 text-[#1952c4] flex items-center justify-center">
@@ -552,67 +543,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-        </div>
-
-        {/* Tabs */}
-        <div className="flex border-b border-[#333] mb-8 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-            Overview & Analytics
-          </button>
-          <button
-            onClick={() => setActiveTab('verifications')}
-            className={`px-6 py-3 font-bold bg-transparent cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'verifications' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white border-none'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-            Pending Verifications
-            {stats?.pending_verifications > 0 && (
-              <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{stats.pending_verifications}</span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            User Management
-          </button>
-
-          <button
-            onClick={() => setActiveTab('listings')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'listings' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-            Listing Management
-          </button>
-
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'bookings' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            Bookings
-          </button>
-
-          <button
-            onClick={() => setActiveTab('reviews')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'reviews' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-            Review Moderation
-          </button>
-
-          <button
-            onClick={() => setActiveTab('announcements')}
-            className={`px-6 py-3 font-bold bg-transparent border-none cursor-pointer flex items-center gap-2 whitespace-nowrap ${activeTab === 'announcements' ? 'text-[#FACC15] border-b-2 border-[#FACC15] border-solid' : 'text-white/60 hover:text-white'}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
-            System Announcements
-          </button>
         </div>
 
         {/* Content Area */}

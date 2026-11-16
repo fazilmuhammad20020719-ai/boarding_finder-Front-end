@@ -1,62 +1,159 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// The owner's top bar (same look as the Owner Dashboard header).
-// Used on shared pages such as /property/:id when an owner is signed in.
-const tabClass = 'px-3 py-2.5 text-sm whitespace-nowrap font-bold cursor-pointer flex items-center gap-2 rounded-xl transition-all border-none bg-transparent text-white/70 hover:text-white hover:bg-white/10';
-
-const icon = (d) => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={d} /></svg>
-);
-
-const TABS = [
-  { label: 'Overview', tab: 'overview', d: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-  { label: 'My Listings', tab: 'listings', d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-  { label: 'Bookings', tab: 'bookings', d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-  { label: 'Messages', tab: 'messages', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
-  { label: 'Students', tab: 'students', d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-  { label: 'Maintenance', tab: 'maintenance', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z' },
-  { label: 'Payments', path: '/earnings', d: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+// Owner top bar in the same style as the student Navbar:
+// logo left, rounded pill of links in the middle, profile pill + dropdown right.
+// Dashboard links open the matching Owner Dashboard tab. On the dashboard itself
+// pass activeTab + onTabChange so the tabs switch without a page change.
+const LINKS = [
+  { label: 'Overview', tab: 'overview' },
+  { label: 'My Listings', tab: 'listings' },
+  { label: 'Bookings', tab: 'bookings' },
+  { label: 'Messages', tab: 'messages' },
+  { label: 'Students', tab: 'students' },
+  { label: 'Maintenance', tab: 'maintenance' },
+  { label: 'Payments', path: '/earnings' },
 ];
 
-const OwnerTopBar = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+const MENU = [
+  { to: '/profile', label: 'My Profile' },
+  { to: '/my-listings', label: 'My Listings' },
+  { to: '/add-listing', label: 'Add Listing' },
+  { to: '/manage-reservations', label: 'Manage Reservations' },
+  { to: '/earnings', label: 'Payments' },
+  { to: '/settings', label: 'Account Settings' },
+];
 
-  const go = (t) => (t.path ? navigate(t.path) : navigate('/owner-dashboard', { state: { tab: t.tab } }));
+const linkClass = (active) =>
+  active
+    ? "relative text-[14px] font-medium text-[#FACC15] transition-colors px-4 py-1.5 bg-transparent border-none cursor-pointer whitespace-nowrap after:content-[''] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-[2px] after:bg-[#FACC15] after:rounded-full"
+    : 'text-[14px] font-medium text-gray-300 hover:text-white transition-colors px-4 py-1.5 bg-transparent border-none cursor-pointer whitespace-nowrap';
+
+const mobileLinkClass = (active) =>
+  active
+    ? 'text-left text-[15px] font-semibold text-[#FACC15] bg-[#222] px-4 py-2.5 rounded-xl inline-block w-fit border-none cursor-pointer'
+    : 'text-left text-[15px] font-semibold text-gray-300 hover:text-white py-2 bg-transparent border-0 border-b border-solid border-[#333] cursor-pointer';
+
+const OwnerTopBar = ({ activeTab, onTabChange }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  const userName = user?.name || 'Owner';
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  const isActive = (l) =>
+    l.path ? location.pathname === l.path : location.pathname === '/owner-dashboard' && activeTab === l.tab;
+
+  const go = (l) => {
+    setIsMobileMenuOpen(false);
+    if (l.path) navigate(l.path);
+    else if (onTabChange) onTabChange(l.tab);
+    else navigate('/owner-dashboard', { state: { tab: l.tab } });
+  };
+
+  const handleLogout = () => {
+    setIsProfileDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    logout();
+    navigate('/login');
+  };
 
   return (
-    <header className="bg-black text-white px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-[#333] font-sans">
-      <button onClick={() => navigate('/owner-dashboard')} className="flex items-center gap-4 lg:w-1/4 bg-transparent border-none text-white cursor-pointer text-left p-0">
-        <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center bg-white/10">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={TABS[1].d} /></svg>
-        </div>
-        <div>
-          <div className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Owner Dashboard</div>
-          <div className="text-sm font-extrabold">{user?.name || 'Owner'}</div>
-        </div>
-      </button>
+    <nav className="w-full bg-black border-b border-[#222] shadow-sm z-50 sticky top-0 font-sans">
+      <div className="max-w-[1600px] w-full mx-auto px-4 md:px-8 lg:px-12">
+        <div className="flex justify-between items-center h-20">
 
-      <div className="hidden lg:flex items-center gap-2 justify-center flex-1">
-        {TABS.map((t) => (
-          <button key={t.label} onClick={() => go(t)} className={tabClass}>
-            {icon(t.d)}
-            {t.label}
-          </button>
-        ))}
+          {/* Logo */}
+          <Link to="/owner-dashboard" onClick={() => onTabChange?.('overview')} className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md shrink-0" />
+            <span className="font-bold text-lg sm:text-[22px] text-white tracking-tight truncate hidden min-[400px]:inline">BoardingFinder<span className="text-[#FACC15]">.</span></span>
+          </Link>
+
+          {/* Desktop links */}
+          <div className="hidden xl:flex items-center gap-1 bg-[#1A1A1A] rounded-full px-2 py-1.5 border border-[#333]">
+            {LINKS.map((l) => (
+              <button key={l.label} onClick={() => go(l)} className={linkClass(isActive(l))}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Notifications, profile, hamburger */}
+          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+            <Link to="/notifications" className="relative cursor-pointer hover:scale-105 transition-transform block">
+              <svg className="w-6 h-6 text-gray-300 hover:text-white transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </Link>
+
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-2.5 px-3 py-1.5 border border-[#333] bg-[#1A1A1A] hover:bg-[#222] rounded-full text-white text-sm font-semibold transition-all cursor-pointer"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#333] text-[#FACC15] flex items-center justify-center font-bold text-xs shadow-sm">
+                  {userInitial}
+                </div>
+                <span className="hidden sm:inline">{userName.split(' ')[0]}</span>
+                <svg className="w-3.5 h-3.5 fill-current text-gray-400 hidden sm:inline" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </button>
+
+              {isProfileDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsProfileDropdownOpen(false)}></div>
+                  <div className="absolute right-0 mt-2 w-52 bg-[#1A1A1A] border border-[#333] rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
+                    {MENU.map((m) => (
+                      <Link key={m.to} to={m.to} onClick={() => setIsProfileDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#222] hover:text-white">
+                        {m.label}
+                      </Link>
+                    ))}
+                    <hr className="border-[#333] my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left block px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 bg-transparent border-none cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="xl:hidden p-2 rounded-xl text-gray-400 hover:bg-[#222] hover:text-white transition-all cursor-pointer border-none bg-transparent"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
+                )}
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center justify-end lg:w-1/4">
-        <button
-          onClick={() => { logout(); navigate('/login'); }}
-          className="flex items-center gap-2 text-white/90 hover:text-[#FACC15] font-semibold transition-colors cursor-pointer bg-transparent border-none"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          <span className="hidden sm:inline">Logout</span>
-        </button>
-      </div>
-    </header>
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="xl:hidden absolute top-20 left-0 w-full bg-black border-b border-[#333] shadow-lg py-4 px-6 z-40 animate-slideDown">
+          <div className="flex flex-col gap-2">
+            {LINKS.map((l) => (
+              <button key={l.label} onClick={() => go(l)} className={mobileLinkClass(isActive(l))}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </nav>
   );
 };
 
