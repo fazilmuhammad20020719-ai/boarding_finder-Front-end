@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
 import { getAvailability } from '../utils/availability';
@@ -8,7 +8,12 @@ import { subscribe } from '../services/realtime';
 const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  // Other pages' owner top bar can open a specific tab
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'overview');
+  useEffect(() => {
+    if (location.state?.tab) setActiveTab(location.state.tab);
+  }, [location.state]);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

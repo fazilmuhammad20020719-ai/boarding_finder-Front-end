@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import OwnerTopBar from '../components/OwnerTopBar';
 import ReportModal from '../components/ReportModal';
 import { useAuth } from '../context/AuthContext';
 import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin, checkSavedStatus, addSavedListing, removeSavedListing, sendMessage } from '../services/api';
@@ -272,14 +273,30 @@ const PropertyDetails = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-sans antialiased text-white">
-      <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={2} activeTab="" />
+      {user?.role === 'owner' ? <OwnerTopBar /> : <Navbar isLoggedIn={true} onLogout={handleLogout} likedCount={2} activeTab="" />}
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-6 md:px-12 py-6">
         {/* ===== BREADCRUMBS ===== */}
         <div className="flex items-center gap-2 text-sm text-white/50 font-medium mb-6">
-          <Link to="/home" className="hover:text-[#FACC15] transition-colors">Home</Link>
-          <span>›</span>
-          <Link to="/search" className="hover:text-[#FACC15] transition-colors">Search</Link>
+          {user?.role === 'owner' ? (
+            <>
+              <Link to="/owner-dashboard" className="hover:text-[#FACC15] transition-colors">Dashboard</Link>
+              <span>›</span>
+              <Link to="/my-listings" className="hover:text-[#FACC15] transition-colors">My Listings</Link>
+            </>
+          ) : user?.role === 'admin' ? (
+            <>
+              <Link to="/admin-dashboard" className="hover:text-[#FACC15] transition-colors">Dashboard</Link>
+              <span>›</span>
+              <Link to="/manage-listings" className="hover:text-[#FACC15] transition-colors">Listings</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/home" className="hover:text-[#FACC15] transition-colors">Home</Link>
+              <span>›</span>
+              <Link to="/search" className="hover:text-[#FACC15] transition-colors">Search</Link>
+            </>
+          )}
           <span>›</span>
           <span className="text-white font-semibold">{listing.name}</span>
         </div>
@@ -295,7 +312,7 @@ const PropertyDetails = () => {
                 <span className="text-xs text-slate-300">You are viewing this listing as an administrator.</span>
               </div>
             </div>
-            <button onClick={() => navigate('/admin')} className="text-sm font-semibold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors border-none cursor-pointer text-white">
+            <button onClick={() => navigate('/admin-dashboard')}className="text-sm font-semibold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors border-none cursor-pointer text-white">
               Back to Dashboard
             </button>
           </div>
@@ -327,6 +344,8 @@ const PropertyDetails = () => {
             <div>
               <div className="flex justify-between items-start mb-2">
                 <h1 className="text-4xl font-extrabold tracking-tight text-white">{listing.name}</h1>
+                {/* Saving is a student feature */}
+                {user?.role !== 'owner' && user?.role !== 'admin' && (
                 <button
                   onClick={async () => {
                     if (!user || user.role === 'owner') {
@@ -351,6 +370,7 @@ const PropertyDetails = () => {
                   </svg>
                   Save
                 </button>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px] text-white/50 font-medium mb-4">
@@ -873,9 +893,11 @@ const PropertyDetails = () => {
                 </>
               )}
 
-              <p className="text-center text-xs text-white/40 mt-5 font-medium">
-                No payment charged until approved by owner
-              </p>
+              {user?.role !== 'owner' && user?.role !== 'admin' && (
+                <p className="text-center text-xs text-white/40 mt-5 font-medium">
+                  No payment charged until approved by owner
+                </p>
+              )}
             </div>
           </div>
         </div>
