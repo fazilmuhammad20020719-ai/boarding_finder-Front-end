@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BrandLogo from './Logo';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getNotifications, getSavedListings } from '../services/api';
@@ -145,9 +146,7 @@ const Navbar = ({ likedCount = 0 }) => {
 
           {/* Logo */}
           <Link to={homePath} className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md shrink-0" />
-            {/* On narrow phones the logo text would push the icons off screen */}
-            <span className={`font-bold text-lg sm:text-[22px] text-white tracking-tight truncate ${isAuthenticated ? 'hidden min-[400px]:inline' : ''}`}>BoardingFinder<span className="text-[#FACC15]">.</span></span>
+            <BrandLogo hideTextOnTiny={isAuthenticated} />
           </Link>
 
           {/* Desktop Navigation Links */}

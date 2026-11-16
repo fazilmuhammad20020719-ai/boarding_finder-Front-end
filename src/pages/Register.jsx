@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BrandLogo from '../components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -132,9 +133,7 @@ const RegisterPage = () => {
 
       {/* ===== TOP NAV ===== */}
       <div className="w-full border-b border-[#222] px-6 md:px-12 h-16 flex items-center justify-between">
-        <Link to="/" className="font-bold text-[20px] text-white tracking-tight">
-          BoardingFinder<span className="text-[#FACC15]">.</span>
-        </Link>
+        <Link to="/"><BrandLogo /></Link>
         <p className="text-sm text-white/40 font-medium hidden sm:block">
           Already have an account?{' '}
           <Link to="/login" className="text-[#FACC15] font-semibold hover:text-[#EAB308] transition-colors">

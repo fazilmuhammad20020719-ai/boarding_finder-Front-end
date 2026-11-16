@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BrandLogo from './Logo';
 import { Link } from 'react-router-dom';
 
 // Admin top bar in the same style as the student Navbar:
@@ -48,8 +49,7 @@ const AdminNavbar = ({ activeTab, onTabChange, pendingCount = 0, user, onLogout 
 
           {/* Logo */}
           <button onClick={() => go('overview')} className="flex items-center gap-2 sm:gap-3 min-w-0 bg-transparent border-none cursor-pointer p-0">
-            <img src="/logo.jpg" alt="BoardingFinder Logo" className="w-8 h-8 rounded-md shrink-0" />
-            <span className="font-bold text-lg sm:text-[22px] text-white tracking-tight truncate hidden min-[400px]:inline">BoardingFinder<span className="text-[#FACC15]">.</span></span>
+            <BrandLogo hideTextOnTiny />
           </button>
 
           {/* Desktop links */}

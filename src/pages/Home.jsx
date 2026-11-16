@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import BrandLogo from '../components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getStats, getAccessToken } from '../services/api';
@@ -653,19 +654,7 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
 
             <div className="lg:col-span-2 flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black shadow-sm border border-black/10">
-                  <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-                    <path d="M15 13.5C15 12.6716 15.6716 12 16.5 12H23.5C24.3284 12 25 12.6716 25 13.5V28H15V13.5Z" stroke="currentColor" strokeWidth="2" />
-                    <line x1="18.3" y1="12" x2="18.3" y2="28" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="21.7" y1="12" x2="21.7" y2="28" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="15" y1="16" x2="25" y2="16" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="15" y1="20" x2="25" y2="20" stroke="currentColor" strokeWidth="1.2" />
-                    <line x1="15" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="1.2" />
-                  </svg>
-                </div>
-                <span className="font-bold text-[22px] tracking-tight">BoardingFinder</span>
-              </div>
+              <BrandLogo textClassName="text-black" />
               <p className="text-black text-sm leading-relaxed max-w-sm font-normal">
                 Find verified boarding houses near universities across Sri Lanka.
               </p>
