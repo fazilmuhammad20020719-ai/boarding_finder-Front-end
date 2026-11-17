@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import OwnerTopBar from '../components/OwnerTopBar';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
 import { getAvailability } from '../utils/availability';
 import { subscribe } from '../services/realtime';
 
@@ -11,9 +11,9 @@ const OwnerDashboard = () => {
   const { logout, user } = useAuth();
   const location = useLocation();
   // Other pages' owner top bar can open a specific tab
-  const [activeTab, setActiveTab] = useState(location.state?.tab || 'overview');
+  const [activeTab, setActiveTab] = useState(location.state?.tab && location.state.tab !== 'students' ? location.state.tab : 'overview');
   useEffect(() => {
-    if (location.state?.tab) setActiveTab(location.state.tab);
+    if (location.state?.tab) setActiveTab(location.state.tab === 'students' ? 'overview' : location.state.tab);
   }, [location.state]);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,8 +32,6 @@ const OwnerDashboard = () => {
   const [bookingsLoading, setBookingsLoading] = useState(false);
 
   // Student Management state
-  const [linkedStudents, setLinkedStudents] = useState([]);
-  const [studentsLoading, setStudentsLoading] = useState(false);
 
   // Overview Stats state
   const [overviewStats, setOverviewStats] = useState(null);
@@ -132,22 +130,6 @@ const OwnerDashboard = () => {
     };
     fetchBookings();
   }, [navigate, activeTab]);
-
-  useEffect(() => {
-    if (activeTab !== 'students') return;
-    const fetchStudents = async () => {
-      setStudentsLoading(true);
-      try {
-        const data = await getLinkedStudents();
-        setLinkedStudents(data.students || []);
-      } catch (err) {
-        console.error("Failed to fetch students", err);
-      } finally {
-        setStudentsLoading(false);
-      }
-    };
-    fetchStudents();
-  }, [activeTab]);
 
   useEffect(() => {
     if (activeTab !== 'maintenance') return;
@@ -691,68 +673,6 @@ const OwnerDashboard = () => {
                           ) : (
                             <span className="text-white/40">—</span>
                           )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Manage Students Area */}
-        {activeTab === 'students' && (
-          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
-            <div className="p-6 border-b border-[#333] bg-[#222] flex items-center justify-between">
-              <div>
-                <h3 className="text-[17px] font-extrabold text-white">My Students</h3>
-                <p className="text-sm text-white/60">Students with approved bookings at your properties. Only an administrator can suspend or remove an account.</p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
-                    <th className="px-6 py-5 rounded-tl-3xl">STUDENT</th>
-                    <th className="px-6 py-5">UNIVERSITY / ID</th>
-                    <th className="px-6 py-5">CURRENT LISTING</th>
-                    <th className="px-6 py-5 rounded-tr-3xl">ACCOUNT STATUS</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[14px] font-medium text-white">
-                  {studentsLoading ? (
-                    <tr>
-                      <td colSpan="4" className="px-6 py-10 text-center text-white/60">Loading linked students...</td>
-                    </tr>
-                  ) : linkedStudents.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="px-6 py-10 text-center text-white/60">No active students linked to your properties.</td>
-                    </tr>
-                  ) : (
-                    linkedStudents.map(student => (
-                      <tr key={student.id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
-                        <td className="px-6 py-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-[#FACC15]/20 text-[#FACC15] flex items-center justify-center font-bold text-sm shrink-0">
-                              {student.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                              <div className="font-bold">{student.name}</div>
-                              <div className="text-xs text-white/60 font-normal">{student.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-white/80">{student.university || 'N/A'}</div>
-                          <div className="text-xs text-white/60 font-normal">ID: {student.student_id || 'N/A'}</div>
-                        </td>
-                        <td className="px-6 py-5 text-white/60">{student.property_name || student.listing_title}</td>
-                        <td className="px-6 py-5">
-                          {(!student.account_status || student.account_status === 'active') && <span className="bg-[#10b981]/20 text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">Active</span>}
-                          {student.account_status === 'paused' && <span className="bg-amber-500/20 text-amber-500 px-3 py-1.5 rounded-full text-xs font-bold">Suspended</span>}
-                          {student.account_status === 'removed' && <span className="bg-red-500/20 text-red-500 px-3 py-1.5 rounded-full text-xs font-bold">Removed</span>}
                         </td>
                       </tr>
                     ))

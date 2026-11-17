@@ -15,7 +15,6 @@ const LINKS = [
   { label: 'My Listings', tab: 'listings' },
   { label: 'Bookings', tab: 'bookings' },
   { label: 'Messages', tab: 'messages' },
-  { label: 'Students', tab: 'students' },
   { label: 'Maintenance', tab: 'maintenance' },
   { label: 'Payments', path: '/earnings' },
 ];
