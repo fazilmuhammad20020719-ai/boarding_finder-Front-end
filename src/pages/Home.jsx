@@ -441,7 +441,6 @@ const HomePage = () => {
               { value: stats ? `${stats.activeListings}+` : "0+", label: "Active listings" },
               { value: stats ? `${stats.partnerUniversities}` : "0", label: "Universities" },
               { value: stats ? `${stats.studentsPlaced}+` : "0+", label: "Students placed" },
-              { value: stats ? `${stats.avgRating}★` : "0.0★", label: "Average rating" },
             ].map((stat) => (
               <div key={stat.label} className="text-center min-w-[120px]">
                 <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>

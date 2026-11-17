@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateBookingStatus, updateBookingStay, generateLease } from '../services/api';
 import { todayISO } from '../utils/dates';
+import { PaymentBadge, ConfirmCashButton } from './CashPayment';
 
 // Owner booking management: approve/decline requests, cancel bookings, and
 // record when each student actually arrived and left. Recording "left" ends
@@ -72,7 +73,8 @@ const StayDateCell = ({ value, canSet, label, min, onSave, onUndo, busy }) => {
   );
 };
 
-const OwnerBookingManager = ({ bookings, setBookings, loading }) => {
+// showPayment adds the Cash on Move-in column; showCode shows the booking ID under the student
+const OwnerBookingManager = ({ bookings, setBookings, loading, showPayment = false, showCode = false }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
   const [busyId, setBusyId] = useState(null);
@@ -145,7 +147,7 @@ const OwnerBookingManager = ({ bookings, setBookings, loading }) => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[1100px]">
+        <table className={`w-full text-left border-collapse ${showPayment ? 'min-w-[1300px]' : 'min-w-[1100px]'}`}>
           <thead>
             <tr className="bg-[#111] text-white/60 text-[11px] uppercase tracking-wider font-bold">
               <th className="px-5 py-4">Student</th>
@@ -154,14 +156,15 @@ const OwnerBookingManager = ({ bookings, setBookings, loading }) => {
               <th className="px-5 py-4">Arrived</th>
               <th className="px-5 py-4">Left</th>
               <th className="px-5 py-4">Status</th>
+              {showPayment && <th className="px-5 py-4">Payment (cash on move-in)</th>}
               <th className="px-5 py-4">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[14px] font-medium text-white">
             {loading ? (
-              <tr><td colSpan="7" className="px-6 py-10 text-center text-white/60">Loading bookings...</td></tr>
+              <tr><td colSpan={showPayment ? 8 : 7} className="px-6 py-10 text-center text-white/60">Loading bookings...</td></tr>
             ) : shown.length === 0 ? (
-              <tr><td colSpan="7" className="px-6 py-10 text-center text-white/60">{bookings.length ? 'No bookings in this view.' : 'No bookings yet.'}</td></tr>
+              <tr><td colSpan={showPayment ? 8 : 7} className="px-6 py-10 text-center text-white/60">{bookings.length ? 'No bookings in this view.' : 'No bookings yet.'}</td></tr>
             ) : (
               shown.map((b) => {
                 const st = stayStatus(b);
@@ -172,6 +175,7 @@ const OwnerBookingManager = ({ bookings, setBookings, loading }) => {
                     <td className="px-5 py-4">
                       <div className="font-bold">{b.seeker_name}</div>
                       <div className="text-xs text-white/50 font-normal">{b.seeker_email}</div>
+                      {showCode && <div className="text-[11px] text-white/30 font-normal mt-0.5">BF-BKG-{String(b.booking_id).padStart(6, '0')}</div>}
                     </td>
                     <td className="px-5 py-4 text-white/70">
                       {b.title}
@@ -205,6 +209,19 @@ const OwnerBookingManager = ({ bookings, setBookings, loading }) => {
                     <td className="px-5 py-4">
                       <span className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${st.cls}`}>{st.label}</span>
                     </td>
+                    {showPayment && (
+                      <td className="px-5 py-4">
+                        {approved ? (
+                          <div className="flex flex-col items-start gap-2">
+                            <PaymentBadge booking={b} />
+                            <ConfirmCashButton
+                              booking={b}
+                              onChange={(u) => patch(b.booking_id, { payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at })}
+                            />
+                          </div>
+                        ) : <span className="text-white/30">—</span>}
+                      </td>
+                    )}
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-2">
                         {b.status === 'pending' && (
