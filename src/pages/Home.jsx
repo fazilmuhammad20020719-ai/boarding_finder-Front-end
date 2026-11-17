@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getStats, getAccessToken } from '../services/api';
 import { getAvailability } from '../utils/availability';
 import { useAuth } from '../context/AuthContext';
-import { UNIVERSITIES, findUniversity } from '../data/universities';
+import { UNIVERSITIES } from '../data/universities';
 import { splitByProximity, formatKm, cityOf, RADIUS_OPTIONS_KM, DEFAULT_RADIUS_KM } from '../utils/proximity';
 
 // Remove MOCK_LISTINGS and map from API instead
@@ -115,7 +115,7 @@ const HomePage = () => {
 
   // ── Nearby ranking: reference point + filters ──
   // Default reference: the student's own university (from their profile), if we know it
-  const [selectedUni, setSelectedUni] = useState(() => (findUniversity(user?.university) ? user.university : ''));
+  const [selectedUni, setSelectedUni] = useState(''); // starts empty on every visit: no filter from earlier or from the profile
   const [refType, setRefType] = useState('university'); // 'university' | 'me'
   const [userPos, setUserPos] = useState(null);         // browser location, never stored or sent anywhere
   const [locating, setLocating] = useState(false);
@@ -500,6 +500,16 @@ const HomePage = () => {
                 <option value="">All locations</option>
                 {cities.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => { setSelectedUni(''); setRefType('university'); setRadiusKm(DEFAULT_RADIUS_KM); setCityFilter(''); }}
+                disabled={!selectedUni && !cityFilter && radiusKm === DEFAULT_RADIUS_KM}
+                className="w-full lg:w-auto px-5 py-3 rounded-xl text-sm font-bold border border-[#333] bg-[#111] text-white hover:border-[#FACC15]/60 hover:text-[#FACC15] transition-colors cursor-pointer whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:border-[#333]"
+              >
+                Clear filters
+              </button>
             </div>
           </div>
 

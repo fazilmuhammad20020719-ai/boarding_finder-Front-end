@@ -6,7 +6,7 @@ import SearchResultsMap from '../components/SearchResultsMap';
 import { getAllListings, getSavedListings, addSavedListing, removeSavedListing, getAccessToken } from '../services/api';
 import { getAvailability } from '../utils/availability';
 import { useAuth } from '../context/AuthContext';
-import { UNIVERSITIES, findUniversity } from '../data/universities';
+import { UNIVERSITIES } from '../data/universities';
 import { distanceFrom, formatKm, cityOf, RADIUS_OPTIONS_KM } from '../utils/proximity';
 
 // Remove MOCK_LISTINGS and map from API instead
@@ -136,7 +136,7 @@ const SearchPage = () => {
 
   // ── Distance from the chosen university (default: the student's own) or "near me" ──
   const { user } = useAuth();
-  const [selectedUni, setSelectedUni] = useState(() => (findUniversity(user?.university) ? user.university : ''));
+  const [selectedUni, setSelectedUni] = useState(''); // starts empty on every visit: no filter from earlier or from the profile
   const [refType, setRefType] = useState('university'); // 'university' | 'me'
   const [userPos, setUserPos] = useState(null);         // browser location, never stored or sent anywhere
   const [locating, setLocating] = useState(false);
@@ -185,6 +185,19 @@ const SearchPage = () => {
     gym: false,
     pool: false
   });
+
+  // Reset every sidebar filter to its starting value
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedUni('');
+    setRefType('university');
+    setRadiusKm(null);
+    setCityFilter('');
+    setMaxPrice(30000);
+    setGenderFilter({ male: false, female: false, mixed: false });
+    setTypeFilter({ dormitory: false, apartment: false, private_room: false });
+    setFacilitiesFilter({ wifi: false, parking: false, laundry: false, meals: false, cctv: false, gym: false, pool: false });
+  };
 
   // Map interactive states
   const [hoveredMapListing, setHoveredMapListing] = useState(null);
@@ -352,7 +365,16 @@ const SearchPage = () => {
 
             {/* LEFT SIDEBAR FILTERS */}
             <aside className="w-full lg:w-[280px] bg-[#1A1A1A] rounded-[24px] p-6 border border-[#333] shadow-sm flex-shrink-0">
-              <h3 className="text-xl font-bold text-white mb-6">Filters</h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white">Filters</h3>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-bold text-[#FACC15] hover:text-[#EAB308] bg-transparent border-none cursor-pointer"
+                >
+                  Clear all
+                </button>
+              </div>
 
               <div className="space-y-6">
                 {/* University / near me */}
