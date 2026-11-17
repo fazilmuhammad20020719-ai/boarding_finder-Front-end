@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import OwnerTopBar from '../components/OwnerTopBar';
 import ReportModal from '../components/ReportModal';
+import { todayISO, isPastDate } from '../utils/dates';
 import { useAuth } from '../context/AuthContext';
 import { getListingById, checkBookingForListing, addReview, updateListingStatusAdmin, checkSavedStatus, addSavedListing, removeSavedListing, sendMessage } from '../services/api';
 import { getAvailability } from '../utils/availability';
@@ -264,6 +265,10 @@ const PropertyDetails = () => {
   const handleBookNow = () => {
     if (!moveInDate) {
       alert("Please select a move-in date.");
+      return;
+    }
+    if (isPastDate(moveInDate)) {
+      alert("The move-in date can't be in the past. Please choose today or a later date.");
       return;
     }
     navigate(`/book/${listing.id}?date=${moveInDate}&duration=${activeDuration}`);
@@ -839,6 +844,7 @@ const PropertyDetails = () => {
                       <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Move-In Date</label>
                       <input
                         type="date"
+                        min={todayISO()}
                         value={moveInDate}
                         onChange={(e) => setMoveInDate(e.target.value)}
                         className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15]"

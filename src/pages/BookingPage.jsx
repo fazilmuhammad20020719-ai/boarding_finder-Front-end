@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { getListingById, createBooking } from '../services/api';
+import { todayISO, isPastDate } from '../utils/dates';
 import { getAvailability } from '../utils/availability';
 
 const BookingPage = () => {
@@ -12,7 +13,11 @@ const BookingPage = () => {
   const { user } = useAuth();
   const [listing, setListing] = useState(null);
   const [activeDuration, setActiveDuration] = useState(searchParams.get('duration') || '6');
-  const [moveInDate, setMoveInDate] = useState(searchParams.get('date') || '');
+  // A past date from the link (e.g. an old tab) is dropped so the student picks again
+  const [moveInDate, setMoveInDate] = useState(() => {
+    const d = searchParams.get('date') || '';
+    return isPastDate(d) ? '' : d;
+  });
 
   // Pre-fill with logged-in user's profile data
   const [fullName, setFullName] = useState(user?.name || '');
@@ -214,7 +219,14 @@ const BookingPage = () => {
                   <>
                     <h2 className="text-[17px] font-extrabold text-white mb-8 tracking-tight">Booking Details</h2>
 
-                    <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
+                    <form className="space-y-6" onSubmit={(e) => {
+                      e.preventDefault();
+                      if (isPastDate(moveInDate)) {
+                        alert("The move-in date can't be in the past. Please choose today or a later date.");
+                        return;
+                      }
+                      setStep(2);
+                    }}>
 
                       {/* Row 1: Date and Duration */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -222,6 +234,7 @@ const BookingPage = () => {
                           <label className="block text-[11px] font-bold text-[#FACC15] tracking-wider mb-2 uppercase">Move-In Date</label>
                           <input
                             type="date"
+                            min={todayISO()}
                             value={moveInDate}
                             onChange={(e) => setMoveInDate(e.target.value)}
                             className="w-full bg-[#111] border border-[#333] rounded-xl px-4 py-3.5 text-[15px] text-white font-medium focus:outline-none focus:border-[#FACC15] focus:ring-1 focus:ring-[#FACC15]"
