@@ -1,50 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-import { sendContactMessage } from '../services/api';
 
 const ContactUs = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSending(true);
-    setError('');
-    try {
-      await sendContactMessage(formData);
-      setSubmitted(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setSubmitted(false), 5000);
-    } catch (err) {
-      setError(err.message || 'Failed to send message. Please try again.');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  // Logged-in users get the ticketed support centre; guests are taken to the form
-  const handleLiveSupport = () => {
-    if (isAuthenticated) {
-      navigate('/support');
-    } else {
-      document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // Logged-in users go to the ticketed support centre; guests sign in first
+  const handleLiveSupport = () => navigate(isAuthenticated ? '/support' : '/login');
 
   return (
     <div className="min-h-screen bg-black font-sans antialiased text-white flex flex-col">
@@ -57,14 +21,13 @@ const ContactUs = () => {
             Get in Touch
           </h1>
           <p className="text-white/70 text-lg font-medium max-w-xl mx-auto">
-            Have a question, feedback, or need support? We'd love to hear from you. Drop us a message below!
+            Have a question, feedback, or need support? We'd love to hear from you.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
 
-          {/* Contact Information (Left) */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* Contact Information */}
             <div className="bg-[#1A1A1A] rounded-3xl p-8 shadow-sm border border-[#333]">
               <h3 className="text-xl font-extrabold mb-6">Contact Information</h3>
 
@@ -101,7 +64,8 @@ const ContactUs = () => {
               </div>
             </div>
 
-            <div className="bg-[#111] border border-[#333] rounded-3xl p-8 text-white relative overflow-hidden">
+            {/* Support */}
+            <div className="bg-[#111] border border-[#333] rounded-3xl p-8 text-white relative overflow-hidden flex flex-col justify-center">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FACC15]/10 rounded-full blur-2xl"></div>
               <h3 className="text-lg font-bold mb-2 relative z-10">Need Immediate Help?</h3>
               <p className="text-white/50 text-sm font-medium mb-6 relative z-10">Our support team is available 24/7 to help you with booking emergencies.</p>
@@ -109,91 +73,6 @@ const ContactUs = () => {
                 Contact Support
               </button>
             </div>
-          </div>
-
-          {/* Contact Form (Right) */}
-          <div className="lg:col-span-3">
-            <div className="bg-[#1A1A1A] rounded-3xl p-8 shadow-sm border border-[#333]">
-              <h3 className="text-2xl font-extrabold mb-6">Send a Message</h3>
-
-              {submitted && (
-                <div className="bg-[#10b981]/10 border border-[#10b981]/20 text-[#10b981] p-4 rounded-2xl mb-6 flex items-center gap-3 font-medium">
-                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  Thank you! Your message has been sent successfully. We will get back to you soon.
-                </div>
-              )}
-
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl mb-6 font-medium">{error}</div>
-              )}
-
-              <form id="contact-form" onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-bold text-white">Full Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="John Doe"
-                      className="w-full bg-[#111] px-4 py-3 rounded-xl border border-[#333] focus:ring-2 focus:ring-[#FACC15]/20 focus:border-[#FACC15] outline-none transition-all font-medium text-sm text-white placeholder-white/40"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-bold text-white">Email Address</label>
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="john@example.com"
-                      className="w-full bg-[#111] px-4 py-3 rounded-xl border border-[#333] focus:ring-2 focus:ring-[#FACC15]/20 focus:border-[#FACC15] outline-none transition-all font-medium text-sm text-white placeholder-white/40"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-bold text-white">Subject</label>
-                  <input
-                    type="text"
-                    name="subject"
-                    required
-                    value={formData.subject}
-                    onChange={handleChange}
-                    placeholder="How can we help?"
-                    className="w-full bg-[#111] px-4 py-3 rounded-xl border border-[#333] focus:ring-2 focus:ring-[#FACC15]/20 focus:border-[#FACC15] outline-none transition-all font-medium text-sm text-white placeholder-white/40"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-bold text-white">Message</label>
-                  <textarea
-                    rows="5"
-                    name="message"
-                    required
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Tell us more about your inquiry..."
-                    className="w-full bg-[#111] px-4 py-3 rounded-xl border border-[#333] focus:ring-2 focus:ring-[#FACC15]/20 focus:border-[#FACC15] outline-none transition-all font-medium text-sm text-white placeholder-white/40 resize-none"
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full disabled:opacity-60 bg-[#FACC15] text-black py-4 rounded-xl font-bold text-[15px] hover:bg-[#EAB308] transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer border-none flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                  {sending ? 'Sending...' : 'Send Message'}
-                </button>
-              </form>
-
-            </div>
-          </div>
-
         </div>
 
       </main>
