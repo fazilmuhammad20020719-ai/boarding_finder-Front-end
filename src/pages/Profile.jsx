@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
-import AvatarUploader from '../components/AvatarUploader';
 import { getSavedListings, getMyBookings, getMyListings, getOwnerBookings } from '../services/api';
 
 const ProfilePage = () => {
@@ -129,9 +128,9 @@ const ProfilePage = () => {
           {/* LEFT COLUMN: PROFILE CARD */}
           <div className="bg-[#1A1A1A] rounded-[28px] border border-[#333] p-8 shadow-sm flex flex-col items-center text-center">
             
-            {/* Profile picture (click the camera to change it) */}
-            <div className="mb-4">
-              <AvatarUploader layout="column" />
+            {/* Avatar: first letter of the name */}
+            <div className="w-24 h-24 rounded-full bg-[#FACC15]/10 text-[#FACC15] flex items-center justify-center font-black text-3xl shadow-md mb-4 border border-[#FACC15]/30">
+              {(profile.name || '?').charAt(0).toUpperCase()}
             </div>
 
             <h2 className="text-xl font-bold text-white flex items-center gap-1.5 justify-center">

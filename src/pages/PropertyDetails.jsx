@@ -884,12 +884,6 @@ const PropertyDetails = () => {
                       Send Inquiry
                     </button>
                     <button
-                      onClick={() => navigate(`/virtual-tour/${listing.id}`)}
-                      className="w-full py-3.5 bg-[#111] border border-[#333] hover:bg-[#222] text-white font-bold rounded-xl transition-colors shadow-sm cursor-pointer"
-                    >
-                      Take Virtual Tour
-                    </button>
-                    <button
                       onClick={() => setIsReportOpen(true)}
                       className="w-full py-2 bg-transparent text-white/40 hover:text-red-400 text-xs font-semibold transition-colors cursor-pointer border-none"
                     >

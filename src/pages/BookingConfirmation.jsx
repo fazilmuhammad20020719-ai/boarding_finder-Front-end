@@ -453,7 +453,7 @@ const BookingConfirmation = () => {
                 <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[13px] text-amber-300">
                   Booking amount: <b>LKR {(rentPrice + securityDeposit).toLocaleString()}</b> (first month + deposit).
                   Once the owner approves, you'll get an email with your payment deadline. Pay the owner by bank transfer or cash:
-                  the full amount if you arrive within 3 days, otherwise at least a 20% advance. Unpaid bookings are cancelled after the deadline.
+                  if you arrive within 5 days, by the day after you arrive (the full amount within 3 days, otherwise at least 20%); for later arrivals, at least a 20% advance within 5 days of approval. Unpaid bookings are cancelled after the deadline.
                 </div>
               </div>
             </div>

@@ -2,8 +2,8 @@
 // by bank transfer or cash, and the owner (or an admin) records each payment.
 //
 // Booking amount = first month's rent + security deposit.
-//   Arrival within 3 days   → full amount by the day before arrival
-//   Arrival in 4–5 days     → at least 20% by the day before arrival
+//   Arrival within 3 days   → full amount by the day after arrival
+//   Arrival in 4–5 days     → at least 20% by the day after arrival
 //   Arrival 6+ days away    → at least 20% within 5 days of approval
 // A booking is CONFIRMED once the required amount is paid; if the deadline
 // passes first, the server cancels it automatically.

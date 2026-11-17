@@ -352,7 +352,7 @@ const BookingPage = () => {
                             }`}
                         >
                           <div className="font-bold">{method}</div>
-                          <div className="text-sm text-white/60 mt-1">No online payment. After the owner approves, pay them by bank transfer or cash before the deadline to confirm your booking: the full first month's rent + deposit if you arrive within 3 days, otherwise at least a 20% advance. Unpaid bookings are cancelled automatically after the deadline.</div>
+                          <div className="text-sm text-white/60 mt-1">No online payment. After the owner approves, pay them by bank transfer or cash before the deadline to confirm your booking: if you arrive within 5 days, pay by the day after you arrive (the full first month's rent + deposit within 3 days, or at least a 20% advance); otherwise at least a 20% advance within 5 days of approval. Unpaid bookings are cancelled automatically after the deadline.</div>
                         </div>
                       ))}
                     </div>

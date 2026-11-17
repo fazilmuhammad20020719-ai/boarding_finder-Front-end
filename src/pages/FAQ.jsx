@@ -37,7 +37,7 @@ const FAQ = () => {
     students: [
       {
         q: "How do I book a boarding house?",
-        a: "Booking is simple! Once you find a property you like, click the 'Apply' or 'Book' button. You'll need to fill out a brief application form. The owner will review it, and once approved, you get an email with a payment deadline. Pay the owner by bank transfer or cash before it: the full first month's rent + deposit if you arrive within 3 days, or at least a 20% advance otherwise. The owner records the payment and your booking is confirmed. There is no online payment, and unpaid bookings are cancelled automatically after the deadline."
+        a: "Booking is simple! Once you find a property you like, click the 'Apply' or 'Book' button. You'll need to fill out a brief application form. The owner will review it, and once approved, you get an email with a payment deadline. Pay the owner by bank transfer or cash by then. If you arrive within 3 days, pay the full first month's rent + deposit by the day after you arrive; within 4–5 days, at least a 20% advance by the day after you arrive; for later arrivals, at least a 20% advance within 5 days of approval. The owner records the payment and your booking is confirmed. There is no online payment, and unpaid bookings are cancelled automatically after the deadline."
       },
       {
         q: "Are the utility bills included in the rent?",

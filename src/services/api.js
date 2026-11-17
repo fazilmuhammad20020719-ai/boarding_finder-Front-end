@@ -267,16 +267,6 @@ export async function deleteAccount(password) {
   return data;
 }
 
-export async function uploadAvatar(file) {
-  const formData = new FormData();
-  formData.append("avatar", file);
-  return request("/auth/avatar", { method: "POST", body: formData });
-}
-
-export async function removeAvatar() {
-  return request("/auth/avatar", { method: "DELETE" });
-}
-
 export async function updateProfile(profileData) {
   return request("/auth/profile", {
     method: "PUT",

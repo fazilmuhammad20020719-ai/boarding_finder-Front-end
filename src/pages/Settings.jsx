@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import AvatarUploader from '../components/AvatarUploader';
 import { useAuth } from '../context/AuthContext';
 import { updatePreferences, changePassword, deleteAccount } from '../services/api';
 
@@ -245,11 +244,17 @@ const Settings = () => {
                 <div>
                   <h2 className="text-xl font-bold text-white mb-6">Account Details</h2>
 
-                  <div className="mb-8 pb-8 border-b border-[#333]">
-                    <AvatarUploader />
-                    <span className="inline-block mt-4 px-3 py-1 rounded-full text-xs font-bold bg-[#FACC15]/10 text-[#FACC15] border border-[#FACC15]/30">
-                      {ROLE_LABEL[role]}
-                    </span>
+                  <div className="flex items-center gap-5 mb-8 pb-8 border-b border-[#333]">
+                    <div className="w-20 h-20 rounded-full bg-[#FACC15]/10 text-[#FACC15] flex items-center justify-center font-black text-3xl border border-[#FACC15]/30 shrink-0">
+                      {(user?.name || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-white text-lg truncate">{user?.name}</div>
+                      <div className="text-sm text-white/50 truncate">{user?.email}</div>
+                      <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold bg-[#FACC15]/10 text-[#FACC15] border border-[#FACC15]/30">
+                        {ROLE_LABEL[role]}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
