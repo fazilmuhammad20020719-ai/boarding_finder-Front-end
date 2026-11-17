@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import OwnerTopBar from '../components/OwnerTopBar';
 import { useAuth } from '../context/AuthContext';
-import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, updateStudentStatus, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
+import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getLinkedStudents, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
 import { getAvailability } from '../utils/availability';
 import { subscribe } from '../services/realtime';
 
@@ -240,23 +240,6 @@ const OwnerDashboard = () => {
     }
   };
 
-  const handleUpdateStudentStatus = async (studentId, action) => {
-    if (!window.confirm(`Are you sure you want to ${action} this student's access?`)) return;
-
-    try {
-      await updateStudentStatus(studentId, action);
-      // Optimistically update UI
-      setLinkedStudents(prev => prev.map(s => {
-        if (s.id !== studentId) return s;
-        if (action === 'pause') return { ...s, account_status: 'paused' };
-        if (action === 'reactivate') return { ...s, account_status: 'active' };
-        if (action === 'remove') return { ...s, account_status: 'removed' };
-        return s;
-      }));
-    } catch (err) {
-      alert("Error updating student: " + err.message);
-    }
-  };
 
 
 
@@ -723,8 +706,8 @@ const OwnerDashboard = () => {
           <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
             <div className="p-6 border-b border-[#333] bg-[#222] flex items-center justify-between">
               <div>
-                <h3 className="text-[17px] font-extrabold text-white">Manage Student Access</h3>
-                <p className="text-sm text-white/60">View and manage students currently linked to your active properties.</p>
+                <h3 className="text-[17px] font-extrabold text-white">My Students</h3>
+                <p className="text-sm text-white/60">Students with approved bookings at your properties. Only an administrator can suspend or remove an account.</p>
               </div>
             </div>
 
@@ -735,18 +718,17 @@ const OwnerDashboard = () => {
                     <th className="px-6 py-5 rounded-tl-3xl">STUDENT</th>
                     <th className="px-6 py-5">UNIVERSITY / ID</th>
                     <th className="px-6 py-5">CURRENT LISTING</th>
-                    <th className="px-6 py-5">ACCOUNT STATUS</th>
-                    <th className="px-6 py-5 rounded-tr-3xl text-right">ACTION</th>
+                    <th className="px-6 py-5 rounded-tr-3xl">ACCOUNT STATUS</th>
                   </tr>
                 </thead>
                 <tbody className="text-[14px] font-medium text-white">
                   {studentsLoading ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-10 text-center text-white/60">Loading linked students...</td>
+                      <td colSpan="4" className="px-6 py-10 text-center text-white/60">Loading linked students...</td>
                     </tr>
                   ) : linkedStudents.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-10 text-center text-white/60">No active students linked to your properties.</td>
+                      <td colSpan="4" className="px-6 py-10 text-center text-white/60">No active students linked to your properties.</td>
                     </tr>
                   ) : (
                     linkedStudents.map(student => (
@@ -768,37 +750,9 @@ const OwnerDashboard = () => {
                         </td>
                         <td className="px-6 py-5 text-white/60">{student.property_name || student.listing_title}</td>
                         <td className="px-6 py-5">
-                          {student.account_status === 'active' && <span className="bg-[#10b981]/20 text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">Active Access</span>}
-                          {student.account_status === 'paused' && <span className="bg-amber-500/20 text-amber-500 px-3 py-1.5 rounded-full text-xs font-bold">Paused</span>}
+                          {(!student.account_status || student.account_status === 'active') && <span className="bg-[#10b981]/20 text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">Active</span>}
+                          {student.account_status === 'paused' && <span className="bg-amber-500/20 text-amber-500 px-3 py-1.5 rounded-full text-xs font-bold">Suspended</span>}
                           {student.account_status === 'removed' && <span className="bg-red-500/20 text-red-500 px-3 py-1.5 rounded-full text-xs font-bold">Removed</span>}
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <div className="flex gap-2 justify-end">
-                            {student.account_status === 'active' && (
-                              <button
-                                onClick={() => handleUpdateStudentStatus(student.id, 'pause')}
-                                className="bg-amber-500/20 text-amber-500 hover:bg-amber-500/40 px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
-                              >
-                                Pause
-                              </button>
-                            )}
-                            {student.account_status === 'paused' && (
-                              <button
-                                onClick={() => handleUpdateStudentStatus(student.id, 'reactivate')}
-                                className="bg-[#10b981]/20 text-[#10b981] hover:bg-[#10b981]/40 px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
-                              >
-                                Reactivate
-                              </button>
-                            )}
-                            {student.account_status !== 'removed' && (
-                              <button
-                                onClick={() => handleUpdateStudentStatus(student.id, 'remove')}
-                                className="bg-red-500/20 text-red-500 hover:bg-red-500/40 px-4 py-2 rounded-xl text-[12px] font-bold transition-colors cursor-pointer border-none"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
                         </td>
                       </tr>
                     ))
@@ -833,11 +787,11 @@ const OwnerDashboard = () => {
                 <tbody className="text-[14px] font-medium text-white">
                   {maintenanceLoading ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-10 text-center text-white/60">Loading maintenance requests...</td>
+                      <td colSpan="4" className="px-6 py-10 text-center text-white/60">Loading maintenance requests...</td>
                     </tr>
                   ) : maintenanceRequests.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-10 text-center text-white/60">No maintenance requests from your tenants.</td>
+                      <td colSpan="4" className="px-6 py-10 text-center text-white/60">No maintenance requests from your tenants.</td>
                     </tr>
                   ) : (
                     maintenanceRequests.map(ticket => (

@@ -516,12 +516,6 @@ export async function getLinkedStudents() {
   return request("/owner/students", { method: "GET" });
 }
 
-export async function updateStudentStatus(studentId, action) {
-  return request(`/owner/students/${studentId}/status`, {
-    method: "PUT",
-    body: JSON.stringify({ action }),
-  });
-}
 
 // ─────────────────────────────────────────────────────────────────
 // Dashboard/Overview API Methods
