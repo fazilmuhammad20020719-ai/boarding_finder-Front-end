@@ -184,6 +184,12 @@ const ManageUsers = () => {
                           }`}></span>
                           {user.status}
                         </span>
+                        {/* Verification result, so a rejected account isn't shown as plain "Active" */}
+                        {user.status === 'Active' && (user.verification === 'rejected' || user.verification === 'pending') && (
+                          <span className={`ml-2 inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${user.verification === 'rejected' ? 'bg-red-500/20 text-red-400' : 'bg-sky-500/20 text-sky-400'}`}>
+                            {user.verification === 'rejected' ? 'Rejected' : 'Pending approval'}
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-white/60">
                         {user.joined}

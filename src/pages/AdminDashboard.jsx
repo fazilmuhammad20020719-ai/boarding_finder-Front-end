@@ -619,12 +619,20 @@ const AdminDashboard = () => {
           // ── Filter state (scoped to this tab render) ──
           // We use a stateless filter approach: filter controls update parent state
           // defined alongside the other state vars at the top of the component.
+          // One status per user: a ban or suspension wins, otherwise the verification result
+          const userStatus = (u) => {
+            if (u.account_status === 'removed') return { key: 'removed', label: 'Banned', cls: 'bg-red-500/20 text-red-500' };
+            if (u.account_status === 'paused') return { key: 'paused', label: 'Suspended', cls: 'bg-amber-500/20 text-amber-500' };
+            if (u.verification_status === 'rejected') return { key: 'rejected', label: 'Rejected', cls: 'bg-red-500/20 text-red-400' };
+            if (u.verification_status === 'pending') return { key: 'pending', label: 'Pending approval', cls: 'bg-sky-500/20 text-sky-400' };
+            if (u.verification_status === 'suspended') return { key: 'paused', label: 'Suspended', cls: 'bg-amber-500/20 text-amber-500' };
+            return { key: 'active', label: 'Active', cls: 'bg-[#10b981]/20 text-[#10b981]' };
+          };
           const filteredUsers = allUsers.filter(user => {
             const q = (userSearchQuery || '').toLowerCase();
             const matchesSearch = !q || user.name?.toLowerCase().includes(q) || user.email?.toLowerCase().includes(q);
             const matchesRole = userFilterRole === 'all' || user.role === userFilterRole;
-            const status = user.account_status || 'active';
-            const matchesStatus = userFilterStatus === 'all' || status === userFilterStatus;
+            const matchesStatus = userFilterStatus === 'all' || userStatus(user).key === userFilterStatus;
             return matchesSearch && matchesRole && matchesStatus;
           });
 
@@ -673,6 +681,8 @@ const AdminDashboard = () => {
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
+                    <option value="pending">Pending approval</option>
+                    <option value="rejected">Rejected</option>
                     <option value="paused">Suspended</option>
                     <option value="removed">Banned</option>
                   </select>
@@ -735,8 +745,8 @@ const AdminDashboard = () => {
                               </select>
                             </td>
                             <td className="px-6 py-5">
-                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.account_status === 'active' ? 'bg-[#10b981]/20 text-[#10b981]' : user.account_status === 'paused' ? 'bg-amber-500/20 text-amber-500' : user.account_status === 'removed' ? 'bg-red-500/20 text-red-500' : 'bg-[#10b981]/20 text-[#10b981]'}`}>
-                                {user.account_status || 'active'}
+                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${userStatus(user).cls}`}>
+                                {userStatus(user).label}
                               </span>
                             </td>
                             <td className="px-6 py-5 text-white/60 text-sm">

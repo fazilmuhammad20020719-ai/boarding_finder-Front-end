@@ -108,35 +108,6 @@ const ManageReservations = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    if (filteredReservations.length === 0) {
-      alert("No reservations to export.");
-      return;
-    }
-
-    const headers = ['Booking ID', 'Tenant', 'Property', 'Check In', 'Check Out', 'Total Price', 'Status'];
-    const rows = filteredReservations.map(res => [
-      res.displayId,
-      `"${res.tenant}"`,
-      `"${res.property}"`,
-      res.checkIn,
-      res.checkOut,
-      res.totalPrice,
-      res.status
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `reservations_${activeTab.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // Filter reservations based on active tab AND property dropdown AND search query
   const filteredReservations = reservations.filter(res => {
     const matchesTab = res.status === activeTab;
@@ -163,16 +134,6 @@ const ManageReservations = () => {
             </Link>
             <h1 className="text-3xl font-extrabold tracking-tight">Manage Reservations</h1>
             <p className="text-white/60 mt-1 text-[15px]">Review requests, accept or decline bookings, and manage upcoming stays.</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={handleExportCSV}
-              className="px-5 py-2.5 bg-[#111] border border-[#333] hover:bg-[#222] text-white font-semibold rounded-xl shadow-sm transition-all text-sm cursor-pointer flex items-center gap-2"
-            >
-              <svg className="w-4 h-4 text-[#FACC15]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              Export to CSV
-            </button>
           </div>
         </div>
 
