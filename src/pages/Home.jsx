@@ -145,10 +145,17 @@ const HomePage = () => {
     ? (userPos ? { type: 'me', ...userPos } : null)
     : (selectedUni ? { type: 'university', name: selectedUni } : null);
 
+  // Towns for the Location filter: only the chosen university's listings
   const cities = useMemo(
-    () => [...new Set(listings.map(l => l.city).filter(Boolean))].sort(),
-    [listings]
+    () => [...new Set(listings
+      .filter(l => !selectedUni || refType !== 'university' || l.universityName === selectedUni)
+      .map(l => l.city).filter(Boolean))].sort(),
+    [listings, selectedUni, refType]
   );
+  // Clear a town that doesn't belong to the newly chosen university
+  useEffect(() => {
+    if (cityFilter && !cities.includes(cityFilter)) setCityFilter('');
+  }, [cities]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { nearby, others } = useMemo(() => {
     const pool = cityFilter ? listings.filter(l => l.city === cityFilter) : listings;
@@ -312,7 +319,7 @@ const HomePage = () => {
 
             <div className="flex items-center justify-between text-[12px] text-white/50 mb-3 font-semibold">
               <span className="truncate">📍 {listing.location}</span>
-              <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distanceKm != null ? `${listing.distanceHow === 'map' ? '~' : ''}${formatKm(listing.distanceKm)}` : listing.distance}</span>
+              <span className="flex-shrink-0 text-[#FACC15] font-bold" title={listing.universityName ? `Distance to ${listing.universityName}` : "No university set for this listing"}>📏 {listing.distanceKm != null ? `${listing.distanceHow === 'map' ? '~' : ''}${formatKm(listing.distanceKm)}` : listing.distance}</span>
             </div>
 
             <div className="flex flex-wrap gap-1.5 mb-3">
@@ -502,38 +509,56 @@ const HomePage = () => {
             </div>
           ) : listings.length === 0 ? (
             <div className="py-12 text-center text-slate-500">No listings available right now.</div>
-          ) : (
+          ) : reference && nearby.length === 0 && others.length === 0 ? (
+            /* The chosen university has no listings: say so, never show another university's */
+            <div className="bg-[#1A1A1A] border border-[#333] rounded-[24px] py-14 px-6 text-center">
+              <span className="text-4xl block mb-3">🏫</span>
+              <h2 className="text-xl font-bold text-white">No Listings Available</h2>
+              <p className="text-white/50 text-sm mt-2">
+                There are no boarding listings for {selectedUni}{cityFilter ? ` in ${cityFilter}` : ''} yet.
+              </p>
+            </div>
+          ) : reference ? (
             <>
-              {reference && (
-                <div className="mb-14">
-                  <div className="flex items-center justify-between mb-6 gap-4">
-                    <div className="min-w-0">
-                      <h2 className="text-2xl font-bold text-white tracking-tight">Nearby Boarding</h2>
-                      <p className="text-white/50 text-sm mt-1 font-normal truncate">
-                        Within {radiusKm} km of {refType === 'me' ? 'your location' : selectedUni}, closest first
-                      </p>
-                    </div>
-                    <span className="text-sm font-bold text-[#FACC15] flex-shrink-0">{nearby.length} found</span>
-                  </div>
-                  {listingGrid(nearby, `No boarding places within ${radiusKm} km yet. Try a larger distance, or see the other hostels below.`)}
-                </div>
-              )}
-
-              <div>
+              <div className="mb-14">
                 <div className="flex items-center justify-between mb-6 gap-4">
                   <div className="min-w-0">
-                    <h2 className="text-2xl font-bold text-white tracking-tight">{reference ? 'Other Available Hostels' : 'Available Hostels'}</h2>
-                    <p className="text-white/50 text-sm mt-1 font-normal">
-                      {reference ? 'In other locations, nearest first' : 'Choose your university to see the closest places first'}
+                    <h2 className="text-2xl font-bold text-white tracking-tight">Nearby Boarding</h2>
+                    <p className="text-white/50 text-sm mt-1 font-normal truncate">
+                      {selectedUni} listings within {radiusKm} km, closest first
                     </p>
                   </div>
-                  <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1 flex-shrink-0">
-                    See all listings →
-                  </Link>
+                  <span className="text-sm font-bold text-[#FACC15] flex-shrink-0">{nearby.length} found</span>
                 </div>
-                {listingGrid(others.slice(0, 9), 'No other boarding places match these filters.')}
+                {listingGrid(nearby, `No ${selectedUni} listings within ${radiusKm} km. Try a larger distance.`)}
               </div>
+
+              {others.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-6 gap-4">
+                    <div className="min-w-0">
+                      <h2 className="text-2xl font-bold text-white tracking-tight">More {selectedUni} Boarding</h2>
+                      <p className="text-white/50 text-sm mt-1 font-normal">Further than {radiusKm} km from the university, nearest first</p>
+                    </div>
+                    <span className="text-sm font-bold text-white/50 flex-shrink-0">{others.length} found</span>
+                  </div>
+                  {listingGrid(others.slice(0, 9), '')}
+                </div>
+              )}
             </>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <div className="min-w-0">
+                  <h2 className="text-2xl font-bold text-white tracking-tight">Available Hostels</h2>
+                  <p className="text-white/50 text-sm mt-1 font-normal">Choose your university to see its boarding places, closest first</p>
+                </div>
+                <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1 flex-shrink-0">
+                  See all listings →
+                </Link>
+              </div>
+              {listingGrid(others.slice(0, 9), 'No boarding places match these filters.')}
+            </div>
           )}
         </section>
 

@@ -46,16 +46,21 @@ export function distanceFrom(listing, ref) {
     return pos ? { km: haversineKm(pos, ref), how: 'map' } : { km: null, how: null };
   }
   if (ref.type === 'university') {
-    // The owner's own "nearest university + distance" is the most reliable signal
-    if (listing.universityName === ref.name && BAND_KM[listing.distanceBand] !== undefined) {
-      return { km: BAND_KM[listing.distanceBand], how: 'owner' };
-    }
+    // Listings belong to the university they were created under. Distance is
+    // only ever measured from that university, never from another one.
+    if (!belongsTo(listing, ref.name)) return { km: null, how: null };
+    // The owner's own distance band to their university is the most reliable signal
+    if (BAND_KM[listing.distanceBand] !== undefined) return { km: BAND_KM[listing.distanceBand], how: 'owner' };
     const uni = findUniversity(ref.name);
     if (pos && uni && uni.lat != null) return { km: haversineKm(pos, uni), how: 'map' };
-    if (listing.universityName === ref.name) return { km: null, how: 'owner' }; // same uni, distance unknown
+    return { km: null, how: 'owner' }; // this university's listing, distance unknown
   }
   return { km: null, how: null };
 }
+
+/** True when a listing was created under the given university. */
+export const belongsTo = (listing, universityName) =>
+  !!universityName && listing.universityName === universityName;
 
 /**
  * Split listings into "nearby" (within radius, or the owner named that
@@ -68,9 +73,13 @@ export function splitByProximity(listings, ref, radiusKm = DEFAULT_RADIUS_KM) {
   });
   if (!ref) return { nearby: [], others: withDistance };
 
+  // A university only ever shows its own listings: "others" are that
+  // university's listings beyond the radius, never another university's.
+  const pool = ref.type === 'university' ? withDistance.filter((l) => belongsTo(l, ref.name)) : withDistance;
+
   const isNearby = (l) =>
     (l.distanceKm !== null && l.distanceKm <= radiusKm) ||
-    (ref.type === 'university' && l.universityName === ref.name && l.distanceKm === null);
+    (ref.type === 'university' && l.distanceKm === null);
 
   const byDistance = (a, b) => {
     if (a.distanceKm === null && b.distanceKm === null) return 0;
@@ -80,8 +89,8 @@ export function splitByProximity(listings, ref, radiusKm = DEFAULT_RADIUS_KM) {
   };
 
   return {
-    nearby: withDistance.filter(isNearby).sort(byDistance),
-    others: withDistance.filter((l) => !isNearby(l)).sort(byDistance),
+    nearby: pool.filter(isNearby).sort(byDistance),
+    others: pool.filter((l) => !isNearby(l)).sort(byDistance),
   };
 }
 

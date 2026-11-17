@@ -212,12 +212,11 @@ const SearchPage = () => {
       // Location (city / area)
       if (cityFilter && listing.city !== cityFilter) return false;
 
-      // Distance: within the radius, or the owner named this university (distance unknown)
-      if (reference && radiusKm !== null) {
-        const sameUni = reference.type === 'university' && listing.universityName === reference.name;
-        const within = listing.distanceKm !== null ? listing.distanceKm <= radiusKm : sameUni;
-        if (!within) return false;
-      }
+      // A chosen university shows only the listings created under it
+      if (reference?.type === 'university' && listing.universityName !== reference.name) return false;
+
+      // Distance from that university (unknown distance = still shown)
+      if (reference && radiusKm !== null && listing.distanceKm !== null && listing.distanceKm > radiusKm) return false;
 
       // Search Query
       const matchesSearch =
@@ -586,7 +585,7 @@ const SearchPage = () => {
                           {/* Distance & Location Info */}
                           <div className="flex items-center justify-between text-[13px] text-white/50 mb-4 font-semibold">
                             <span className="truncate">📍 {listing.location}</span>
-                            <span className="flex-shrink-0 text-[#FACC15] font-bold">📏 {listing.distanceKm != null ? `${listing.distanceHow === 'map' ? '~' : ''}${formatKm(listing.distanceKm)}` : listing.distance}</span>
+                            <span className="flex-shrink-0 text-[#FACC15] font-bold" title={listing.universityName ? `Distance to ${listing.universityName}` : "No university set for this listing"}>📏 {listing.distanceKm != null ? `${listing.distanceHow === 'map' ? '~' : ''}${formatKm(listing.distanceKm)}` : listing.distance}</span>
                           </div>
 
                           {/* Amenities Badges */}
@@ -626,8 +625,17 @@ const SearchPage = () => {
               ) : (
                 <div className="bg-[#1A1A1A] rounded-[32px] p-12 text-center shadow-sm border border-[#333]">
                   <span className="text-5xl block mb-4">🔍</span>
-                  <h3 className="text-xl font-bold text-white">No boarding houses matches filters</h3>
-                  <p className="text-white/50 mt-2">Try adjusting your filters or search keywords.</p>
+                  {reference?.type === 'university' && !listings.some((l) => l.universityName === reference.name) ? (
+                    <>
+                      <h3 className="text-xl font-bold text-white">No Listings Available</h3>
+                      <p className="text-white/50 mt-2">There are no boarding listings for {reference.name} yet.</p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-bold text-white">No boarding houses match your filters</h3>
+                      <p className="text-white/50 mt-2">Try adjusting your filters or search keywords.</p>
+                    </>
+                  )}
                 </div>
               )}
             </div>
