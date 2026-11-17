@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getMyBookings, updateBookingStatus } from '../services/api';
-import { PaymentBadge } from '../components/CashPayment';
+import { PaymentBadge, isConfirmed, isPaid, paymentDueText } from '../components/CashPayment';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -89,8 +89,13 @@ const MyBookings = () => {
               bookingDate: new Date(b.created_at).toLocaleDateString(),
               image: imageUrl,
               owner_id: b.owner_id,
-              // Cash on Move-in status (confirmed by the owner)
-              payment: { status: b.status, payment_status: b.payment_status, paid_amount: b.paid_amount, paid_at: b.paid_at, price: b.price, security_deposit: b.security_deposit },
+              // Payment before arrival (recorded by the owner): amount, minimum, deadline
+              payment: {
+                status: b.status, payment_status: b.payment_status, paid_amount: b.paid_amount, paid_at: b.paid_at,
+                price: b.price, security_deposit: b.security_deposit, booking_amount: b.booking_amount,
+                required_amount: b.required_amount, payment_plan: b.payment_plan,
+                payment_deadline_on: b.payment_deadline_on, rejection_reason: b.rejection_reason,
+              },
               ownerName: "Owner" // Owner details aren't joined in the student view currently, fallback
             };
           });
@@ -267,10 +272,24 @@ const MyBookings = () => {
                           <div className="text-[13px] font-bold text-[#FACC15]">LKR {booking.totalPrice.toLocaleString()}</div>
                         </div>
                       </div>
-                      {booking.payment?.status === 'approved' && (
-                        <div className="flex flex-wrap items-center gap-2 mb-5">
-                          <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Payment</span>
-                          <PaymentBadge booking={booking.payment} />
+                      {(booking.payment?.status === 'approved' || booking.payment?.rejection_reason === 'payment_overdue') && (
+                        <div className="mb-5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Payment</span>
+                            <PaymentBadge booking={booking.payment} />
+                          </div>
+                          {booking.payment.status === 'approved' && !isConfirmed(booking.payment) && (
+                            <p className="text-xs text-amber-300/90 mt-2 leading-relaxed">
+                              {paymentDueText(booking.payment)}. Pay the owner by bank transfer or cash; they record it here.
+                              If it isn't received by the deadline, the booking is cancelled automatically.
+                            </p>
+                          )}
+                          {booking.payment.status === 'approved' && isConfirmed(booking.payment) && !isPaid(booking.payment) && (
+                            <p className="text-xs text-white/50 mt-2">Booking confirmed. Pay the remaining balance to the owner on or before move-in.</p>
+                          )}
+                          {booking.payment.rejection_reason === 'payment_overdue' && (
+                            <p className="text-xs text-white/50 mt-2">The payment deadline passed, so the room was released. You can book again if it's still available.</p>
+                          )}
                         </div>
                       )}
                     </div>

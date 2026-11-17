@@ -18,7 +18,7 @@ const ROLE_LABEL = { student: '🎓 Student', owner: '🏠 Property Owner', admi
 // Switching one off stops those notifications (in the app and by email).
 const NOTIFICATION_OPTIONS = {
   student: [
-    { id: 'bookingUpdates', title: 'Booking Updates', text: 'When an owner approves, rejects or cancels your booking, or confirms your move-in payment.' },
+    { id: 'bookingUpdates', title: 'Booking Updates', text: 'When an owner declines or cancels your booking, or a stay ends. Payment instructions, receipts and deadline notices are always sent.' },
     { id: 'maintenance', title: 'Maintenance Updates', text: 'When the status of your repair request changes.' },
     { id: 'announcements', title: 'Announcements', text: 'Platform news and updates from the BoardingFinder team.' },
   ],

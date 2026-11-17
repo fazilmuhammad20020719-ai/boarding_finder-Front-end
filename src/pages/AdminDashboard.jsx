@@ -889,7 +889,7 @@ const AdminDashboard = () => {
                       <th className="px-6 py-5">OWNER</th>
                       <th className="px-6 py-5">TOTAL AMOUNT</th>
                       <th className="px-6 py-5">STATUS</th>
-                      <th className="px-6 py-5">PAYMENT (CASH ON MOVE-IN)</th>
+                      <th className="px-6 py-5">PAYMENT</th>
                       <th className="px-6 py-5 rounded-tr-3xl">ACTIONS</th>
                     </tr>
                   </thead>

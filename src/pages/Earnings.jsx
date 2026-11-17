@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import OwnerTopBar from '../components/OwnerTopBar';
 import { getOwnerLedger } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { PaymentBadge, ConfirmCashButton, isPaid, moveInAmount } from '../components/CashPayment';
+import { PaymentBadge, ConfirmCashButton, isPaid, moveInAmount, paymentDueText } from '../components/CashPayment';
 
 const Earnings = () => {
   const [ledger, setLedger] = useState([]);
@@ -25,11 +25,12 @@ const Earnings = () => {
     fetchLedger();
   }, []);
 
-  const received = ledger.filter(isPaid).reduce((sum, b) => sum + Number(b.paid_amount || 0), 0);
-  const due = ledger.filter((b) => !isPaid(b)).reduce((sum, b) => sum + moveInAmount(b), 0);
+  // Everything recorded so far (full payments and advances) and the balances still owed
+  const received = ledger.reduce((sum, b) => sum + Number(b.paid_amount || 0), 0);
+  const due = ledger.filter((b) => !isPaid(b)).reduce((sum, b) => sum + Math.max(0, moveInAmount(b) - Number(b.paid_amount || 0)), 0);
   // Keep the row but take the new payment fields from the server response
   const updateRow = (id, u) => setLedger((rows) => rows.map((r) => (r.booking_id === id
-    ? { ...r, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at } : r)));
+    ? { ...r, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at, booking_amount: u.booking_amount } : r)));
 
   const handleLogout = () => {
     logout();
@@ -44,7 +45,7 @@ const Earnings = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">Move-in Payments</h1>
-            <p className="text-white/60 mt-1 text-[15px]">Students pay in cash when they move in. Mark each payment once you receive it.</p>
+            <p className="text-white/60 mt-1 text-[15px]">Students pay you by bank transfer or cash before their payment deadline (full amount, or at least a 20% advance). Record each payment when you receive it; unpaid bookings are cancelled automatically after the deadline.</p>
           </div>
           <Link to="/owner-dashboard">
             <button className="px-5 py-2.5 bg-[#111] border border-[#333] hover:bg-[#222] text-white font-semibold rounded-xl shadow-sm transition-all text-sm cursor-pointer">
@@ -55,7 +56,7 @@ const Earnings = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-[#1A1A1A] p-5 rounded-[20px] border border-[#333]">
-            <div className="text-white/60 font-semibold text-xs uppercase tracking-wider mb-2">Cash received</div>
+            <div className="text-white/60 font-semibold text-xs uppercase tracking-wider mb-2">Received</div>
             <div className="text-2xl font-bold text-emerald-400">LKR {received.toLocaleString()}</div>
           </div>
           <div className="bg-[#1A1A1A] p-5 rounded-[20px] border border-[#333]">
@@ -64,7 +65,7 @@ const Earnings = () => {
           </div>
           <div className="bg-[#1A1A1A] p-5 rounded-[20px] border border-[#333]">
             <div className="text-white/60 font-semibold text-xs uppercase tracking-wider mb-2">Payment method</div>
-            <div className="text-2xl font-bold text-white">Cash on Move-in</div>
+            <div className="text-lg font-bold text-white">Bank transfer or cash</div>
           </div>
         </div>
 
@@ -87,7 +88,7 @@ const Earnings = () => {
                       {b.student_phone ? <> · {b.student_phone}</> : null}
                     </div>
                     <div className="text-xs text-white/40 mt-0.5">
-                      Due on move-in: LKR {Number(b.monthly_rent).toLocaleString()} rent + LKR {Number(b.security_deposit).toLocaleString()} deposit
+                      {paymentDueText(b)} · LKR {Number(b.monthly_rent).toLocaleString()} rent + LKR {Number(b.security_deposit).toLocaleString()} deposit
                     </div>
                   </div>
                   <div className="flex flex-col items-start md:items-end gap-2">

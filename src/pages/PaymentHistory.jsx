@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getPaymentHistory } from '../services/api';
-import { PaymentBadge, isPaid, moveInAmount } from '../components/CashPayment';
+import { PaymentBadge, isPaid, moveInAmount, paymentDueText } from '../components/CashPayment';
 
-// Student view of move-in payments. Payment is Cash on Move-in only: the
-// student pays the owner in person and the owner confirms it in the system.
+// Student view of booking payments. No online gateway: the student pays the
+// owner (bank transfer or cash) before the deadline; the owner records it.
 const PaymentHistory = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,8 +18,9 @@ const PaymentHistory = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const totalPaid = payments.filter(isPaid).reduce((sum, p) => sum + Number(p.paid_amount || 0), 0);
-  const totalDue = payments.filter((p) => !isPaid(p)).reduce((sum, p) => sum + moveInAmount(p), 0);
+  // Payments recorded by owners (full or advance) and what is still owed
+  const totalPaid = payments.reduce((sum, p) => sum + Number(p.paid_amount || 0), 0);
+  const totalDue = payments.filter((p) => !isPaid(p)).reduce((sum, p) => sum + Math.max(0, moveInAmount(p) - Number(p.paid_amount || 0)), 0);
 
   return (
     <div className="min-h-screen bg-black font-sans antialiased text-white flex flex-col">
@@ -29,22 +30,23 @@ const PaymentHistory = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-white tracking-tight">My Payments</h1>
           <p className="text-white/60 mt-2">
-            You pay the owner in cash when you move in. The owner confirms it here once received.
+            After the owner approves your booking, pay them by bank transfer or cash before the deadline shown below (at least the
+            minimum amount) to confirm it. The owner records each payment here. Unpaid bookings are cancelled after the deadline.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-[#1A1A1A] p-5 rounded-2xl border border-[#333]">
-            <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Paid (confirmed)</div>
+            <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Paid so far</div>
             <div className="text-2xl font-black text-emerald-400">LKR {totalPaid.toLocaleString()}</div>
           </div>
           <div className="bg-[#1A1A1A] p-5 rounded-2xl border border-[#333]">
-            <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">To pay on move-in</div>
+            <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Balance to pay</div>
             <div className="text-2xl font-black text-amber-400">LKR {totalDue.toLocaleString()}</div>
           </div>
           <div className="bg-[#1A1A1A] p-5 rounded-2xl border border-[#333]">
             <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Payment method</div>
-            <div className="text-2xl font-black text-white">Cash on Move-in</div>
+            <div className="text-lg font-black text-white">Bank transfer or cash to the owner</div>
           </div>
         </div>
 
@@ -55,7 +57,7 @@ const PaymentHistory = () => {
             <div className="p-8 text-center text-red-400">{error}</div>
           ) : payments.length === 0 ? (
             <div className="p-8 text-center text-white/50">
-              No approved bookings yet. Once an owner approves your booking, the move-in payment shows here.
+              No approved bookings yet. Once an owner approves your booking, the payment due and its deadline show here.
               <div className="mt-4">
                 <Link to="/my-bookings" className="text-[#FACC15] font-bold">Go to My Bookings</Link>
               </div>
@@ -70,7 +72,7 @@ const PaymentHistory = () => {
                       Owner: {p.owner_name} · Move-in {new Date(p.move_in_date).toLocaleDateString()}
                     </div>
                     <div className="text-xs text-white/40 mt-0.5">
-                      LKR {Number(p.monthly_rent).toLocaleString()} first month + LKR {Number(p.security_deposit).toLocaleString()} deposit, paid in cash
+                      {paymentDueText(p)} · booking amount = LKR {Number(p.monthly_rent).toLocaleString()} first month + LKR {Number(p.security_deposit).toLocaleString()} deposit
                     </div>
                   </div>
                   <PaymentBadge booking={p} />

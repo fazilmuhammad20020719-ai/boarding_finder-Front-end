@@ -29,7 +29,7 @@ const BookingPage = () => {
   const [specialRequests, setSpecialRequests] = useState('');
 
   const [step, setStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState('Cash on Move-in'); // the only payment method
+  const [paymentMethod, setPaymentMethod] = useState('Pay the owner after approval'); // the only payment method
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -342,7 +342,7 @@ const BookingPage = () => {
                     <h2 className="text-[17px] font-extrabold text-white mb-8 tracking-tight">Payment Method</h2>
 
                     <div className="space-y-4 mb-8">
-                      {['Cash on Move-in'].map(method => (
+                      {['Pay the owner after approval'].map(method => (
                         <div
                           key={method}
                           onClick={() => setPaymentMethod(method)}
@@ -352,7 +352,7 @@ const BookingPage = () => {
                             }`}
                         >
                           <div className="font-bold">{method}</div>
-                          <div className="text-sm text-white/60 mt-1">No online payment. Pay the first month's rent and deposit to the owner in cash when you move in. The owner confirms it in the system.</div>
+                          <div className="text-sm text-white/60 mt-1">No online payment. After the owner approves, pay them by bank transfer or cash before the deadline to confirm your booking: the full first month's rent + deposit if you arrive within 3 days, otherwise at least a 20% advance. Unpaid bookings are cancelled automatically after the deadline.</div>
                         </div>
                       ))}
                     </div>

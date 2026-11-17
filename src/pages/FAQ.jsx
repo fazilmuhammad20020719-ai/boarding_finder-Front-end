@@ -37,7 +37,7 @@ const FAQ = () => {
     students: [
       {
         q: "How do I book a boarding house?",
-        a: "Booking is simple! Once you find a property you like, click the 'Apply' or 'Book' button. You'll need to fill out a brief application form. The owner will review it, and once approved, you pay the first month's rent and deposit to the owner in cash when you move in. There is no online payment."
+        a: "Booking is simple! Once you find a property you like, click the 'Apply' or 'Book' button. You'll need to fill out a brief application form. The owner will review it, and once approved, you get an email with a payment deadline. Pay the owner by bank transfer or cash before it: the full first month's rent + deposit if you arrive within 3 days, or at least a 20% advance otherwise. The owner records the payment and your booking is confirmed. There is no online payment, and unpaid bookings are cancelled automatically after the deadline."
       },
       {
         q: "Are the utility bills included in the rent?",
@@ -55,7 +55,7 @@ const FAQ = () => {
     owners: [
       {
         q: "How much does it cost to list a property?",
-        a: "Listing your property on BoardingFinder is free. There are no service fees or commissions: students pay you directly in cash on move-in, and you confirm the payment in your dashboard."
+        a: "Listing your property on BoardingFinder is free. There are no service fees or commissions: students pay you directly by bank transfer or cash before their payment deadline, and you record each payment in your dashboard."
       },
       {
         q: "How do I get paid?",

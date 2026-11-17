@@ -677,17 +677,25 @@ export const signLease = async (leaseId, signature) => {
   return data;
 };
 
-// ─── PAYMENTS (Cash on Move-in only) ─────────────────────────────────────────
+// ─── PAYMENTS (paid to the owner before arrival; recorded by the owner) ──────
 
-/**
- * Owner (or admin) confirms the move-in cash was received — or undoes it.
- * amount is optional; the server defaults it to first month's rent + deposit.
- */
-export const setBookingPayment = async (bookingId, paid, amount) => {
-  const data = await request(`/bookings/${bookingId}/payment`, {
-    method: "PUT",
-    body: JSON.stringify(paid ? { paid: true, amount } : { paid: false }),
-  });
+/** Payments recorded for a booking (owner, admin or the booking's student). */
+export const getBookingPayments = async (bookingId) => {
+  const data = await request(`/bookings/${bookingId}/payments`);
+  if (data.error) throw new Error(data.error);
+  return data.payments || [];
+};
+
+/** Owner/admin records a payment: { amount, paid_on, method: cash|bank_transfer|other, reference } */
+export const addBookingPayment = async (bookingId, payment) => {
+  const data = await request(`/bookings/${bookingId}/payments`, { method: "POST", body: JSON.stringify(payment) });
+  if (data.error) throw new Error(data.error);
+  return data;
+};
+
+/** Owner/admin removes a payment recorded by mistake. */
+export const deleteBookingPayment = async (bookingId, paymentId) => {
+  const data = await request(`/bookings/${bookingId}/payments/${paymentId}`, { method: "DELETE" });
   if (data.error) throw new Error(data.error);
   return data;
 };

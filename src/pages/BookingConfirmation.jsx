@@ -19,7 +19,7 @@ const BookingConfirmation = () => {
   // Read booking details from URL search params
   const propertyId = searchParams.get('propertyId');
   const duration = parseInt(searchParams.get('duration') || '6');
-  const paymentMethod = 'Cash on Move-in'; // the only payment method
+  const paymentMethod = 'Pay the owner after approval'; // the only payment method
   // Personal details and the created booking arrive in router state (not the URL)
   const routeState = location.state || {};
   const createdBooking = routeState.booking || null;
@@ -451,8 +451,9 @@ const BookingConfirmation = () => {
                   <span className="text-[20px] font-black text-[#FACC15]">LKR {total.toLocaleString()}</span>
                 </div>
                 <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[13px] text-amber-300">
-                  Pay in cash on move-in day: <b>LKR {(rentPrice + securityDeposit).toLocaleString()}</b> (first month + deposit).
-                  No online payment. The owner confirms it in the system after receiving it.
+                  Booking amount: <b>LKR {(rentPrice + securityDeposit).toLocaleString()}</b> (first month + deposit).
+                  Once the owner approves, you'll get an email with your payment deadline. Pay the owner by bank transfer or cash:
+                  the full amount if you arrive within 3 days, otherwise at least a 20% advance. Unpaid bookings are cancelled after the deadline.
                 </div>
               </div>
             </div>

@@ -597,7 +597,7 @@ const HomePage = () => {
                 {
                   step: "Step 03",
                   title: "Book Securely",
-                  desc: "Send a booking request directly to the owner and pay in cash when you move in — no online payment needed.",
+                  desc: "Send a booking request to the owner. Once approved, pay them by bank transfer or cash before the deadline to confirm it — no online payment needed.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateBookingStatus, updateBookingStay, generateLease } from '../services/api';
 import { todayISO } from '../utils/dates';
-import { PaymentBadge, ConfirmCashButton } from './CashPayment';
+import { PaymentBadge, ConfirmCashButton, isConfirmed } from './CashPayment';
 
 // Owner booking management: approve/decline requests, cancel bookings, and
 // record when each student actually arrived and left. Recording "left" ends
@@ -13,11 +13,14 @@ const fmt = (d) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString(undefined, 
 // One status for each booking, combining the booking status with the stay dates
 const stayStatus = (b) => {
   if (b.status === 'pending') return { key: 'requests', label: 'Request', cls: 'bg-amber-500/20 text-amber-500' };
+  if (b.status === 'rejected' && b.rejection_reason === 'payment_overdue') return { key: 'closed', label: 'Cancelled · unpaid', cls: 'bg-red-500/20 text-red-400' };
   if (b.status === 'rejected') return { key: 'closed', label: 'Declined', cls: 'bg-red-500/20 text-red-500' };
   if (b.status === 'cancelled') return { key: 'closed', label: 'Cancelled', cls: 'bg-slate-500/20 text-slate-400' };
   if (b.left_on) return { key: 'left', label: 'Left', cls: 'bg-white/10 text-white/60' };
   if (b.arrived_on) return { key: 'staying', label: 'Staying', cls: 'bg-[#10b981]/20 text-[#10b981]' };
-  return { key: 'upcoming', label: 'Upcoming', cls: 'bg-sky-500/20 text-sky-400' };
+  // Approved, not arrived yet: confirmed once the required payment is in
+  if (isConfirmed(b)) return { key: 'upcoming', label: 'Confirmed', cls: 'bg-[#10b981]/20 text-[#10b981]' };
+  return { key: 'upcoming', label: 'Awaiting payment', cls: 'bg-amber-500/20 text-amber-400' };
 };
 
 const FILTERS = [
@@ -73,8 +76,8 @@ const StayDateCell = ({ value, canSet, label, min, onSave, onUndo, busy }) => {
   );
 };
 
-// showPayment adds the Cash on Move-in column; showCode shows the booking ID under the student
-const OwnerBookingManager = ({ bookings, setBookings, loading, showPayment = false, showCode = false }) => {
+// showPayment shows the payment column (record payments); showCode shows the booking ID under the student
+const OwnerBookingManager = ({ bookings, setBookings, loading, showPayment = true, showCode = false }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
   const [busyId, setBusyId] = useState(null);
@@ -131,7 +134,7 @@ const OwnerBookingManager = ({ bookings, setBookings, loading, showPayment = fal
       <div className="p-6 border-b border-[#333] bg-[#222] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h3 className="text-[17px] font-extrabold text-white">Manage Bookings</h3>
-          <p className="text-sm text-white/60">Approve requests, record when students arrive and leave, or cancel a booking.</p>
+          <p className="text-sm text-white/60">Approve requests, record payments, record when students arrive and leave, or cancel a booking. Unpaid bookings are cancelled automatically after their payment deadline.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
@@ -156,7 +159,7 @@ const OwnerBookingManager = ({ bookings, setBookings, loading, showPayment = fal
               <th className="px-5 py-4">Arrived</th>
               <th className="px-5 py-4">Left</th>
               <th className="px-5 py-4">Status</th>
-              {showPayment && <th className="px-5 py-4">Payment (cash on move-in)</th>}
+              {showPayment && <th className="px-5 py-4">Payment</th>}
               <th className="px-5 py-4">Actions</th>
             </tr>
           </thead>
@@ -216,10 +219,10 @@ const OwnerBookingManager = ({ bookings, setBookings, loading, showPayment = fal
                             <PaymentBadge booking={b} />
                             <ConfirmCashButton
                               booking={b}
-                              onChange={(u) => patch(b.booking_id, { payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at })}
+                              onChange={(u) => patch(b.booking_id, { payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at, booking_amount: u.booking_amount })}
                             />
                           </div>
-                        ) : <span className="text-white/30">—</span>}
+                        ) : b.rejection_reason === 'payment_overdue' ? <PaymentBadge booking={b} /> : <span className="text-white/30">—</span>}
                       </td>
                     )}
                     <td className="px-5 py-4">
