@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import OwnerTopBar from '../components/OwnerTopBar';
+import OwnerBookingManager from '../components/OwnerBookingManager';
 import { useAuth } from '../context/AuthContext';
 import { deleteListing, getConversations, getMessages, sendMessage, markMessagesAsRead, getOwnerOverviewStats, getOwnerMaintenanceRequests, updateMaintenanceStatus, pauseListing, getListingAnalytics, getMyListings, getOwnerBookings, updateBookingStatus } from '../services/api';
 import { getAvailability } from '../utils/availability';
@@ -611,76 +612,7 @@ const OwnerDashboard = () => {
 
         {/* Bookings Area */}
         {activeTab === 'bookings' && (
-          <div className="bg-[#1A1A1A] rounded-3xl overflow-hidden shadow-sm border border-[#333]">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-[#222] text-white/60 text-[11px] uppercase tracking-wider font-bold">
-                    <th className="px-6 py-5 rounded-tl-3xl">STUDENT</th>
-                    <th className="px-6 py-5">LISTING</th>
-                    <th className="px-6 py-5">PERIOD</th>
-                    <th className="px-6 py-5">STATUS</th>
-                    <th className="px-6 py-5">AMOUNT</th>
-                    <th className="px-6 py-5 rounded-tr-3xl">ACTION</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[14px] font-medium text-white">
-                  {bookingsLoading ? (
-                    <tr>
-                      <td colSpan="6" className="px-6 py-10 text-center text-white/60">Loading bookings...</td>
-                    </tr>
-                  ) : ownerBookings.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="px-6 py-10 text-center text-white/60">No bookings found.</td>
-                    </tr>
-                  ) : (
-                    ownerBookings.map(booking => (
-                      <tr key={booking.booking_id} className="border-b border-[#333] hover:bg-[#222] transition-colors">
-                        <td className="px-6 py-5 font-bold">
-                          {booking.seeker_name}
-                          <div className="text-xs text-white/60 font-normal">{booking.seeker_email}</div>
-                        </td>
-                        <td className="px-6 py-5 text-white/60">{booking.title}</td>
-                        <td className="px-6 py-5 text-white/60">
-                          {new Date(booking.move_in_date).toLocaleDateString()}
-                          <div className="text-xs">{booking.duration_months} Months</div>
-                        </td>
-                        <td className="px-6 py-5">
-                          {booking.status === 'pending' && <span className="bg-amber-500/20 text-amber-500 px-3 py-1.5 rounded-full text-xs font-bold">pending</span>}
-                          {booking.status === 'approved' && <span className="bg-[#10b981]/20 text-[#10b981] px-3 py-1.5 rounded-full text-xs font-bold">approved</span>}
-                          {booking.status === 'rejected' && <span className="bg-red-500/20 text-red-500 px-3 py-1.5 rounded-full text-xs font-bold">rejected</span>}
-                          {booking.status === 'cancelled' && <span className="bg-slate-500/20 text-slate-400 px-3 py-1.5 rounded-full text-xs font-bold">cancelled</span>}
-                        </td>
-                        <td className="px-6 py-5 font-bold text-[#FACC15]">LKR {Number(booking.total_amount).toLocaleString()}</td>
-                        <td className="px-6 py-5">
-                          {booking.status === 'pending' ? (
-                            <div className="flex gap-2">
-                              <button onClick={() => handleUpdateBookingStatus(booking.booking_id, 'approved')} className="bg-[#FACC15] hover:bg-[#EAB308] text-black px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Approve</button>
-                              <button onClick={() => handleUpdateBookingStatus(booking.booking_id, 'rejected')} className="bg-red-500/20 text-red-500 hover:bg-red-500/40 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none">Decline</button>
-                            </div>
-                          ) : booking.status === 'approved' ? (
-                            <div className="flex gap-2">
-                              {!booking.lease_status && (
-                                <button onClick={() => handleGenerateLease(booking.booking_id)} className="bg-[#10b981]/20 hover:bg-[#10b981]/40 text-[#10b981] px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Generate Lease</button>
-                              )}
-                              {booking.lease_status === 'pending' && (
-                                <button onClick={() => navigate(`/digital-lease?booking_id=${booking.booking_id}`)} className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-500 px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">Lease Pending</button>
-                              )}
-                              {booking.lease_status === 'signed' && (
-                                <button onClick={() => navigate(`/digital-lease?booking_id=${booking.booking_id}`)} className="bg-[#FACC15] hover:bg-[#EAB308] text-black px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors cursor-pointer border-none shadow-sm">View Signed Lease</button>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-white/40">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <OwnerBookingManager bookings={ownerBookings} setBookings={setOwnerBookings} loading={bookingsLoading} />
         )}
 
         {/* Maintenance Area */}

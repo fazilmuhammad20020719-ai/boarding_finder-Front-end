@@ -430,6 +430,14 @@ export async function getPagedAdminBookings(page) {
   return fetchPage("/admin/bookings", page);
 }
 
+// Owner records when the student arrived / left (action: arrived | left | undo_arrived | undo_left)
+export async function updateBookingStay(id, action, date) {
+  return request(`/bookings/${id}/stay`, {
+    method: "PUT",
+    body: JSON.stringify({ action, date }),
+  });
+}
+
 export async function updateBookingStatusAdmin(bookingId, status) {
   return request(`/admin/bookings/${bookingId}/status`, {
     method: "PUT",
