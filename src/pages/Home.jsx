@@ -471,15 +471,7 @@ const HomePage = () => {
                   <option value="">Select a university…</option>
                   {UNIVERSITIES.map(u => <option key={u.name} value={u.name}>{u.name}</option>)}
                 </select>
-                <button
-                  type="button"
-                  onClick={useMyLocation}
-                  className={`px-4 py-3 rounded-xl text-sm font-bold border cursor-pointer whitespace-nowrap ${refType === 'me' ? 'bg-[#FACC15] text-black border-[#FACC15]' : 'bg-[#111] text-white border-[#333] hover:border-[#FACC15]/50'}`}
-                >
-                  {locating ? 'Locating…' : '📍 Near me'}
-                </button>
               </div>
-              {geoError && <p className="text-xs text-red-400 mt-2">{geoError}</p>}
             </div>
             <div>
               <label className="block text-[11px] font-bold text-white/50 tracking-wider mb-2 uppercase">Distance</label>
@@ -532,7 +524,7 @@ const HomePage = () => {
                   <div className="min-w-0">
                     <h2 className="text-2xl font-bold text-white tracking-tight">{reference ? 'Other Available Hostels' : 'Available Hostels'}</h2>
                     <p className="text-white/50 text-sm mt-1 font-normal">
-                      {reference ? 'In other locations, nearest first' : 'Choose your university or use "Near me" to see the closest places first'}
+                      {reference ? 'In other locations, nearest first' : 'Choose your university to see the closest places first'}
                     </p>
                   </div>
                   <Link to="/search" className="text-sm font-bold text-[#FACC15] hover:underline flex items-center gap-1 flex-shrink-0">
