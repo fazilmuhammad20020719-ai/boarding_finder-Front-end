@@ -51,17 +51,6 @@ const AboutUs = () => {
                 We built a centralized platform where property owners can easily list their spaces, and students can search, filter, and book verified accommodations securely. We prioritize transparency with reviews, accurate pricing, and direct owner communication.
               </p>
             </div>
-
-            <div className="grid grid-cols-2 gap-6 pt-6 border-t border-[#333]">
-              <div>
-                <div className="text-3xl font-black text-white mb-1">5,000+</div>
-                <div className="text-sm font-bold text-white/50">Students Helped</div>
-              </div>
-              <div>
-                <div className="text-3xl font-black text-white mb-1">1,200+</div>
-                <div className="text-sm font-bold text-white/50">Verified Listings</div>
-              </div>
-            </div>
           </div>
         </section>
 
