@@ -18,7 +18,6 @@ const RegisterPage = () => {
   const [studentId, setStudentId] = useState('');
 
   // Step 2 Fields (Property Owner)
-  const [permitNumber, setPermitNumber] = useState('');
 
   // Common Fields
   const [password, setPassword] = useState('');
@@ -65,12 +64,6 @@ const RegisterPage = () => {
       if (!studentId || studentId.trim().length < 2) errs.studentId = 'Student ID must be at least 2 characters.';
       else if (studentId.trim().length > 50) errs.studentId = 'Student ID must not exceed 50 characters.';
     }
-    if (role === 'owner') {
-      // Permit number is optional; validate only when entered
-      const permit = permitNumber.trim();
-      if (permit && permit.length < 2) errs.permitNumber = 'Permit number must be at least 2 characters.';
-      else if (permit.length > 50) errs.permitNumber = 'Permit number must not exceed 50 characters.';
-    }
     if (!password) errs.password = 'Password is required.';
     else if (passwordStrength < 5) errs.password = 'Password does not meet all complexity requirements.';
     if (password !== confirmPassword) errs.confirmPassword = 'Passwords do not match.';
@@ -109,7 +102,6 @@ const RegisterPage = () => {
         const payload = {
           name, email, phone, password, role,
           ...(role === 'student' && { university, course, studentId }),
-          ...(role === 'owner' && permitNumber.trim() && { permitNumber: permitNumber.trim() }),
         };
 
         await register(payload);
@@ -310,15 +302,7 @@ const RegisterPage = () => {
                         {fieldErrors.studentId && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.studentId}</p>}
                       </div>
                     </>
-                  ) : (
-                    <>
-                      <div>
-                        <label className={labelCls}>Business Registration / TIN <span className="text-white/40 font-normal normal-case">(optional)</span></label>
-                        <input type="text" value={permitNumber} onChange={(e) => setPermitNumber(e.target.value)} placeholder="e.g. BR-123456789" className={`${inputCls} ${fieldErrors.permitNumber ? '!border-red-500/60' : ''}`} maxLength={50} required />
-                        {fieldErrors.permitNumber && <p className="text-red-400 text-xs mt-1.5 font-medium">{fieldErrors.permitNumber}</p>}
-                      </div>
-                    </>
-                  )}
+                  ) : null}
 
                   <div>
                     <label className={labelCls}>Password</label>

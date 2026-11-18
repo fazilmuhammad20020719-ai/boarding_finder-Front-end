@@ -1,5 +1,5 @@
 // Payment before arrival. There is no online gateway: the student pays the owner
-// by bank transfer or cash, and the owner (or an admin) records each payment.
+// by bank transfer or cash, and the boarding owner records each payment.
 //
 // Booking amount = first month's rent + security deposit.
 //   Arrival within 3 days   → full amount by the day after arrival
@@ -67,7 +67,7 @@ export const PaymentBadge = ({ booking, className = '' }) => {
 const inputCls = 'px-2.5 py-1.5 rounded-lg bg-black border border-white/20 text-white text-sm';
 
 /**
- * Owner/admin control: record a payment (amount, date, method, reference),
+ * Owner-only control: record a payment (amount, date, method, reference),
  * see the payments recorded so far and remove one entered by mistake.
  * Calls onChange(updatedBooking) after each change.
  */

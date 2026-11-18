@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { PaymentBadge, ConfirmCashButton } from '../components/CashPayment';
+import { PaymentBadge } from '../components/CashPayment';
 import AdminNavbar from '../components/AdminNavbar';
 import {
   getPendingUsers, verifyUserAdmin, getVerificationStats,
@@ -922,14 +922,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-6 py-5">
                           {booking.status === 'approved' ? (
-                            <div className="flex flex-col items-start gap-2">
-                              <PaymentBadge booking={booking} />
-                              <ConfirmCashButton
-                                booking={booking}
-                                onChange={(u) => setAllBookings(prev => prev.map(b => b.booking_id === booking.booking_id
-                                  ? { ...b, payment_status: u.payment_status, paid_amount: u.paid_amount, paid_at: u.paid_at } : b))}
-                              />
-                            </div>
+                            <PaymentBadge booking={booking} />
                           ) : <span className="text-xs text-white/40">—</span>}
                         </td>
                         <td className="px-6 py-5 flex gap-2">
